@@ -2,25 +2,43 @@ package main.java.com.example.restapi.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.*;
+
+
+@Entity
+@Table(name = "medicamentos")
 
 public class Medicamento {
-    private Long id;               // Identificador del medicamento
-    private String nombre;         // Nombre del medicamento
-    private String tipo;           // Tipo de medicamento (Ej: "Analgésico", "Antibiótico")
-    private double precio;         // Precio del medicamento
-    private int stock;             // Cantidad disponible en la farmacia
-    private String proveedor;      // Nombre del proveedor del medicamento
-    private List<Compra> compras;    // Lista de compras asociadas a este medicamento
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+ 
+    @Column(nullable = false, length = 50)
+    private String nombre;
+ 
+    @Column(nullable = false, length = 50)
+    private String tipo;
+ 
+    @Column(nullable = false)
+    private double precio;
 
+    @Column(nullable = false)
+    private int stock;
+
+    @Column(nullable = false, length = 50)
+    private String proveedor;
+ 
+    @Column(nullable = false)
+    private boolean disponible = true;
+ 
+    public Medicamento() {}
     
-    public Medicamento(Long id, String nombre, String tipo, double precio, int stock, String proveedor) {
-        this.id = id;
+    public Medicamento(String nombre, String tipo, double precio, int stock, String proveedor) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.precio = precio;
         this.stock = stock;
         this.proveedor = proveedor;
-        this.compras = new ArrayList<>();
     }
 
     
@@ -42,8 +60,8 @@ public class Medicamento {
     public String getProveedor() { return proveedor; }
     public void setProveedor(String proveedor) { this.proveedor = proveedor; }
 
-    public List<Compra> getCompras() { return compras; }
-    public void addCompra(Compra compra) { this.compras.add(compra); }
+    public boolean isDisponible() { return disponible; }
+    public void setDisponible(boolean disponible) { this.disponible = disponible; }
 
     @Override
     public String toString() {
@@ -54,6 +72,7 @@ public class Medicamento {
                 ", precio=" + precio +
                 ", stock=" + stock +
                 ", proveedor='" + proveedor + '\'' +
+                ", disponible=" + disponible +
                 '}';
     }
 }
