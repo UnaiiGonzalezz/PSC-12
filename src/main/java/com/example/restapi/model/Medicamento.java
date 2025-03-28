@@ -30,6 +30,10 @@ public class Medicamento {
  
     @Column(nullable = false)
     private boolean disponible = true;
+
+    //Relación ManyToMany inversa
+    @ManyToMany(mappedBy = "medicamentos")
+    private List<Compra> compras;
  
     public Medicamento() {}
     
@@ -62,6 +66,9 @@ public class Medicamento {
 
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
+
+    public List<Compra> getCompras() { return compras; }
+    public void setCompras(List<Compra> compras) { this.compras = compras; }
 
     @Override
     public String toString() {

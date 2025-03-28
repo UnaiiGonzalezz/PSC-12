@@ -1,6 +1,9 @@
 package main.java.com.example.restapi.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -15,9 +18,13 @@ public class Compra {
     @JoinColumn(name = "idCliente", nullable = false)
     private Cliente cliente;
  
-    @ManyToOne
-    @JoinColumn(name = "idMedicamento", nullable = false)
-    private Medicamento medicamento;
+    @ManyToMany
+    @JoinTable(
+        name = "compra_medicamento",
+        joinColumns = @JoinColumn(name = "idCompra"),
+        inverseJoinColumns = @JoinColumn(name = "idMedicamento")
+    )
+    private List<Medicamento> medicamentos;
  
     @Column(nullable = false)
     private LocalDate fechaCompra;
@@ -34,11 +41,13 @@ public class Compra {
     @Column(nullable = false, length = 50)
     private String metodoPago;
  
-    public Compra() {}
+    public Compra() {
+        this.medicamentos = new ArrayList<>(); // Inicializamos la lista de medicamentos
+    }
 
-    public Compra(Cliente cliente, Medicamento medicamento, LocalDate fechaCompra, int cantidad, String metodoPago) {
+    public Compra(Cliente cliente, List<Medicamento> medicamentos, LocalDate fechaCompra, int cantidad, String metodoPago) {
         this.cliente = cliente;
-        this.medicamento = medicamento;
+        this.medicamentos = medicamentos;
         this.fechaCompra = fechaCompra;
         this.cantidad = cantidad;
         this.metodoPago = metodoPago;
@@ -46,9 +55,9 @@ public class Compra {
         this.pago = calcularTotal(); 
     }
 
-
+    // Calcular el pago sumando el precio de todos los medicamentos
     private double calcularTotal() {
-        return cantidad * medicamento.getPrecio(); // Multiplica la cantidad por el precio del medicamento
+        return medicamentos.stream().mapToDouble(Medicamento::getPrecio).sum() * cantidad;
     }
 
     
@@ -58,8 +67,8 @@ public class Compra {
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
 
-    public Medicamento getMedicamento() { return medicamento; }
-    public void setMedicamento(Medicamento medicamento) { this.medicamento = medicamento; }
+    public List<Medicamento> getMedicamentos() { return medicamentos; }
+    public void setMedicamentos(List<Medicamento> medicamentos) { this.medicamentos = medicamentos; }
 
     public LocalDate getFechaCompra() { return fechaCompra; }
     public void setFechaCompra(LocalDate fechaCompra) { this.fechaCompra = fechaCompra; }
@@ -97,7 +106,7 @@ public class Compra {
         return "Compra{" +
                 "id=" + id +
                 ", cliente=" + cliente.getNombre() + " " + cliente.getApellido() +
-                ", medicamento=" + medicamento.getNombre() +
+                ", medicamentos=" + medicamentos.stream().map(Medicamento::getNombre).toList() +
                 ", cantidad=" + cantidad +
                 ", fechaCompra=" + fechaCompra +
                 ", pago=" + pago +
