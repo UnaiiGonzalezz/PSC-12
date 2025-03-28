@@ -1,20 +1,42 @@
 package main.java.com.example.restapi.model;
 
 import java.time.LocalDate;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "compras")
 
 public class Compra {
-    private Long id;                // Identificador único de la compra
-    private Cliente cliente;        // Cliente que hace la compra
-    private Medicamento medicamento; // Medicamento que se ha comprado
-    private LocalDate fechaCompra;  // Fecha de la compra
-    private int cantidad;           // Cantidad de unidades compradas
-    private double pago;            // Coste total de la compra
-    private String estado;          // Estado de la compra (Pendiente, Enviado, Entregado)
-    private String metodoPago;      // Método de pago
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+ 
+    @ManyToOne
+    @JoinColumn(name = "idCliente", nullable = false)
+    private Cliente cliente;
+ 
+    @ManyToOne
+    @JoinColumn(name = "idMedicamento", nullable = false)
+    private Medicamento medicamento;
+ 
+    @Column(nullable = false)
+    private LocalDate fechaCompra;
 
-    
-    public Compra(Long id, Cliente cliente, Medicamento medicamento, LocalDate fechaCompra, int cantidad, String metodoPago) {
-        this.id = id;
+    @Column(nullable = false)
+    private int cantidad;
+ 
+    @Column(nullable = false)
+    private double pago;
+ 
+    @Column(nullable = false, length = 50)
+    private String estado = "Pendiente";
+ 
+    @Column(nullable = false, length = 50)
+    private String metodoPago;
+ 
+    public Compra() {}
+
+    public Compra(Cliente cliente, Medicamento medicamento, LocalDate fechaCompra, int cantidad, String metodoPago) {
         this.cliente = cliente;
         this.medicamento = medicamento;
         this.fechaCompra = fechaCompra;
@@ -54,10 +76,6 @@ public class Compra {
     public String getMetodoPago() { return metodoPago; }
     public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
 
-    // Método para cancelar la compra
-    public void cancelarCompra() {
-        this.estado = "Cancelada";
-    }
 
     // Método para confirmar la compra
     public void confirmarCompra() {
@@ -69,6 +87,11 @@ public class Compra {
         this.estado = "Entregado";
     }
 
+    // Método para cancelar la compra
+    public void cancelarCompra() {
+        this.estado = "Cancelada";
+    }
+    
     @Override
     public String toString() {
         return "Compra{" +
