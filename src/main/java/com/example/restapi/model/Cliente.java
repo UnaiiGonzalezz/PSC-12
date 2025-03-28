@@ -2,24 +2,44 @@ package main.java.com.example.restapi.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.*;
 
+
+@Entity
+ @Table(name = "clientes")
+ 
 public class Cliente {
-    private Long id;               // Identificador único del cliente
-    private String nombre;         // Nombre del cliente
-    private String apellido;       // Apellido del cliente
-    private String email;          // Correo electrónico 
-    private String telefono;       // Número de teléfono
-    private String metodoPago;     // Método de pago preferido (tarjeta, efectivo, etc.)
-    private List<Compra> compras;  // Lista de compras realizadas por el cliente
 
-    public Cliente(Long id, String nombre, String apellido, String email, String telefono, String metodoPago) {
-        this.id = id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+ 
+    @Column(nullable = false, length = 50)
+    private String nombre;
+ 
+    @Column(nullable = false, length = 50)
+    private String apellido;
+ 
+    @Column(nullable = false, unique = true, length = 50)
+    private String email;
+ 
+    @Column(nullable = false, length = 50)
+    private String telefono;
+ 
+    @Column(nullable = false, length = 50)
+    private String metodoPago;
+ 
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Compra> compras;
+ 
+    public Cliente() {}
+
+    public Cliente(String nombre, String apellido, String email, String telefono, String metodoPago) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
         this.telefono = telefono;
         this.metodoPago = metodoPago;
-        this.compras = new ArrayList<>();
     }
 
     public Long getId() { return id; }
