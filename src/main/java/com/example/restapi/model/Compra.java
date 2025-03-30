@@ -1,11 +1,10 @@
-package main.java.com.example.restapi.model;
+package com.example.restapi.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
-
 @Entity
 @Table(name = "compras")
 

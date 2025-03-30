@@ -1,12 +1,10 @@
-package main.java.com.example.restapi.model;
+package com.example.restapi.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.persistence.*;
 
 
 @Entity
- @Table(name = "clientes")
+@Table(name = "clientes")
  
 public class Cliente {
 
@@ -28,9 +26,6 @@ public class Cliente {
  
     @Column(nullable = false, length = 50)
     private String metodoPago;
- 
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Compra> compras;
  
     public Cliente() {}
 
@@ -59,9 +54,6 @@ public class Cliente {
 
     public String getMetodoPago() { return metodoPago; }
     public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
-
-    public List<Compra> getCompras() { return compras; }
-    public void addCompra(Compra compra) { this.compras.add(compra); }
 
     @Override
     public String toString() {
