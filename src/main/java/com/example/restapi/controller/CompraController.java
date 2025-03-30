@@ -1,9 +1,11 @@
-package main.java.com.example.restapi.controller;
+package com.example.restapi.controller;
 
-import main.java.com.example.restapi.model.Compra;
-import main.java.com.example.restapi.service.CompraService;
+import com.example.restapi.model.Compra;
+import com.example.restapi.service.CompraService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -20,7 +22,7 @@ public class CompraController {
 
     @PostMapping
     public Compra createCompra(@RequestBody Compra compra) {
-        return compraService.createCompra(compra);
+        return compraService.saveCompra(compra);
     }
 }
 

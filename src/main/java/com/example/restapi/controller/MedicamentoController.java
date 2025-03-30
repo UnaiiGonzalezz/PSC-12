@@ -1,9 +1,11 @@
-package main.java.com.example.restapi.controller;
+package com.example.restapi.controller;
 
-import main.java.com.example.restapi.model.Medicamento;
-import main.java.com.example.restapi.service.MedicamentoService;
+import com.example.restapi.model.Medicamento;
+import com.example.restapi.service.MedicamentoService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -20,6 +22,6 @@ public class MedicamentoController {
 
     @PostMapping
     public Medicamento createMedicamento(@RequestBody Medicamento medicamento) {
-        return medicamentoService.createMedicamento(medicamento);
+        return medicamentoService.saveMedicamento(medicamento);
     }
 }

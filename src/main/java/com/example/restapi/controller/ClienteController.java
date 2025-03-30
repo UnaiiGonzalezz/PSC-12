@@ -1,10 +1,11 @@
-package main.java.com.example.restapi.controller;
+package com.example.restapi.controller;
 
-import main.java.com.example.restapi.model.Cliente;
-import main.java.com.example.restapi.service.ClienteService;
+import com.example.restapi.model.Cliente;
+import com.example.restapi.service.ClienteService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -21,7 +22,7 @@ public class ClienteController {
 
     @PostMapping
     public Cliente createCliente(@RequestBody Cliente cliente) {
-        return clienteService.createCliente(cliente);
+        return clienteService.saveCliente(cliente);
     }
 }
 
