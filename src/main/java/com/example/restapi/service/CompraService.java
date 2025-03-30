@@ -1,9 +1,7 @@
-package main.java.com.example.restapi.service;
+package com.example.restapi.service;
 
-import main.java.com.example.restapi.model.Cliente;
-import main.java.com.example.restapi.model.Compra;
-import main.java.com.example.restapi.model.Medicamento;
-import main.java.com.example.restapi.repository.CompraRepository;
+import com.example.restapi.model.Compra;
+import com.example.restapi.repository.CompraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,19 +24,9 @@ public class CompraService {
         return compraRepository.findById(id);
     }
 
-    // Buscar compras de un cliente
-    public List<Compra> getComprasByCliente(Cliente cliente) {
-        return compraRepository.findByCliente(cliente);
-    }
-
     // Buscar compras por estado
     public List<Compra> getComprasByEstado(String estado) {
         return compraRepository.findByEstado(estado);
-    }
-
-    // Buscar compras que contengan un medicamento específico
-    public List<Compra> getComprasByMedicamento(Medicamento medicamento) {
-        return compraRepository.findByMedicamentosContaining(medicamento);
     }
 
     // Guardar o actualizar una compra

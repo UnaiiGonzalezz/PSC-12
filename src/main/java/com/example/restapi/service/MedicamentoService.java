@@ -1,7 +1,7 @@
-package main.java.com.example.restapi.service;
+package com.example.restapi.service;
 
-import main.java.com.example.restapi.model.Medicamento;
-import main.java.com.example.restapi.repository.MedicamentoRepository;
+import com.example.restapi.model.Medicamento;
+import com.example.restapi.repository.MedicamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
