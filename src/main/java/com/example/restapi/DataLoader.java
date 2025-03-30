@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.example.restapi.model.Cliente;
+
 import com.example.restapi.model.Medicamento;
 import com.example.restapi.model.Compra;
 import com.example.restapi.repository.ClienteRepository;
@@ -24,8 +25,8 @@ public class DataLoader {
             CompraRepository compraRepository) {
         return args -> {
             // Crear clientes de prueba
-            Cliente cliente1 = new Cliente("Domingo", "Bermejo", "123456789");
-            Cliente cliente2 = new Cliente("Ana", "Gómez", "987654321");
+            Cliente cliente1 = new Cliente("Domingo", "Bermejo", " ", "123456789", " ");
+            Cliente cliente2 = new Cliente("Ana", "Gómez", " ", "987654321", " ");
             clienteRepository.saveAll(List.of(cliente1, cliente2));
 
             // Crear medicamentos de prueba
