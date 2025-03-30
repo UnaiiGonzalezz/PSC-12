@@ -1,14 +1,15 @@
-package main.java.com.example.restapi;
+package com.example.restapi;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import main.java.com.example.restapi.model.Cliente;
-import main.java.com.example.restapi.model.Medicamento;
-import main.java.com.example.restapi.model.Compra;
-import main.java.com.example.restapi.repository.ClienteRepository;
-import main.java.com.example.restapi.repository.MedicamentoRepository;
-import main.java.com.example.restapi.repository.CompraRepository;
+
+import com.example.restapi.model.Cliente;
+import com.example.restapi.model.Medicamento;
+import com.example.restapi.model.Compra;
+import com.example.restapi.repository.ClienteRepository;
+import com.example.restapi.repository.MedicamentoRepository;
+import com.example.restapi.repository.CompraRepository;
 
 import java.time.LocalDate;
 import java.util.List;
