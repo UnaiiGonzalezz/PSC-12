@@ -25,8 +25,8 @@ public class DataLoader {
             CompraRepository compraRepository) {
         return args -> {
             // Crear clientes de prueba
-            Cliente cliente1 = new Cliente("Domingo", "Bermejo", " ", "123456789", " ");
-            Cliente cliente2 = new Cliente("Ana", "Gómez", " ", "987654321", " ");
+            Cliente cliente1 = new Cliente("Domingo", "Bermejo", "domingo@bermejo.com", "123456789", " ");
+            Cliente cliente2 = new Cliente("Ana", "Gómez", "ana@gomez.com", "987654321", " ");
             clienteRepository.saveAll(List.of(cliente1, cliente2));
 
             // Crear medicamentos de prueba

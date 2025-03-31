@@ -7,7 +7,6 @@ import java.util.List;
 import jakarta.persistence.*;
 @Entity
 @Table(name = "compras")
-
 public class Compra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
