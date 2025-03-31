@@ -14,7 +14,7 @@ public class Medicamento {
     private String nombre;
  
     @Column(nullable = false, length = 50)
-    private String tipo;
+    private String categoria;
  
     @Column(nullable = false)
     private double precio;
@@ -30,9 +30,9 @@ public class Medicamento {
  
     public Medicamento() {}
     
-    public Medicamento(String nombre, String tipo, double precio, int stock, String proveedor) {
+    public Medicamento(String nombre, String categoria, double precio, int stock, String proveedor) {
         this.nombre = nombre;
-        this.tipo = tipo;
+        this.categoria = categoria;
         this.precio = precio;
         this.stock = stock;
         this.proveedor = proveedor;
@@ -45,8 +45,8 @@ public class Medicamento {
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
 
     public double getPrecio() { return precio; }
     public void setPrecio(double precio) { this.precio = precio; }
@@ -65,7 +65,7 @@ public class Medicamento {
         return "Medicamento{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
-                ", tipo='" + tipo + '\'' +
+                ", categoria='" + categoria + '\'' +
                 ", precio=" + precio +
                 ", stock=" + stock +
                 ", proveedor='" + proveedor + '\'' +

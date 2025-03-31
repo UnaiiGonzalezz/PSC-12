@@ -38,5 +38,15 @@ public class MedicamentoService {
     public void deleteMedicamento(Long id) {
         medicamentoRepository.deleteById(id);
     }
+
+    // Nuevo método para buscar por nombre
+    public List<Medicamento> getMedicamentosPorNombre(String nombre) {
+        return medicamentoRepository.findByNombreIgnoreCase(nombre);
+    }
+
+    // Nuevo método para buscar por categoría
+    public List<Medicamento> getMedicamentosPorCategoria(String categoria) {
+        return medicamentoRepository.findByCategoriaIgnoreCase(categoria);
+    }
 }
 
