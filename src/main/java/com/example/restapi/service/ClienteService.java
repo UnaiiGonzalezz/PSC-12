@@ -38,5 +38,14 @@ public class ClienteService {
     public void deleteCliente(Long id) {
         clienteRepository.deleteById(id);
     }
+
+    /*public boolean verificarCredenciales(String email, String contrasena) {
+        Cliente cliente = clienteRepository.findByEmail(email);
+        if (cliente != null && cliente.getContrasena().equals(contrasena)) {
+            return true;
+        }
+        return false;
+    }*/
+
 }
 

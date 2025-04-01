@@ -19,6 +19,9 @@ public class Cliente {
  
     @Column(nullable = false, unique = true, length = 50)
     private String email;
+
+    @Column(nullable = false) 
+    private String contrasena;
  
     @Column(nullable = false, length = 50)
     private String telefono;
@@ -28,10 +31,11 @@ public class Cliente {
  
     public Cliente() {}
 
-    public Cliente(String nombre, String apellido, String email, String telefono, String metodoPago) {
+    public Cliente(String nombre, String apellido, String email, String contrasena, String telefono, String metodoPago) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
+        this.contrasena = contrasena;
         this.telefono = telefono;
         this.metodoPago = metodoPago;
     }
@@ -48,6 +52,9 @@ public class Cliente {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
+    public String getContrasena() { return contrasena; }
+    public void setContrasena(String contrasena) { this.contrasena = contrasena; }
+
     public String getTelefono() { return telefono; }
     public void setTelefono(String telefono) { this.telefono = telefono; }
 
@@ -61,6 +68,7 @@ public class Cliente {
                 ", nombre='" + nombre + '\'' +
                 ", apellido='" + apellido + '\'' +
                 ", email='" + email + '\'' +
+                ", contraseña='" + contrasena + '\'' +
                 ", telefono='" + telefono + '\'' +
                 ", metodoPago='" + metodoPago + '\'' +
                 '}';
