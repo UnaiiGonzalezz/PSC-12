@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import com.example.restapi.model.dto.LoginDTO;
+
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,21 @@ public class ClienteController {
     public Cliente createCliente(@RequestBody Cliente cliente) {
         return clienteService.saveCliente(cliente);
     }
+
+@PostMapping("/login")
+public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+    if (loginDTO.getEmail() == null || loginDTO.getContrasena() == null) {
+        return ResponseEntity.badRequest().body("Email y contraseña son requeridos.");
+    }
+
+    boolean valido = clienteService.verificarCredenciales(loginDTO.getEmail(), loginDTO.getContrasena());
+
+    if (valido) {
+        return ResponseEntity.ok().body("Inicio de sesión exitoso.");
+    } else {
+        return ResponseEntity.status(401).body("Credenciales incorrectas.");
+    }
+}
 
     /*@PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {

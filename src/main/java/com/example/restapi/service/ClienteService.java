@@ -3,6 +3,7 @@ package com.example.restapi.service;
 import com.example.restapi.model.Cliente;
 import com.example.restapi.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,41 +12,38 @@ import java.util.Optional;
 @Service
 public class ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    // Obtener todos los clientes
+    @Autowired
+    public ClienteService(ClienteRepository clienteRepository, PasswordEncoder passwordEncoder) {
+        this.clienteRepository = clienteRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     public List<Cliente> getAllClientes() {
         return clienteRepository.findAll();
     }
 
-    // Buscar cliente por ID
     public Optional<Cliente> getClienteById(Long id) {
         return clienteRepository.findById(id);
     }
 
-    // Buscar cliente por teléfono
     public Optional<Cliente> getClienteByTelefono(String telefono) {
         return Optional.ofNullable(clienteRepository.findByTelefono(telefono));
     }
 
-    // Guardar o actualizar un cliente
     public Cliente saveCliente(Cliente cliente) {
+        cliente.setContrasena(passwordEncoder.encode(cliente.getContrasena()));
         return clienteRepository.save(cliente);
     }
 
-    // Eliminar un cliente por ID
     public void deleteCliente(Long id) {
         clienteRepository.deleteById(id);
     }
 
-    /*public boolean verificarCredenciales(String email, String contrasena) {
+    public boolean verificarCredenciales(String email, String contrasena) {
         Cliente cliente = clienteRepository.findByEmail(email);
-        if (cliente != null && cliente.getContrasena().equals(contrasena)) {
-            return true;
-        }
-        return false;
-    }*/
-
+        return cliente != null && passwordEncoder.matches(contrasena, cliente.getContrasena());
+    }
 }
-
