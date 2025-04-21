@@ -1,7 +1,10 @@
 package com.example.restapi.service;
 
 import com.example.restapi.model.Cliente;
+import com.example.restapi.model.Compra;
+import com.example.restapi.model.dto.RegistroDTO;
 import com.example.restapi.repository.ClienteRepository;
+import com.example.restapi.repository.CompraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,12 +16,35 @@ import java.util.Optional;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final CompraRepository compraRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public ClienteService(ClienteRepository clienteRepository, PasswordEncoder passwordEncoder) {
+    public ClienteService(ClienteRepository clienteRepository, CompraRepository compraRepository, PasswordEncoder passwordEncoder) {
         this.clienteRepository = clienteRepository;
+        this.compraRepository = compraRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public Cliente registrarCliente(RegistroDTO registroDTO) {
+        if (clienteRepository.existsByEmail(registroDTO.getEmail())) {
+            throw new IllegalArgumentException("El email ya está registrado");
+        }
+        
+        Cliente cliente = new Cliente(
+            registroDTO.getNombre(),
+            registroDTO.getApellido(),
+            registroDTO.getEmail(),
+            passwordEncoder.encode(registroDTO.getContrasena()),
+            registroDTO.getTelefono(),
+            registroDTO.getMetodoPago()
+        );
+        
+        return clienteRepository.save(cliente);
+    }
+
+    public List<Compra> obtenerComprasPorCliente(Long clienteId) {
+        return compraRepository.findByClienteId(clienteId);
     }
 
     public List<Cliente> getAllClientes() {

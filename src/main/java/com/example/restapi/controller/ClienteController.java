@@ -1,13 +1,15 @@
 package com.example.restapi.controller;
 
 import com.example.restapi.model.Cliente;
+import com.example.restapi.model.Compra;
+import com.example.restapi.model.dto.LoginDTO;
+import com.example.restapi.model.dto.RegistroDTO;
 import com.example.restapi.service.ClienteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import com.example.restapi.model.dto.LoginDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,22 @@ public class ClienteController {
     
     @Autowired
     private ClienteService clienteService;
+
+        @PostMapping("/registro")
+    public ResponseEntity<?> registrarCliente(@RequestBody RegistroDTO registroDTO) {
+        try {
+            Cliente nuevoCliente = clienteService.registrarCliente(registroDTO);
+            return new ResponseEntity<>(nuevoCliente, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    @GetMapping("/{id}/compras")
+    public ResponseEntity<List<Compra>> obtenerComprasPorCliente(@PathVariable Long id) {
+        List<Compra> compras = clienteService.obtenerComprasPorCliente(id);
+        return ResponseEntity.ok(compras);
+    }
 
     @GetMapping
     public List<Cliente> getAllClientes() {

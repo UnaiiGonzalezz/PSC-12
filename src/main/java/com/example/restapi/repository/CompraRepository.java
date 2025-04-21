@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface CompraRepository extends JpaRepository<Compra, Long> {
 
+    List<Compra> findByClienteId(long clienteId);
     // Buscar las compras por el estado en el que se encuentran (Pendiente, Enviado, Entregado, Cancelada)
     List<Compra> findByEstado(String estado);
 
