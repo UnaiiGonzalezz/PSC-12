@@ -1,31 +1,49 @@
-SpringBoot + REST API + MySQL
-=============================
+# SpringBoot + REST API + MySQL (Proyecto Farmacia)
 
-This example relies on the SpringBoot to create a REST API and connecting to a MySQL database using JPA, with a sample web application and a command line client.
+Este proyecto está desarrollado como parte de la asignatura **Procesos del Software y Calidad**. Se trata de una API REST para la gestión de una farmacia, utilizando tecnologías como **Spring Boot**, **MySQL**, **JPA** y **Maven**.
 
-The basic structure of a SpringBoot project can be initialized using *Spring initializr* at https://start.spring.io/.
+La estructura básica del proyecto se ha generado con la herramienta [Spring Initializr](https://start.spring.io/).
 
-Launching the application
--------------------------
+---
 
-First, check all the required dependencies specified by the pom.xml file and the database configuration contained in *src/main/resources/application.properties* file.
+## Cómo ejecutar la aplicación
 
-Now, run the following command to check to download all dependencies and check that everything correctly compiles
+### 1. Verificar dependencias
+Asegúrate de que todas las dependencias estén correctamente definidas en el archivo `pom.xml`, y que la configuración de la base de datos esté en `src/main/resources/application.properties`.
 
-      mvn compile
+### 2. Compilar el proyecto
+Ejecuta el siguiente comando para descargar todas las dependencias y comprobar que la compilación se realiza correctamente:
 
-Make sure that the MySQL database was correctly configured before connecting the application to use it. 
-Use the contents of the file *src/main/resources/dbsetup.sql* to create the database, an specific user 'spq' (pass: 'spq') for the application and grant privileges to that user. If you are using the command line client for MySQL you could run the following command
+```bash
+mvn compile
+```
 
-      mysql –uroot -p < src/main/resources/dbsetup.sql
+### 3. Configurar la base de datos
+Antes de iniciar la aplicación, asegúrate de tener un servidor **MySQL** en funcionamiento. Puedes usar el script `src/main/resources/dbsetup.sql` para:
+- Crear la base de datos
+- Crear el usuario `spq` con contraseña `spq`
+- Asignarle los permisos necesarios
 
-otherwise you could use the contents of the file in any other MySQL client you are using.
+Ejemplo de ejecución desde terminal:
 
-Now, launch the server using the following command
+```bash
+mysql -uroot -p < src/main/resources/dbsetup.sql
+```
 
-    mvn spring-boot:run
+También puedes ejecutar el contenido del archivo desde cualquier cliente gráfico de MySQL.
 
-If there are no errors, you should get a running web application serving its contents at http://localhost:8080/. You can press Ctrl+C to stop the running application.
+### 4. Iniciar la aplicación
+Para iniciar el servidor Spring Boot, ejecuta:
+
+```bash
+mvn spring-boot:run
+```
+
+Si no hay errores, la aplicación se ejecutará en:  
+[http://localhost:8080](http://localhost:8080)  
+Para detenerla, presiona `Ctrl+C`.
+
+---
 
 REST API
 --------
