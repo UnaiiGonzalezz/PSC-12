@@ -59,6 +59,11 @@ public class ClienteService {
         return Optional.ofNullable(clienteRepository.findByTelefono(telefono));
     }
 
+    public Optional<Cliente> getClienteByEmail(String email) {
+    return Optional.ofNullable(clienteRepository.findByEmail(email));
+}
+
+
     public Cliente saveCliente(Cliente cliente) {
         cliente.setContrasena(passwordEncoder.encode(cliente.getContrasena()));
         return clienteRepository.save(cliente);
@@ -72,4 +77,23 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findByEmail(email);
         return cliente != null && passwordEncoder.matches(contrasena, cliente.getContrasena());
     }
+    // 🔧 AÑADIR dentro de tu clase, debajo de saveCliente quizá
+    public Cliente updateCliente(Long id, Cliente datos) {
+    Cliente existente = clienteRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
+
+    existente.setNombre(datos.getNombre());
+    existente.setApellido(datos.getApellido());
+    existente.setEmail(datos.getEmail());
+
+    // Si te pasan una nueva contraseña la volvemos a encriptar
+    if (datos.getContrasena() != null && !datos.getContrasena().isBlank()) {
+        existente.setContrasena(passwordEncoder.encode(datos.getContrasena()));
+    }
+    existente.setTelefono(datos.getTelefono());
+    existente.setMetodoPago(datos.getMetodoPago());
+
+    return clienteRepository.save(existente);
+    }
+
 }
