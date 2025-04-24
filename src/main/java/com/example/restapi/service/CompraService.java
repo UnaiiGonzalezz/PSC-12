@@ -23,7 +23,7 @@ public class CompraService {
 
     /* ---------- CRUD básico ---------- */
     public List<Compra> getAllCompras() { return compraRepository.findAll(); }
-    public Optional<Compra> getCompraById(Long id) { return compraRepository.findById(id); }
+    //public Optional<Compra> getCompraById(Long id) { return compraRepository.findById(id); }
     public List<Compra> getComprasByEstado(String e) { return compraRepository.findByEstado(e); }
     public Compra saveCompra(Compra c) { return compraRepository.save(c); }
     public void deleteCompra(Long id) { compraRepository.deleteById(id); }
@@ -52,7 +52,7 @@ public class CompraService {
     }
 
     /* ---------- Estado detallado ---------- */
-    public Optional<EstadoCompraDTO> getEstadoCompraDTO(Long id) {
+    /* public Optional<EstadoCompraDTO> getEstadoCompraDTO(Long id) {
         return compraRepository.findById(id).map(this::mapToEstadoDTO);
     }
 
@@ -66,8 +66,12 @@ public class CompraService {
 
         return new EstadoCompraDTO(c.getId(), c.getEstado(), c.getFechaCompra(),
                 clienteInfo, medsInfo);
-    }
+    } */
 
+    public Optional<Compra> getCompraById(Long id) {
+        return compraRepository.findById(id);
+    }
+    
     /* ---------- crear desde carrito (ya existente) ---------- */
     @Transactional
     public Compra crearDesdeCarrito(Carrito carrito) {
