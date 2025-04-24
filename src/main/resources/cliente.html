@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de clientes</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <h1>Clientes registrados</h1>
+  <table>
+    <thead>
+      <tr><th>Nombre</th><th>Apellido</th><th>Email</th><th>Teléfono</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <script>
+    fetch('/clientes')
+      .then(r => r.json())
+      .then(clientes => {
+        const rows = clientes.map(c =>
+          `<tr><td>${c.nombre}</td><td>${c.apellido}</td><td>${c.email}</td><td>${c.telefono}</td></tr>`
+        ).join('');
+        document.getElementById('tbody').innerHTML = rows;
+      })
+      .catch(() => alert('No se pudieron cargar los clientes.'));
+  </script>
+</body>
+</html>
