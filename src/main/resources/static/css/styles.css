@@ -1,0 +1,23 @@
+/* ---------- layout básico ---------- */
+body   { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+h1     { margin-bottom: 1rem; }
+a      { color:#0077cc; text-decoration:none; }
+a:hover{ text-decoration:underline; }
+
+.toolbar input {
+  padding:.4rem .6rem; border:1px solid #ccc; border-radius:4px; width:230px;
+}
+.toolbar button { margin-left:.4rem; }
+
+/* ---------- tabla ---------- */
+table { border-collapse:collapse; width:100%; margin-top:1rem; }
+th,td { border:1px solid #ddd; padding:.6rem .8rem; }
+th    { background:#f7f7f7; text-align:left; }
+
+.paginacion { margin-top:.8rem; }
+button:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ---------- detalle ---------- */
+.detalle { list-style:none; padding:0; }
+.detalle li { margin:.3rem 0; }
+.error   { color:#c00; }

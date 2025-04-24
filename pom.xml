@@ -98,6 +98,18 @@
     		<scope>runtime</scope>
 		</dependency>
 
+		<!-- Spring Boot Starter Security -->
+    	<dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-security</artifactId>
+    	</dependency>
+
+    	<!-- Flyway (Migraciones de base de datos) -->
+    	<dependency>
+        	<groupId>org.flywaydb</groupId>
+        	<artifactId>flyway-core</artifactId>
+    	</dependency>
+
 
 	</dependencies>
 
@@ -128,6 +140,20 @@
 						<argument>${server.port}</argument>
 					</arguments>
 				</configuration>
+			</plugin>
+
+			<plugin>
+  				<groupId>io.gatling</groupId>
+  				<artifactId>gatling-maven-plugin</artifactId>
+  				<version>4.9.0</version>
+  				<executions>
+    				<execution>
+      					<id>gatling-test</id>
+      					<goals>
+        					<goal>test</goal>
+      					</goals>
+    				</execution>
+ 				 </executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -13,47 +13,36 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private ClienteService clienteService;
-    @Autowired 
-    private JwtUtil jwtUtil;
+    @Autowired private ClienteService clienteService;
+    @Autowired private JwtUtil        jwtUtil;
 
     /* ---------- POST /auth/login ---------- */
     @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody LoginDTO body) {
-        boolean ok = clienteService.verificarCredenciales(
-                body.getEmail(), body.getContrasena());
-
-        if (!ok) {
-            // credenciales incorrectas
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Email o contraseña incorrectos");
-        }
-
-        // obtener Cliente para devolver datos públicos
-        Cliente cliente = clienteService.getClienteById(
-                clienteService.getClienteByEmail(body.getEmail()).get().getId()
-        ).orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR, "Error recuperando cliente"));
-
-        ClienteDTO dto = new ClienteDTO(
-                cliente.getId(), cliente.getNombre(), cliente.getApellido(),
-                cliente.getEmail(), cliente.getMetodoPago());
-
-        return new LoginResponseDTO("Login correcto", dto);
-    }
-
     public LoginResponseDTO login(@RequestBody LoginDTO body) {
         boolean ok = clienteService.verificarCredenciales(body.getEmail(), body.getContrasena());
         if (!ok)
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email o contraseña incorrectos");
 
-        Cliente c = clienteService.getClienteByEmail(body.getEmail()).get();
-        ClienteDTO dto = new ClienteDTO(c.getId(), c.getNombre(), c.getApellido(),
-                                        c.getEmail(), c.getMetodoPago());
-
+        Cliente c   = clienteService.getClienteByEmail(body.getEmail()).get();
         String token = jwtUtil.generateToken(c.getEmail());
 
-        return new LoginResponseDTO(token, dto);   // ← token en la respuesta
+        return new LoginResponseDTO(token,
+                new ClienteDTO(c.getId(), c.getNombre(), c.getApellido(),
+                               c.getEmail(), c.getMetodoPago()));
+    }
+
+    /* ---------- OPCIONAL: POST /auth/registro ---------- */
+    @PostMapping("/registro")
+    @ResponseStatus(HttpStatus.CREATED)
+    public LoginResponseDTO registro(@RequestBody RegistroDTO body) {
+        // crea cliente
+        Cliente nuevo = clienteService.registrarCliente(body);
+
+        // token inmediato
+        String token = jwtUtil.generateToken(nuevo.getEmail());
+
+        return new LoginResponseDTO(token,
+                new ClienteDTO(nuevo.getId(), nuevo.getNombre(), nuevo.getApellido(),
+                               nuevo.getEmail(), nuevo.getMetodoPago()));
     }
 }

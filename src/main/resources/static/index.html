@@ -1,99 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Book Management</title>
-    <script>
-        async function fetchBooks() {
-            const response = await fetch('/api/books');
-            const books = await response.json();
-            let tableContent = books.map(book => 
-                `<tr id="row-${book.id}">
-                    <td>${book.id}</td>
-                    <td id="title-cell-${book.id}">${book.title}</td>
-                    <td id="author-cell-${book.id}">${book.author}</td>
-                    <td id="actions-${book.id}">
-                        <button onclick="enableEdit(${book.id}, '${book.title}', '${book.author}')">Update</button>
-                        <button onclick="deleteBook(${book.id})">Delete</button>
-                    </td>
-                </tr>`
-            ).join('');
-            document.getElementById('bookTable').innerHTML = tableContent;
-        }
-
-        async function addBook() {
-            const title = document.getElementById('title').value;
-            const author = document.getElementById('author').value;
-
-            await fetch('/api/books', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, author })
-            });
-
-            document.getElementById('title').value = "";
-            document.getElementById('author').value = "";
-            fetchBooks();
-        }
-
-        function enableEdit(id, title, author) {
-            document.getElementById(`row-${id}`).innerHTML = `
-                <td>${id}</td>
-                <td><input type="text" id="edit-title-${id}" value="${title}"></td>
-                <td><input type="text" id="edit-author-${id}" value="${author}"></td>
-                <td>
-                    <button onclick="confirmUpdate(${id})">Confirm</button>
-                    <button onclick="fetchBooks()">Cancel</button>
-                </td>
-            `;
-        }
-
-        async function confirmUpdate(id) {
-            const title = document.getElementById(`edit-title-${id}`).value;
-            const author = document.getElementById(`edit-author-${id}`).value;
-
-            await fetch(`/api/books/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, author })
-            });
-
-            fetchBooks();
-        }
-
-        async function deleteBook(id) {
-            await fetch(`/api/books/${id}`, {
-                method: 'DELETE'
-            });
-
-            fetchBooks();
-        }
-
-        window.onload = fetchBooks;
-    </script>
+  <meta charset="UTF-8" />
+  <title>Farmacia - Catálogo</title>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
-    <h2>Book Management</h2>
+  <h1>Medicamentos disponibles</h1>
 
-    <form onsubmit="event.preventDefault(); addBook();">
-        <input type="text" id="title" placeholder="Title" required>
-        <input type="text" id="author" placeholder="Author" required>
-        <button type="submit">Add Book</button>
-    </form>
+  <div class="toolbar">
+    <input id="buscador" placeholder="Buscar por nombre…" />
+    <button onclick="cargar()">Buscar</button>
+  </div>
 
-    <h3>Book List</h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="bookTable"></tbody>
-    </table>
+  <table>
+    <thead>
+      <tr><th>Nombre</th><th>Precio&nbsp;(€)</th><th></th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="paginacion">
+    <button onclick="prev()" id="prev">&larr; Anterior</button>
+    <span id="pagina"></span>
+    <button onclick="next()" id="next">Siguiente &rarr;</button>
+  </div>
+
+<script>
+let page = 0, size = 10;
+
+function pintar(meds, totalPages) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = meds.map(m =>
+    `<tr>
+       <td>${m.nombre}</td>
+       <td>€${m.precio.toFixed(2)}</td>
+       <td><a href="medicamento.html?id=${m.id}">Ver</a></td>
+     </tr>`).join('');
+
+  /* paginación */
+  document.getElementById('pagina').textContent = `Página ${page + 1} de ${totalPages}`;
+  document.getElementById('prev').disabled = page === 0;
+  document.getElementById('next').disabled = page + 1 >= totalPages;
+}
+
+function cargar() {
+  const q = document.getElementById('buscador').value.trim();
+  let url;
+
+  if (q) {                       // búsqueda directa
+    url = `/medicamentos/nombre/${encodeURIComponent(q)}`;
+    fetch(url).then(r => r.json()).then(list => pintar(list, 1));
+  } else {                       // paginado
+    url = `/medicamentos/pag?page=${page}&size=${size}&sort=nombre,asc`;
+    fetch(url).then(r => r.json()).then(data => pintar(data.content, data.totalPages));
+  }
+}
+
+function next() { page++; cargar(); }
+function prev() { page--; cargar(); }
+
+window.onload = cargar;
+</script>
 </body>
 </html>
