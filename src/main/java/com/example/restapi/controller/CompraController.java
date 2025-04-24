@@ -6,8 +6,11 @@ import com.example.restapi.model.dto.*;
 import com.example.restapi.security.SecurityUtil;
 import com.example.restapi.service.CompraService;
 import com.example.restapi.repository.ClienteRepository;
+
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,12 +35,23 @@ public class CompraController {
     }
 
     /* ---------- Estado detallado ---------- */
-    @GetMapping("/{id}/estado")
+    /*@GetMapping("/{id}/estado")
     public EstadoCompraDTO getEstadoCompra(@PathVariable Long id) {
         return compraService.getEstadoCompraDTO(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Compra no encontrada"));
+    }*/
+    @GetMapping("/{id}/estado")
+    public ResponseEntity<String> getEstadoCompra(@PathVariable Long id) {
+    Optional<Compra> compraOpt = compraService.getCompraById(id);
+
+    if (compraOpt.isEmpty()) {
+        return ResponseEntity.notFound().build();
     }
+
+    Compra compra = compraOpt.get();
+    return ResponseEntity.ok("El estado de su pedido es: " + compra.getEstado());
+}
 
     /* ---------- Historial por ID de cliente (se mantiene) ---------- */
     @GetMapping("/cliente/{clienteId}")
@@ -57,7 +71,7 @@ public class CompraController {
     }
 
     /* ---------- Cambiar estado de una compra ---------- */
-    @PatchMapping("/{id}/estado")
+    /*@PatchMapping("/{id}/estado")
     public EstadoCompraDTO cambiarEstado(@PathVariable Long id,
                                          @RequestBody CambioEstadoDTO body) {
         try {
@@ -66,5 +80,5 @@ public class CompraController {
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
         }
-    }
+    }*/
 }
