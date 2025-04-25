@@ -12,6 +12,8 @@ import com.example.restapi.repository.StockMovimientoRepository;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.example.restapi.model.dto.CheckoutResponseDTO;
+
 @Service
 public class CarritoService {
 
