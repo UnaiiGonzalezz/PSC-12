@@ -71,6 +71,37 @@ public class CompraService {
         return compraRepository.findById(id);
     }
     
+    /* ---------- Estado detallado ---------- */
+public Optional<EstadoCompraDTO> getEstadoCompraDTO(Long id) {
+        return compraRepository                      // busca la compra
+                .findById(id)
+                .map(this::mapToEstadoDTO);          // y la mapea a DTO
+    }
+    
+    /** Mapea una entidad Compra al DTO de estado detallado. */
+    private EstadoCompraDTO mapToEstadoDTO(Compra c) {
+        // datos del cliente
+        var clienteInfo = new EstadoCompraDTO.ClienteInfo(
+                c.getCliente().getNombre(),
+                c.getCliente().getApellido(),
+                c.getCliente().getEmail());
+    
+        // lista de medicamentos (nombre + precio)
+        var medsInfo = c.getMedicamentos().stream()
+                .map(m -> new EstadoCompraDTO.MedicamentoInfo(
+                        m.getNombre(), m.getPrecio()))
+                .collect(Collectors.toList());
+    
+        // construimos el DTO completo
+        return new EstadoCompraDTO(
+                c.getId(),
+                c.getEstado(),
+                c.getFechaCompra(),
+                clienteInfo,
+                medsInfo);
+    }
+
+
     /* ---------- crear desde carrito (ya existente) ---------- */
     @Transactional
     public Compra crearDesdeCarrito(Carrito carrito) {
