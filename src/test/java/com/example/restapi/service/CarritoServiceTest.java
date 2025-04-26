@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 class CarritoServiceTest {
@@ -50,23 +51,27 @@ class CarritoServiceTest {
         verify(carritoRepo).save(any(Carrito.class));
     }
 
-    /* ---------- checkout ---------- */
-    @Test
-    void checkout_descuentaStockYCreaCompra() {
-        Carrito carrito = new Carrito(ana);
-        carrito.addItem(ibup, 2);
+@Test
+void checkout_descuentaStockYCreaCompra() {
+    Carrito carrito = new Carrito(ana);
+    carrito.addItem(ibup, 2);
 
-        when(carritoRepo.findByCliente(ana)).thenReturn(Optional.of(carrito));
-        when(medRepo.save(any(Medicamento.class))).thenAnswer(i -> i.getArgument(0));
-        when(compraService.crearDesdeCarrito(any()))
-                .thenReturn(new Compra(ana, carrito.getItems(),
-                        java.time.LocalDate.now(), 2, ana.getMetodoPago()));
+    when(carritoRepo.findByCliente(ana)).thenReturn(Optional.of(carrito));
+    when(medRepo.save(any(Medicamento.class))).thenAnswer(i -> i.getArgument(0));
+    when(compraService.crearDesdeCarrito(any()))
+            .thenReturn(new Compra(
+                ana,
+                carrito.getItems().stream().map(CarritoItem::getMedicamento).toList(),
+                java.time.LocalDate.now(),
+                2,
+                ana.getMetodoPago()
+            ));
 
-        CheckoutResponseDTO dto = service.checkout(ana);
+    CheckoutResponseDTO dto = service.checkout(ana);
 
-        assertThat(dto.getTotal()).isEqualTo(10);
-        verify(medRepo).save(argThat(m -> m.getStock() == 18)); // 20-2
-        verify(carritoRepo).delete(carrito);
-        verify(movRepo, atLeastOnce()).save(any(StockMovimiento.class));
-    }
+    assertThat(dto.getTotal()).isEqualTo(10);
+    verify(medRepo).save(argThat(m -> m.getStock() == 18)); // 20-2
+    verify(carritoRepo).delete(carrito);
+    verify(movRepo, atLeastOnce()).save(any(StockMovimiento.class));
+}
 }

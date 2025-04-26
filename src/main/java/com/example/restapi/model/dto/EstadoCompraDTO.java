@@ -62,6 +62,8 @@ public class EstadoCompraDTO {
 
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
+
+        
     }
 
     // Clase interna para info de medicamentos
