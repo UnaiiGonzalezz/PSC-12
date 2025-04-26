@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CompraRepository extends JpaRepository<Compra, Long> {
     List<Compra> findByClienteId(Long clienteId);
+    List<Compra> findByEstado(String estado);
 }

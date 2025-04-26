@@ -43,9 +43,10 @@ class CompraServiceTest {
 
         List<CompraResumenDTO> res = service.getHistorialPorCliente(1L);
 
-        assertThat(res).singleElement()
-                       .extracting(CompraResumenDTO::getEstado)
-                       .isEqualTo("Pendiente");
+        assertThat(res)
+            .singleElement()
+            .extracting(CompraResumenDTO::getEstado)
+            .isEqualTo("Pendiente");
     }
 
     @Test
@@ -53,9 +54,9 @@ class CompraServiceTest {
         when(compraRepo.findById(99L)).thenReturn(Optional.of(compraPendiente));
 
         assertThat(service.getEstadoCompraDTO(99L))
-                .isPresent()
-                .get()
-                .extracting(dto -> dto.getCliente().getEmail()) // <-- Corregido: getEmail()
-                .isEqualTo("ana@demo.es");
+            .isPresent()
+            .get()
+            .extracting(dto -> dto.getCliente().getEmail()) // <- corregido getEmail()
+            .isEqualTo("ana@demo.es");
     }
 }
