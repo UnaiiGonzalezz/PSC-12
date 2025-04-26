@@ -19,19 +19,18 @@ class CompraServiceTest {
     @InjectMocks
     private CompraService service;
 
-    @Mock private CompraRepository compraRepo;
+    @Mock
+    private CompraRepository compraRepo;
 
-    private Cliente ana;
+    private Cliente     ana;
     private Medicamento ibup;
-    private Compra compraPendiente;
+    private Compra      compraPendiente;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
         ana  = new Cliente("Ana","López","ana@demo.es","HASH","600","Tarjeta");
         ibup = new Medicamento("Ibuprofeno","Analgésico",5,30,"Bayer");
-
         compraPendiente = new Compra(
                 ana, List.of(ibup), LocalDate.now(), 2, ana.getMetodoPago());
     }
@@ -42,8 +41,9 @@ class CompraServiceTest {
 
         List<CompraResumenDTO> res = service.getHistorialPorCliente(1L);
 
-        assertThat(res).hasSize(1);
-        assertThat(res.get(0).getEstado()).isEqualTo("Pendiente");
+        assertThat(res).singleElement()
+                       .extracting(CompraResumenDTO::getEstado)
+                       .isEqualTo("Pendiente");
     }
 
     @Test

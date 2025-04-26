@@ -21,10 +21,10 @@ class CarritoServiceTest {
     @InjectMocks
     private CarritoService service;
 
-    @Mock private CarritoRepository carritoRepo;
-    @Mock private MedicamentoRepository medRepo;
+    @Mock private CarritoRepository        carritoRepo;
+    @Mock private MedicamentoRepository    medRepo;
     @Mock private StockMovimientoRepository movRepo;
-    @Mock private CompraService compraService;     // usado en checkout
+    @Mock private CompraService            compraService;
 
     private Cliente ana;
     private Medicamento ibup;
@@ -32,7 +32,6 @@ class CarritoServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
         ana  = new Cliente("Ana","López","ana@demo.es","HASH","600","Tarjeta");
         ibup = new Medicamento("Ibuprofeno","Analgésico",5,20,"Bayer");
         ibup.setId(1L);
@@ -43,12 +42,11 @@ class CarritoServiceTest {
     void addMedicamento_creaCarritoYDevuelveDTO() {
         when(carritoRepo.findByCliente(ana)).thenReturn(Optional.empty());
         when(medRepo.findById(1L)).thenReturn(Optional.of(ibup));
-        when(carritoRepo.save(any(Carrito.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+        when(carritoRepo.save(any(Carrito.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var dto = service.addMedicamento(ana, 1L, 2);
 
-        assertThat(dto.getTotal()).isEqualTo(10);   // 2 x 5 €
+        assertThat(dto.getTotal()).isEqualTo(10);   // 2 × 5 €
         verify(carritoRepo).save(any(Carrito.class));
     }
 
@@ -56,7 +54,7 @@ class CarritoServiceTest {
     @Test
     void checkout_descuentaStockYCreaCompra() {
         Carrito carrito = new Carrito(ana);
-        carrito.addItem(ibup, 2);                // stock suficiente
+        carrito.addItem(ibup, 2);
 
         when(carritoRepo.findByCliente(ana)).thenReturn(Optional.of(carrito));
         when(medRepo.save(any(Medicamento.class))).thenAnswer(i -> i.getArgument(0));
@@ -67,7 +65,7 @@ class CarritoServiceTest {
         CheckoutResponseDTO dto = service.checkout(ana);
 
         assertThat(dto.getTotal()).isEqualTo(10);
-        verify(medRepo).save(argThat(m -> m.getStock() == 18));   // 20-2
+        verify(medRepo).save(argThat(m -> m.getStock() == 18)); // 20-2
         verify(carritoRepo).delete(carrito);
         verify(movRepo, atLeastOnce()).save(any(StockMovimiento.class));
     }
