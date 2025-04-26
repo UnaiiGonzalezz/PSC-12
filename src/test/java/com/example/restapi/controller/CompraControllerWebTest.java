@@ -32,14 +32,14 @@ class CompraControllerWebTest {
 
     @BeforeEach
     void setUp() {
-        // 1) mockeamos updateEstado(...)
+        // mock updateEstado(...)
         Compra compra = new Compra();
         compra.setId(5L);
         compra.setEstado("Enviado");
         Mockito.when(compraService.updateEstado(anyLong(), anyString()))
                .thenReturn(compra);
 
-        // 2) mockeamos getEstadoCompraDTO(...)
+        // mock getEstadoCompraDTO(...)
         EstadoCompraDTO dto = new EstadoCompraDTO(
                 5L, "Enviado", LocalDate.now(), null, null);
         Mockito.when(compraService.getEstadoCompraDTO(5L))
@@ -50,7 +50,7 @@ class CompraControllerWebTest {
     void cambiarEstado() throws Exception {
         mvc.perform(patch("/compras/5/estado")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"estado":"Enviado"}"""))
+                .content("{\"estado\":\"Enviado\"}"))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.estado").value("Enviado"));
     }
