@@ -1,147 +1,135 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.2</version>
-		<relativePath /> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>rest-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>rest-api</name>
-	<description>Demo project for Spring Boot REST API</description>
-	<properties>
-		<java.version>17</java.version>
-		<server.hostname>127.0.0.1</server.hostname>
-		<server.port>8080</server.port>
-	</properties>
-	<dependencies>
-		 
-  	<dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-  	</dependency>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  	<dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-  	</dependency>
+    <!-- BOM de Spring Boot: fija todas las versiones de Spring + terceros -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.2</version>
+        <relativePath/>
+    </parent>
 
-  	<dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-  	</dependency>
+    <groupId>com.example</groupId>
+    <artifactId>rest-api</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>rest-api</name>
+    <description>Demo project for Spring Boot REST API</description>
 
-  <!-- MySQL driver -->
-  	<dependency>
-      <groupId>com.mysql</groupId>
-      <artifactId>mysql-connector-j</artifactId>
-      <version>8.3.0</version>
-  	</dependency>
+    <properties>
+        <java.version>17</java.version>
+        <!-- hace que el compilador use release 17 -->
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <server.hostname>127.0.0.1</server.hostname>
+        <server.port>8080</server.port>
+    </properties>
 
-  <!-- OpenAPI / Swagger-UI -->
-  	<dependency>
-      <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.2.0</version>
-  	</dependency>
+    <!-- ============================================================= -->
+    <!-- ====================   DEPENDENCIAS   ======================= -->
+    <!-- ============================================================= -->
+    <dependencies>
 
-  <!-- JWT -->
-  	<dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-api</artifactId>
-      <version>0.11.5</version>
-  	</dependency>
-  
-  	<dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-impl</artifactId>
-      <version>0.11.5</version>
-      <scope>runtime</scope>
-  	</dependency>
-  
-  	<dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-jackson</artifactId>
-      <version>0.11.5</version>
-      <scope>runtime</scope>
-  	</dependency>
+        <!-- Core Web + JPA + Seguridad -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
-  <!-- Flyway migraciones -->
-  	<dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
- 	</dependency>
+        <!-- Driver MySQL -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.3.0</version>
+        </dependency>
 
-  
-  	<dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-      <exclusions>
-          <!-- No JUnit4 -->
-          <exclusion>
-              <groupId>org.junit.vintage</groupId>
-              <artifactId>junit-vintage-engine</artifactId>
-          </exclusion>
-      </exclusions>
-  	</dependency>
+        <!-- Documentación OpenAPI / Swagger UI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.2.0</version>
+        </dependency>
 
-  <!-- BBDD embebida para tests -->
-  	<dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-  	</dependency>
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
 
-	</dependencies>
+        <!-- Flyway DB migrations -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
 
-	<build>
-		<plugins>
-			<!-- Required by Spring Boot-->
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+        <!-- ===== TEST ===== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <!-- quitamos JUnit 4 -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- BBDD en memoria para tests -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-			<!-- Configures exec:java command to launch client-->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<mainClass>com.example.restapi.client.BookManager</mainClass>
-					<arguments>
-						<argument>${server.hostname}</argument>
-						<argument>${server.port}</argument>
-					</arguments>
-				</configuration>
-			</plugin>
+    </dependencies>
 
-			<plugin>
-  				<groupId>io.gatling</groupId>
-  				<artifactId>gatling-maven-plugin</artifactId>
-  				<version>4.9.0</version>
-  				<executions>
-    				<execution>
-      					<id>gatling-test</id>
-      					<goals>
-        					<goal>test</goal>
-      					</goals>
-    				</execution>
- 				 </executions>
-			</plugin>
-		</plugins>
-	</build>
+    <!-- ============================================================= -->
+    <!-- ======================   PLUG-INS   ========================= -->
+    <!-- ============================================================= -->
+    <build>
+        <plugins>
+            <!-- Spring Boot plugin (repackage y run) -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Gatling para test de rendimiento (#48) -->
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>4.9.0</version>
+                <executions>
+                    <execution>
+                        <id>gatling-test</id>
+                        <goals><goal>test</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
