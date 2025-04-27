@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
   <nav>
     <a href="index.html">Catálogo</a> |
     <a href="cliente.html">Clientes</a> |
@@ -13,7 +14,16 @@
     <a href="nueva-compra.html">Nueva compra</a> |
     <a href="admin.html">Admin</a>
   </nav>
+
   <h1>Clientes registrados</h1>
+
+  <div>
+    <h2>Iniciar sesión</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button onclick="login()">Login</button>
+  </div>
+
   <table>
     <thead>
       <tr><th>Nombre</th><th>Apellido</th><th>Email</th><th>Teléfono</th></tr>
@@ -21,16 +31,51 @@
     <tbody id="tbody"></tbody>
   </table>
 
-  <script>
-    fetch('/clientes')
-      .then(r => r.json())
-      .then(clientes => {
-        const rows = clientes.map(c =>
-          `<tr><td>${c.nombre}</td><td>${c.apellido}</td><td>${c.email}</td><td>${c.telefono}</td></tr>`
-        ).join('');
-        document.getElementById('tbody').innerHTML = rows;
-      })
-      .catch(() => alert('No se pudieron cargar los clientes.'));
-  </script>
+<script>
+let token = null;  // Aquí guardaremos el token
+
+function login() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  fetch('/auth/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ email, contrasena: password })
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('Login incorrecto');
+    return r.json();
+  })
+  .then(data => {
+    token = data.token;  // Suponiendo que tu backend responde { "token": "eyJhbGciOi..." }
+    alert('Login correcto');
+    cargarClientes();    // Ahora sí, podemos cargar los clientes
+  })
+  .catch(() => alert('Error al iniciar sesión'));
+}
+
+function cargarClientes() {
+  if (!token) {
+    alert('Primero debes iniciar sesión.');
+    return;
+  }
+
+  fetch('/api/clientes', {
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  })
+  .then(r => r.json())
+  .then(clientes => {
+    const rows = clientes.map(c =>
+      `<tr><td>${c.nombre}</td><td>${c.apellido}</td><td>${c.email}</td><td>${c.telefono}</td></tr>`
+    ).join('');
+    document.getElementById('tbody').innerHTML = rows;
+  })
+  .catch(() => alert('No se pudieron cargar los clientes.'));
+}
+</script>
+
 </body>
 </html>

@@ -21,19 +21,26 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+            .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/",                    // <--- Esto hace público el acceso al index.html
+                    "/",                      
                     "/index.html",
-                    "/css/**",              // <--- si tienes archivos CSS públicos
-                    "/js/**",               // <--- si tienes archivos JS públicos
+                    "/cliente.html",
+                    "/compra.html",
+                    "/nueva-compra.html",
+                    "/admin.html",
+                    "/css/**",
+                    "/js/**",
                     "/auth/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
-                    "/medicamentos/**"      // <--- también los medicamentos públicos
+                    "/medicamentos/**",
+                    "/api/clientes",         // 👈 necesario
+                    "/api/clientes/**"        // 👈 MUY necesario también
                 ).permitAll()
                 .anyRequest().authenticated()
             )
