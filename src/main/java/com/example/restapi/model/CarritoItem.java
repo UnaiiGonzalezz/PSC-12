@@ -11,20 +11,22 @@ public class CarritoItem {
     private Long id;
 
     /* --- Relaciones --- */
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_carrito")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_carrito", nullable = false)
     private Carrito carrito;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_medicamento")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_medicamento", nullable = false)
     private Medicamento medicamento;
 
-    /* --- Datos --- */
+    /* --- Atributos --- */
     @Column(nullable = false)
     private int cantidad;
 
     /* --- Constructores --- */
-    public CarritoItem() { }
+    public CarritoItem() {
+        // Constructor vacío obligatorio para JPA
+    }
 
     public CarritoItem(Carrito carrito, Medicamento medicamento, int cantidad) {
         this.carrito = carrito;
@@ -35,19 +37,39 @@ public class CarritoItem {
     /* --- Métodos de dominio --- */
 
     public double getSubtotal() {
-        return medicamento.getPrecio() * cantidad;
+        if (medicamento != null) {
+            return medicamento.getPrecio() * cantidad;
+        }
+        return 0.0;
     }
 
-    /* --- Getters / Setters --- */
+    /* --- Getters y Setters --- */
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Carrito getCarrito() { return carrito; }
-    public void setCarrito(Carrito carrito) { this.carrito = carrito; }
+    public Carrito getCarrito() {
+        return carrito;
+    }
 
-    public Medicamento getMedicamento() { return medicamento; }
-    public void setMedicamento(Medicamento medicamento) { this.medicamento = medicamento; }
+    public void setCarrito(Carrito carrito) {
+        this.carrito = carrito;
+    }
 
-    public int getCantidad() { return cantidad; }
-    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    public Medicamento getMedicamento() {
+        return medicamento;
+    }
+
+    public void setMedicamento(Medicamento medicamento) {
+        this.medicamento = medicamento;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
 }

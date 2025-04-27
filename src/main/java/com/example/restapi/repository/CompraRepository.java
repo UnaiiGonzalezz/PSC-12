@@ -1,17 +1,15 @@
 package com.example.restapi.repository;
- 
+
+import com.example.restapi.model.Compra;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
- 
-import com.example.restapi.model.Compra;
+
 import java.util.List;
- 
+
 @Repository
 public interface CompraRepository extends JpaRepository<Compra, Long> {
-
-    List<Compra> findByClienteId(long clienteId);
-    // Buscar las compras por el estado en el que se encuentran (Pendiente, Enviado, Entregado, Cancelada)
-    List<Compra> findByEstado(String estado);
-
-
+    
+    List<Compra> findByClienteId(Long clienteId);   // EXISTENTE
+    
+    List<Compra> findByEstado(String estado);       // <-- AÑADIR ESTA LÍNEA
 }

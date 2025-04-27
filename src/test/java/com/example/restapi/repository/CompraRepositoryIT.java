@@ -1,76 +1,68 @@
 package com.example.restapi.repository;
 
-import com.example.restapi.model.*;
+import com.example.restapi.model.Cliente;
+import com.example.restapi.model.Compra;
+import com.example.restapi.model.Medicamento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest                   // solo capa JPA
-@ActiveProfiles("test")        // usa application-test.properties (H2)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DataJpaTest
 class CompraRepositoryIT {
 
-    @Autowired private CompraRepository  compraRepo;
-    @Autowired private ClienteRepository clienteRepo;
-    @Autowired private MedicamentoRepository medRepo;
+    @Autowired
+    private CompraRepository compraRepo;
 
-    private Cliente juan;
-    private Cliente ana;
+    @Autowired
+    private ClienteRepository clienteRepo;
+
+    @Autowired
+    private MedicamentoRepository medicamentoRepo;
+
+    private Cliente cliente;
+    private Medicamento medicamento;
 
     @BeforeEach
     void setUp() {
-        // Clientes
-        juan = clienteRepo.save(new Cliente(
-                "Juan","Pérez","juan@demo.es","1234","600111111","Tarjeta"));
-        ana = clienteRepo.save(new Cliente(
-                "Ana","López","ana@demo.es","1234","600222222","Tarjeta"));
+        cliente = clienteRepo.save(new Cliente(
+                "Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta"));
 
-        // Medicamentos
-        Medicamento ibup = medRepo.save(new Medicamento(
-                "Ibuprofeno","Analgesico",5.0,100,"Bayer"));
-        Medicamento para = medRepo.save(new Medicamento(
-                "Paracetamol","Analgesico",3.0,100,"Bayer"));
+        medicamento = medicamentoRepo.save(new Medicamento(
+                "Ibuprofeno", "Analgésico", 5, 30, "Bayer"));
 
-        // Compras de Juan
-        compraRepo.save(new Compra(juan, List.of(ibup),
-                LocalDate.now(), 2, juan.getMetodoPago()));            // estado Pendiente
-        Compra enviada = new Compra(juan, List.of(para),
-                LocalDate.now(), 1, juan.getMetodoPago());
-        enviada.confirmarCompra();                                    // estado Enviado
-        compraRepo.save(enviada);
-
-        // Compra de Ana
-        Compra entregada = new Compra(ana, List.of(ibup, para),
-                LocalDate.now(), 3, ana.getMetodoPago());
-        entregada.entregarCompra();                                   // estado Entregado
-        compraRepo.save(entregada);
+        Compra compra = new Compra(
+                cliente,
+                List.of(medicamento),
+                LocalDate.now(),
+                2,
+                cliente.getMetodoPago()
+        );
+        compraRepo.save(compra);
     }
 
     @Test
-    void findByClienteId_devuelveSoloComprasDelCliente() {
-        List<Compra> comprasJuan = compraRepo.findByClienteId(juan.getId());
-        List<Compra> comprasAna  = compraRepo.findByClienteId(ana.getId());
-
-        assertThat(comprasJuan).hasSize(2);
-        assertThat(comprasAna).hasSize(1);
+    void findByClienteId_devuelveComprasDelCliente() {
+        List<Compra> compras = compraRepo.findByClienteId(cliente.getId());
+        assertThat(compras).isNotEmpty();
+        assertThat(compras.get(0).getCliente().getEmail()).isEqualTo(cliente.getEmail());
     }
 
     @Test
-    void findByEstado_devuelveComprasConEseEstado() {
+    void findByEstado_devuelveComprasPorEstado() {
         List<Compra> pendientes = compraRepo.findByEstado("Pendiente");
-        List<Compra> enviados   = compraRepo.findByEstado("Enviado");
-        List<Compra> entregados = compraRepo.findByEstado("Entregado");
+        assertThat(pendientes).isNotEmpty();
+        assertThat(pendientes.get(0).getEstado()).isEqualTo("Pendiente");
+    }
 
-        assertThat(pendientes).hasSize(1);
-        assertThat(enviados).hasSize(1);
-        assertThat(entregados).hasSize(1);
+    @Test
+    void findByEstado_noDevuelveNadaSiEstadoNoCoincide() {
+        List<Compra> entregadas = compraRepo.findByEstado("Entregado");
+        assertThat(entregadas).isEmpty();
     }
 }

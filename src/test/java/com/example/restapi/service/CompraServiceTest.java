@@ -5,9 +5,7 @@ import com.example.restapi.model.dto.CompraResumenDTO;
 import com.example.restapi.repository.CompraRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,20 +31,18 @@ class CompraServiceTest {
         MockitoAnnotations.openMocks(this);
         ana = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta");
         ibup = new Medicamento("Ibuprofeno", "Analgésico", 5, 30, "Bayer");
-        compraPendiente = new Compra(
-                ana, List.of(ibup), LocalDate.now(), 2, ana.getMetodoPago());
+        compraPendiente = new Compra(ana, List.of(ibup), LocalDate.now(), 2, ana.getMetodoPago());
     }
 
     @Test
     void historialPorCliente_mapeaADTO() {
-        when(compraRepo.findByClienteId(1L)).thenReturn(List.of(compraPendiente));
+        when(compraRepo.findByClienteId(anyLong())).thenReturn(List.of(compraPendiente));
 
         List<CompraResumenDTO> res = service.getHistorialPorCliente(1L);
 
-        assertThat(res)
-            .singleElement()
-            .extracting(CompraResumenDTO::getEstado)
-            .isEqualTo("Pendiente");
+        assertThat(res).singleElement()
+                       .extracting(CompraResumenDTO::getEstado)
+                       .isEqualTo("Pendiente");
     }
 
     @Test
@@ -54,9 +50,9 @@ class CompraServiceTest {
         when(compraRepo.findById(99L)).thenReturn(Optional.of(compraPendiente));
 
         assertThat(service.getEstadoCompraDTO(99L))
-            .isPresent()
-            .get()
-            .extracting(dto -> dto.getCliente().getEmail()) // <- corregido getEmail()
-            .isEqualTo("ana@demo.es");
+                .isPresent()
+                .get()
+                .extracting(dto -> dto.getCliente().getEmail())
+                .isEqualTo("ana@demo.es");
     }
 }

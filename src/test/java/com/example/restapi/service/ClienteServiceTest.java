@@ -1,59 +1,65 @@
 package com.example.restapi.service;
 
-import com.example.restapi.model.*;
-import com.example.restapi.model.dto.CompraResumenDTO;
+import com.example.restapi.model.Cliente;
+import com.example.restapi.model.dto.RegistroDTO;
+import com.example.restapi.repository.ClienteRepository;
 import com.example.restapi.repository.CompraRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-class CompraServiceTest {
+class ClienteServiceTest {
 
     @InjectMocks
-    private CompraService service;
+    private ClienteService clienteService;
+
+    @Mock
+    private ClienteRepository clienteRepo;
 
     @Mock
     private CompraRepository compraRepo;
 
-    private Cliente ana;
-    private Medicamento ibup;
-    private Compra compraPendiente;
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ana = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta");
-        ibup = new Medicamento("Ibuprofeno", "Analgésico", 5, 30, "Bayer");
-        compraPendiente = new Compra(
-                ana, List.of(ibup), LocalDate.now(), 2, ana.getMetodoPago());
     }
 
     @Test
-    void historialPorCliente_mapeaADTO() {
-        when(compraRepo.findByClienteId(1L)).thenReturn(List.of(compraPendiente));
+    void registrarCliente_nuevoClienteGuardado() {
+        RegistroDTO registro = new RegistroDTO();
+        registro.setNombre("Carlos");
+        registro.setApellido("Sánchez");
+        registro.setEmail("carlos@example.com");
+        registro.setContrasena("1234");
+        registro.setTelefono("600123456");
+        registro.setMetodoPago("Tarjeta");
 
-        List<CompraResumenDTO> res = service.getHistorialPorCliente(1L);
+        when(clienteRepo.existsByEmail("carlos@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("1234")).thenReturn("HASH1234");
+        when(clienteRepo.save(any(Cliente.class))).thenAnswer(i -> i.getArgument(0));
 
-        assertThat(res).singleElement()
-                       .extracting(CompraResumenDTO::getEstado)
-                       .isEqualTo("Pendiente");
+        Cliente guardado = clienteService.registrarCliente(registro);
+
+        assertThat(guardado.getEmail()).isEqualTo("carlos@example.com");
+        verify(clienteRepo).save(any(Cliente.class));
     }
 
     @Test
-    void estadoCompraDTO_devuelveDatosDetallados() {
-        when(compraRepo.findById(99L)).thenReturn(Optional.of(compraPendiente));
+    void verificarCredenciales_contraseñaCorrecta() {
+        Cliente cliente = new Cliente("Ana", "López", "ana@example.com", "HASHED_PASS", "600", "Tarjeta");
 
-        assertThat(service.getEstadoCompraDTO(99L))
-                .isPresent()
-                .get()
-                .extracting(dto -> dto.getCliente().getEmail()) // <-- CORREGIDO: getEmail()
-                .isEqualTo("ana@demo.es");
+        when(clienteRepo.findByEmail("ana@example.com")).thenReturn(cliente);
+        when(passwordEncoder.matches("1234", "HASHED_PASS")).thenReturn(true);
+
+        boolean resultado = clienteService.verificarCredenciales("ana@example.com", "1234");
+
+        assertThat(resultado).isTrue();
     }
 }
