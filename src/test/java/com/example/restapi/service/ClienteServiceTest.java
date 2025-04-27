@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -55,7 +57,7 @@ class ClienteServiceTest {
     void verificarCredenciales_contraseñaCorrecta() {
         Cliente cliente = new Cliente("Ana", "López", "ana@example.com", "HASHED_PASS", "600", "Tarjeta");
 
-        when(clienteRepo.findByEmail("ana@example.com")).thenReturn(cliente);
+        when(clienteRepo.findByEmail("ana@example.com")).thenReturn(Optional.of(cliente)); // <--- corregido aquí
         when(passwordEncoder.matches("1234", "HASHED_PASS")).thenReturn(true);
 
         boolean resultado = clienteService.verificarCredenciales("ana@example.com", "1234");

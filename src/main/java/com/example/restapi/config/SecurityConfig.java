@@ -24,11 +24,19 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**",
-                                 "/v3/api-docs/**",
-                                 "/swagger-ui.html",
-                                 "/swagger-ui/**").permitAll()
-                .anyRequest().authenticated())
+                .requestMatchers(
+                    "/",                    // <--- Esto hace público el acceso al index.html
+                    "/index.html",
+                    "/css/**",              // <--- si tienes archivos CSS públicos
+                    "/js/**",               // <--- si tienes archivos JS públicos
+                    "/auth/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/medicamentos/**"      // <--- también los medicamentos públicos
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

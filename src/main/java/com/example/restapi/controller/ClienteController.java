@@ -1,63 +1,45 @@
 package com.example.restapi.controller;
 
 import com.example.restapi.model.Cliente;
-import com.example.restapi.model.dto.ClienteDTO;
 import com.example.restapi.model.dto.RegistroDTO;
 import com.example.restapi.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/clientes")
+@RequestMapping("/api/clientes")
 public class ClienteController {
 
     @Autowired
     private ClienteService clienteService;
 
-    /* ---------- util ---------- */
-    private ClienteDTO toDTO(Cliente c) {
-        return new ClienteDTO(c.getId(), c.getNombre(), c.getApellido(),
-                              c.getEmail(), c.getMetodoPago());
+    @PostMapping
+    public ResponseEntity<Cliente> registrarCliente(@RequestBody RegistroDTO registroDTO) {
+        Cliente nuevoCliente = clienteService.registrarCliente(registroDTO);
+        return ResponseEntity.ok(nuevoCliente);
     }
 
-    /* ---------- #30 Registro ---------- */
-    @PostMapping("/registro")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ClienteDTO registrar(@RequestBody RegistroDTO body) {
-        return toDTO(clienteService.registrarCliente(body));
-    }
-
-    /* ---------- #31 Listado ---------- */
     @GetMapping
-    public List<ClienteDTO> list() {
-        return clienteService.getAllClientes().stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<Cliente>> listarClientes() {
+        return ResponseEntity.ok(clienteService.getAllClientes());
     }
 
     @GetMapping("/{id}")
-    public ClienteDTO get(@PathVariable Long id) {
-        return clienteService.getClienteById(id)
-                .map(this::toDTO)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+    public ResponseEntity<Cliente> getCliente(@PathVariable Long id) {
+        return ResponseEntity.ok(clienteService.getClienteById(id));
     }
 
-    /* ---------- #32 Actualizar ---------- */
     @PutMapping("/{id}")
-    public ClienteDTO update(@PathVariable Long id, @RequestBody Cliente body) {
-        return toDTO(clienteService.updateCliente(id, body));
+    public ResponseEntity<Cliente> actualizarCliente(@PathVariable Long id, @RequestBody Cliente cliente) {
+        return ResponseEntity.ok(clienteService.updateCliente(id, cliente));
     }
 
-    /* ---------- #33 Eliminar ---------- */
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarCliente(@PathVariable Long id) {
         clienteService.deleteCliente(id);
+        return ResponseEntity.noContent().build();
     }
 }
