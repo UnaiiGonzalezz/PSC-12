@@ -33,6 +33,11 @@ public class ClienteService {
         return clienteRepository.findByEmail(email);
     }
 
+    /**
+     * Registrar un nuevo cliente
+     * @param registroDTO DTO con los datos del nuevo cliente
+     * @return El cliente recién registrado
+     */
     public Cliente registrarCliente(RegistroDTO registroDTO) {
         Cliente cliente = new Cliente();
         cliente.setNombre(registroDTO.getNombre());
@@ -53,6 +58,12 @@ public class ClienteService {
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + id));
     }
 
+    /**
+     * Actualizar los datos de un cliente existente
+     * @param id El id del cliente a actualizar
+     * @param clienteDetails El objeto con los nuevos detalles del cliente
+     * @return El cliente actualizado
+     */
     public Cliente updateCliente(Long id, Cliente clienteDetails) {
         Cliente cliente = getClienteById(id);
         cliente.setNombre(clienteDetails.getNombre());
@@ -63,8 +74,17 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    public void deleteCliente(Long id) {
-        Cliente cliente = getClienteById(id);
-        clienteRepository.delete(cliente);
+    /**
+     * Eliminar un cliente por su ID
+     * @param id El id del cliente a eliminar
+     * @return true si el cliente fue eliminado correctamente, false si no fue encontrado
+     */
+    public boolean deleteCliente(Long id) {
+        Optional<Cliente> clienteOpt = clienteRepository.findById(id);
+        if (clienteOpt.isPresent()) {
+            clienteRepository.delete(clienteOpt.get());
+            return true;  // Cliente eliminado con éxito
+        }
+        return false;  // No se encontró el cliente con el ID proporcionado
     }
 }

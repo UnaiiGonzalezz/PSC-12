@@ -17,6 +17,7 @@
 
   <h1>Clientes registrados</h1>
 
+  <!-- Formulario de inicio de sesión -->
   <div>
     <h2>Iniciar sesión</h2>
     <input id="email" placeholder="Email">
@@ -24,6 +25,7 @@
     <button onclick="login()">Login</button>
   </div>
 
+  <!-- Tabla de clientes -->
   <table>
     <thead>
       <tr><th>Nombre</th><th>Apellido</th><th>Email</th><th>Teléfono</th></tr>
@@ -31,51 +33,58 @@
     <tbody id="tbody"></tbody>
   </table>
 
-<script>
-let token = null;  // Aquí guardaremos el token
+  <script>
+    let token = null;  // Aquí guardamos el token después de iniciar sesión
 
-function login() {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
+    // Función para iniciar sesión
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-  fetch('/auth/login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ email, contrasena: password })
-  })
-  .then(r => {
-    if (!r.ok) throw new Error('Login incorrecto');
-    return r.json();
-  })
-  .then(data => {
-    token = data.token;  // Suponiendo que tu backend responde { "token": "eyJhbGciOi..." }
-    alert('Login correcto');
-    cargarClientes();    // Ahora sí, podemos cargar los clientes
-  })
-  .catch(() => alert('Error al iniciar sesión'));
-}
-
-function cargarClientes() {
-  if (!token) {
-    alert('Primero debes iniciar sesión.');
-    return;
-  }
-
-  fetch('/api/clientes', {
-    headers: {
-      'Authorization': 'Bearer ' + token
+      fetch('/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email, contrasena: password })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error('Login incorrecto');
+        return r.json();
+      })
+      .then(data => {
+        token = data.token;  // Suponiendo que el backend te da el token como respuesta
+        alert('Login correcto');
+        cargarClientes();    // Cargamos los clientes después de iniciar sesión
+      })
+      .catch(() => alert('Error al iniciar sesión'));
     }
-  })
-  .then(r => r.json())
-  .then(clientes => {
-    const rows = clientes.map(c =>
-      `<tr><td>${c.nombre}</td><td>${c.apellido}</td><td>${c.email}</td><td>${c.telefono}</td></tr>`
-    ).join('');
-    document.getElementById('tbody').innerHTML = rows;
-  })
-  .catch(() => alert('No se pudieron cargar los clientes.'));
-}
-</script>
+
+    // Función para cargar los clientes registrados
+    function cargarClientes() {
+      if (!token) {
+        alert('Primero debes iniciar sesión.');
+        return;
+      }
+
+      fetch('/api/clientes', {
+        headers: {
+          'Authorization': 'Bearer ' + token  // Incluye el token JWT en el encabezado de la solicitud
+        }
+      })
+      .then(r => r.json())
+      .then(clientes => {
+        const rows = clientes.map(c =>
+          `<tr>
+            <td>${c.nombre}</td>
+            <td>${c.apellido}</td>
+            <td>${c.email}</td>
+            <td>${c.telefono}</td>
+          </tr>`
+        ).join('');
+        document.getElementById('tbody').innerHTML = rows;
+      })
+      .catch(() => alert('No se pudieron cargar los clientes.'));
+    }
+  </script>
 
 </body>
 </html>

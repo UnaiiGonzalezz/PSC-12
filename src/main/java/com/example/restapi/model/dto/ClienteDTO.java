@@ -9,8 +9,7 @@ public class ClienteDTO {
 
     public ClienteDTO() { }
 
-    public ClienteDTO(Long id, String nombre, String apellido,
-                      String email, String metodoPago) {
+    public ClienteDTO(Long id, String nombre, String apellido, String email, String metodoPago) {
         this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -18,7 +17,8 @@ public class ClienteDTO {
         this.metodoPago = metodoPago;
     }
 
-    // Getters
+    // Getters y setters
+
     public Long getId() {
         return id;
     }
@@ -39,7 +39,6 @@ public class ClienteDTO {
         return metodoPago;
     }
 
-    // Setters
     public void setId(Long id) {
         this.id = id;
     }
