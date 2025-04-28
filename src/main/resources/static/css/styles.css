@@ -27,17 +27,24 @@ h1 {
 
 nav {
   margin-bottom: 2rem;
+  background: linear-gradient(to right, #005c9e, #0077cc);
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 nav a {
-  color: #0077cc;
+  color: white;
   text-decoration: none;
-  margin-right: 15px;
-  font-weight: 500;
+  margin-right: 20px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 nav a:hover {
-  text-decoration: underline;
+  color: #ffd700; /* Color dorado para el hover */
+  transform: scale(1.1);
 }
 
 nav a:focus {
