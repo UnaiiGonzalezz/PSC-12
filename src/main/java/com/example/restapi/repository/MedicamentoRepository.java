@@ -21,4 +21,6 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> 
 
     // ⚡️ Ahora devuelve una LISTA en vez de Optional único
     List<Medicamento> findByNombre(String nombre);
+
+    
 }

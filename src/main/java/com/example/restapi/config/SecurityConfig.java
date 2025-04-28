@@ -22,28 +22,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF ya que usas JWT
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Usamos sesión sin estado para JWT
             .authorizeHttpRequests(auth -> auth
+                // Permitimos acceso a recursos estáticos y rutas públicas
                 .requestMatchers(
-                    "/",                      
-                    "/index.html",
-                    "/cliente.html",
-                    "/compra.html",
-                    "/nueva-compra.html",
+                    "/",                       // Página de inicio
+                    "/index.html",             
+                    "/cliente.html",            
+                    "/compra.html",            
+                    "/nueva-compra.html",      
                     "/admin.html",
-                    "/css/**",
-                    "/js/**",
-                    "/auth/**",
-                    "/v3/api-docs/**",
-                    "/swagger-ui.html",
-                    "/swagger-ui/**",
-                    "/medicamentos/**",
-                    "/api/clientes",         // 👈 necesario
-                    "/api/clientes/**"        // 👈 MUY necesario también
+                    "/medicamento.html",              
+                    "/css/**",                 
+                    "/js/**",                  
+                    "/auth/**",                // Rutas de autenticación (login, etc)
+                    "/v3/api-docs/**",         // Swagger docs
+                    "/swagger-ui.html",        // Swagger UI
+                    "/swagger-ui/**",          // Swagger UI recursos
+                    "/medicamentos/**",        // Acceso público para ver medicamentos 
+                    "/api/clientes",           // Endpoint clientes
+                    "/api/clientes/**"         // Detalles de cliente
                 ).permitAll()
+                // Requiere autenticación para todas las demás rutas
                 .anyRequest().authenticated()
             )
+            // Añadimos el filtro JWT para la validación de autenticación
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -51,6 +55,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // Usamos BCrypt para encriptar contraseñas
     }
 }
