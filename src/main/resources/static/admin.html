@@ -6,32 +6,67 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
 <nav>
-  <a href="index.html">Catálogo</a> |
-  <a href="cliente.html">Clientes</a> |
-  <a href="compra.html">Ver compra</a> |
-  <a href="nueva-compra.html">Nueva compra</a> |
+  <a href="index.html">Catálogo</a>
+  <a href="cliente.html">Clientes</a>
+  <a href="compra.html">Ver compra</a>
+  <a href="nueva-compra.html">Nueva compra</a>
   <a href="admin.html">Admin</a>
+  <button class="logout-button" onclick="logout()">Cerrar sesión</button>
 </nav>
 
-  <h1>Administrar medicamentos</h1>
+<h1>Administrar medicamentos</h1>
 
+<div>
   <form onsubmit="eliminar(); return false;">
     <label>ID del medicamento a eliminar:</label>
     <input type="number" id="idMed" required>
     <button type="submit">Eliminar</button>
   </form>
+</div>
 
-  <p id="msg"></p>
+<p id="msg"></p>
 
-  <script>
-    function eliminar() {
-      const id = document.getElementById('idMed').value;
-      fetch(`/medicamentos/${id}`, { method: 'DELETE' })
-        .then(r => r.text())
-        .then(msg => document.getElementById('msg').textContent = msg)
-        .catch(() => document.getElementById('msg').textContent = 'Error al eliminar.');
+<script>
+// Verificar al cargar la página si el usuario es ADMIN
+window.onload = function() {
+  const token = sessionStorage.getItem('token');
+  const rol = sessionStorage.getItem('rol');
+
+  if (!token || rol !== 'ADMIN') {
+    alert('Acceso denegado. Necesitas ser ADMIN.');
+    window.location.href = 'login.html';
+  }
+};
+
+function logout() {
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('rol');
+  alert('Sesión cerrada.');
+  window.location.href = 'login.html';
+}
+
+function eliminar() {
+  const token = sessionStorage.getItem('token');
+  const id = document.getElementById('idMed').value;
+
+  fetch(`/medicamentos/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(r => {
+    if (r.ok) {
+      document.getElementById('msg').textContent = 'Medicamento eliminado correctamente.';
+    } else {
+      document.getElementById('msg').textContent = 'Error al eliminar.';
     }
-  </script>
+  })
+  .catch(() => {
+    document.getElementById('msg').textContent = 'Error al eliminar.';
+  });
+}
+</script>
+
 </body>
 </html>

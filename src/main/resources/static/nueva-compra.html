@@ -6,51 +6,69 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
 <nav>
-  <a href="index.html">Catálogo</a> |
-  <a href="cliente.html">Clientes</a> |
-  <a href="compra.html">Ver compra</a> |
-  <a href="nueva-compra.html">Nueva compra</a> |
+  <a href="index.html">Catálogo</a>
+  <a href="cliente.html">Clientes</a>
+  <a href="compra.html">Ver compra</a>
+  <a href="nueva-compra.html">Nueva compra</a>
   <a href="admin.html">Admin</a>
 </nav>
 
-  <h1>Comprar medicamentos</h1>
+<h1>Comprar medicamentos</h1>
 
-  <form id="formCompra">
-    <label>Email del cliente:</label>
-    <input type="email" id="email" required><br>
+<form id="formCompra">
+  <label>Email del cliente:</label>
+  <input type="email" id="email" required><br>
 
-    <label>IDs de medicamentos (separados por coma):</label>
-    <input type="text" id="ids" required><br>
+  <label>IDs de medicamentos (separados por coma):</label>
+  <input type="text" id="ids" required><br>
 
-    <label>Cantidad:</label>
-    <input type="number" id="cantidad" required><br>
+  <label>Cantidad:</label>
+  <input type="number" id="cantidad" required><br>
 
-    <label>Método de pago:</label>
-    <input type="text" id="metodoPago" required><br>
+  <label>Método de pago:</label>
+  <input type="text" id="metodoPago" required><br>
 
-    <button type="submit">Confirmar compra</button>
-  </form>
+  <button type="submit">Confirmar compra</button>
+</form>
 
-  <script>
-    document.getElementById('formCompra').onsubmit = function(e) {
-      e.preventDefault();
-      const datos = {
-        email: document.getElementById('email').value,
-        medicamentoIds: document.getElementById('ids').value.split(',').map(id => parseInt(id.trim())),
-        cantidad: parseInt(document.getElementById('cantidad').value),
-        metodoPago: document.getElementById('metodoPago').value
-      };
+<button class="logout-button" onclick="logout()">Cerrar sesión</button>
 
-      fetch('/compras/crear-por-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-      })
-      .then(r => r.text())
-      .then(msg => alert(msg))
-      .catch(err => alert('Error en la compra'));
-    }
-  </script>
+<script>
+const token = sessionStorage.getItem('token');
+if (!token) {
+  window.location.href = 'login.html';
+}
+
+function logout() {
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('rol');
+  window.location.href = 'login.html';
+}
+
+document.getElementById('formCompra').onsubmit = function(e) {
+  e.preventDefault();
+  const datos = {
+    email: document.getElementById('email').value,
+    medicamentoIds: document.getElementById('ids').value.split(',').map(id => parseInt(id.trim())),
+    cantidad: parseInt(document.getElementById('cantidad').value),
+    metodoPago: document.getElementById('metodoPago').value
+  };
+
+  fetch('/compras/crear-por-email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify(datos)
+  })
+  .then(r => r.text())
+  .then(msg => alert(msg))
+  .catch(() => alert('Error en la compra'));
+}
+</script>
+
 </body>
 </html>

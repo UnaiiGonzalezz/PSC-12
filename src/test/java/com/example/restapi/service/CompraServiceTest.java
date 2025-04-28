@@ -29,7 +29,7 @@ class CompraServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ana = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta");
+        ana = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta", "USER");
         ibup = new Medicamento("Ibuprofeno", "Analgésico", 5, 30, "Bayer");
         compraPendiente = new Compra(ana, List.of(ibup), LocalDate.now(), 2, ana.getMetodoPago());
     }

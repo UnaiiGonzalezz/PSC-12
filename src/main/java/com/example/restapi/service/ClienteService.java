@@ -46,6 +46,7 @@ public class ClienteService {
         cliente.setTelefono(registroDTO.getTelefono());
         cliente.setMetodoPago(registroDTO.getMetodoPago());
         cliente.setContrasena(passwordEncoder.encode(registroDTO.getContrasena()));
+        cliente.setRol("USER");  // ✅ Asignamos el rol "USER" al nuevo cliente
         return clienteRepository.save(cliente);
     }
 
@@ -71,6 +72,7 @@ public class ClienteService {
         cliente.setEmail(clienteDetails.getEmail());
         cliente.setTelefono(clienteDetails.getTelefono());
         cliente.setMetodoPago(clienteDetails.getMetodoPago());
+        cliente.setRol(clienteDetails.getRol()); // ✅ También permite actualizar el rol
         return clienteRepository.save(cliente);
     }
 
@@ -83,8 +85,8 @@ public class ClienteService {
         Optional<Cliente> clienteOpt = clienteRepository.findById(id);
         if (clienteOpt.isPresent()) {
             clienteRepository.delete(clienteOpt.get());
-            return true;  // Cliente eliminado con éxito
+            return true;
         }
-        return false;  // No se encontró el cliente con el ID proporcionado
+        return false;
     }
 }

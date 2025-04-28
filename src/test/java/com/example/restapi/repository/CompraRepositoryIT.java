@@ -31,7 +31,7 @@ class CompraRepositoryIT {
     @BeforeEach
     void setUp() {
         cliente = clienteRepo.save(new Cliente(
-                "Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta"));
+                "Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta", "USER"));
 
         medicamento = medicamentoRepo.save(new Medicamento(
                 "Ibuprofeno", "Analgésico", 5, 30, "Bayer"));

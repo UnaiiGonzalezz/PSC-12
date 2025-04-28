@@ -1,8 +1,16 @@
 package com.example.restapi.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "clientes")
 public class Cliente {
 
@@ -10,101 +18,21 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
     private String nombre;
-
-    @Column(nullable = false, length = 50)
     private String apellido;
-
-    @Column(nullable = false, unique = true, length = 50)
     private String email;
-
-    @Column(nullable = false)
     private String contrasena;
-
-    @Column(nullable = false, length = 50)
     private String telefono;
-
-    @Column(nullable = false, length = 50)
     private String metodoPago;
+    private String rol; // "USER" o "ADMIN"
 
-    public Cliente() {}
-
-    public Cliente(String nombre, String apellido, String email, String contrasena, String telefono, String metodoPago) {
+    public Cliente(String nombre, String apellido, String email, String contrasena, String telefono, String metodoPago, String rol) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
         this.contrasena = contrasena;
         this.telefono = telefono;
         this.metodoPago = metodoPago;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellido() {
-        return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getContrasena() {
-        return contrasena;
-    }
-
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public String getMetodoPago() {
-        return metodoPago;
-    }
-
-    public void setMetodoPago(String metodoPago) {
-        this.metodoPago = metodoPago;
-    }
-
-    @Override
-    public String toString() {
-        return "Cliente{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                ", apellido='" + apellido + '\'' +
-                ", email='" + email + '\'' +
-                ", contraseña='" + contrasena + '\'' +
-                ", telefono='" + telefono + '\'' +
-                ", metodoPago='" + metodoPago + '\'' +
-                '}';
+        this.rol = rol;
     }
 }

@@ -1,24 +1,32 @@
 package com.example.restapi.model.dto;
 
+/**
+ * DTO para capturar los datos de inicio de sesión.
+ */
 public class LoginDTO {
     private String email;
-    private String contrasena;
+    private String password;  // Usamos el nombre estándar "password"
 
-    public LoginDTO() {}
+    public LoginDTO() { }
 
-    public LoginDTO(String email, String contrasena) {
+    public LoginDTO(String email, String password) {
         this.email = email;
-        this.contrasena = contrasena;
+        this.password = password;
     }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getContrasena() { return contrasena; }
-    public void setContrasena(String contrasena) { this.contrasena = contrasena; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    // AÑADIR ESTE MÉTODO:
     public String getPassword() {
-        return contrasena;  // Mapea getPassword() a contrasena
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

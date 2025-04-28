@@ -20,15 +20,12 @@ class CarritoServiceIT {
 
     @Test
     void checkoutFlujoCompleto() {
-        // 1. Datos de prueba
-        Medicamento ibup = medRepo.save(new Medicamento("Ibuprofeno","Analgesico",5.0,100,"Bayer"));
-        Cliente ana = clienteRepo.save(new Cliente("Ana","Lopez","ana@demo.es","1234","600000000","Tarjeta"));
+        Medicamento ibup = medRepo.save(new Medicamento("Ibuprofeno", "Analgesico", 5.0, 100, "Bayer"));
+        Cliente ana = clienteRepo.save(new Cliente("Ana", "Lopez", "ana@demo.es", "1234", "600000000", "Tarjeta", "USER"));
 
-        // 2. Añadir al carrito y hacer checkout
         carritoService.addMedicamento(ana, ibup.getId(), 2);
         var resp = carritoService.checkout(ana);
 
-        // 3. Verificaciones
         assertThat(resp.getTotal()).isEqualTo(10.0);
         assertThat(compraRepo.findById(resp.getCompraId())).isPresent();
         assertThat(medRepo.findById(ibup.getId()).get().getStock()).isEqualTo(98);

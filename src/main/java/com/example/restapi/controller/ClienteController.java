@@ -23,9 +23,16 @@ public class ClienteController {
     public ResponseEntity<List<ClienteDTO>> listarClientes() {
         List<Cliente> clientes = clienteService.getAllClientes();
         List<ClienteDTO> clienteDTOs = clientes.stream()
-            .map(cliente -> new ClienteDTO(cliente.getId(), cliente.getNombre(), cliente.getApellido(), cliente.getEmail(), cliente.getMetodoPago()))
+            .map(cliente -> new ClienteDTO(
+                    cliente.getId(),
+                    cliente.getNombre(),
+                    cliente.getApellido(),
+                    cliente.getEmail(),
+                    cliente.getMetodoPago(),
+                    cliente.getRol() // ✅ Se incluye el rol aquí
+            ))
             .collect(Collectors.toList());
-        return ResponseEntity.ok(clienteDTOs);  // Retorna la lista de DTOs
+        return ResponseEntity.ok(clienteDTOs);
     }
 
     // Endpoint para obtener un cliente por ID
@@ -33,10 +40,17 @@ public class ClienteController {
     public ResponseEntity<ClienteDTO> obtenerCliente(@PathVariable Long id) {
         Cliente cliente = clienteService.getClienteById(id);
         if (cliente != null) {
-            ClienteDTO clienteDTO = new ClienteDTO(cliente.getId(), cliente.getNombre(), cliente.getApellido(), cliente.getEmail(), cliente.getMetodoPago());
+            ClienteDTO clienteDTO = new ClienteDTO(
+                    cliente.getId(),
+                    cliente.getNombre(),
+                    cliente.getApellido(),
+                    cliente.getEmail(),
+                    cliente.getMetodoPago(),
+                    cliente.getRol() // ✅ Se incluye el rol aquí
+            );
             return ResponseEntity.ok(clienteDTO);
         } else {
-            return ResponseEntity.notFound().build();  // Si el cliente no existe
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -44,7 +58,14 @@ public class ClienteController {
     @PostMapping
     public ResponseEntity<ClienteDTO> registrarCliente(@RequestBody RegistroDTO registroDTO) {
         Cliente nuevoCliente = clienteService.registrarCliente(registroDTO);
-        ClienteDTO clienteDTO = new ClienteDTO(nuevoCliente.getId(), nuevoCliente.getNombre(), nuevoCliente.getApellido(), nuevoCliente.getEmail(), nuevoCliente.getMetodoPago());
+        ClienteDTO clienteDTO = new ClienteDTO(
+                nuevoCliente.getId(),
+                nuevoCliente.getNombre(),
+                nuevoCliente.getApellido(),
+                nuevoCliente.getEmail(),
+                nuevoCliente.getMetodoPago(),
+                nuevoCliente.getRol() // ✅ Se incluye el rol aquí
+        );
         return ResponseEntity.ok(clienteDTO);
     }
 
@@ -53,10 +74,17 @@ public class ClienteController {
     public ResponseEntity<ClienteDTO> actualizarCliente(@PathVariable Long id, @RequestBody Cliente cliente) {
         Cliente clienteActualizado = clienteService.updateCliente(id, cliente);
         if (clienteActualizado != null) {
-            ClienteDTO clienteDTO = new ClienteDTO(clienteActualizado.getId(), clienteActualizado.getNombre(), clienteActualizado.getApellido(), clienteActualizado.getEmail(), clienteActualizado.getMetodoPago());
+            ClienteDTO clienteDTO = new ClienteDTO(
+                    clienteActualizado.getId(),
+                    clienteActualizado.getNombre(),
+                    clienteActualizado.getApellido(),
+                    clienteActualizado.getEmail(),
+                    clienteActualizado.getMetodoPago(),
+                    clienteActualizado.getRol() // ✅ Se incluye el rol aquí
+            );
             return ResponseEntity.ok(clienteDTO);
         } else {
-            return ResponseEntity.notFound().build();  // Si no se encuentra el cliente
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -65,9 +93,9 @@ public class ClienteController {
     public ResponseEntity<Void> eliminarCliente(@PathVariable Long id) {
         boolean eliminado = clienteService.deleteCliente(id);
         if (eliminado) {
-            return ResponseEntity.noContent().build();  // El cliente ha sido eliminado correctamente
+            return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.notFound().build();  // Si no se encuentra el cliente
+            return ResponseEntity.notFound().build();
         }
     }
 }

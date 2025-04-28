@@ -1,58 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Farmacia - Catálogo</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
 
-  <nav>
-    <a href="cliente.html">Clientes</a> |
-    <a href="compra.html">Ver compra</a> |
-    <a href="index.html">Catálogo</a> |
-    <a href="nueva-compra.html">Nueva compra</a> |
-    <a href="admin.html">Admin</a>
-  </nav>
+<nav>
+  <a href="index.html">Catálogo</a>
+  <a href="cliente.html">Clientes</a>
+  <a href="compra.html">Ver compra</a>
+  <a href="nueva-compra.html">Nueva compra</a>
+  <a href="admin.html">Admin</a>
+</nav>
 
-  <h1>Medicamentos disponibles</h1>
+<h1>Medicamentos disponibles</h1>
 
-  <div class="toolbar">
-    <input id="buscador" placeholder="Buscar por nombre…" />
-    <button onclick="cargar()">Buscar</button>
-  </div>
+<div class="toolbar">
+  <input id="buscador" placeholder="Buscar por nombre...">
+  <button onclick="cargar()">Buscar</button>
+</div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Precio&nbsp;(€)</th>
-        <th>Acción</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+<table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Precio (€)</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
 
-  <div class="paginacion">
-    <button onclick="prev()" id="prev">&larr; Anterior</button>
-    <span id="pagina"></span>
-    <button onclick="next()" id="next">Siguiente &rarr;</button>
-  </div>
+<div class="paginacion">
+  <button onclick="prev()" id="prev">&larr; Anterior</button>
+  <span id="pagina"></span>
+  <button onclick="next()" id="next">Siguiente &rarr;</button>
+</div>
+
+<button class="logout-button" onclick="logout()">Cerrar sesión</button>
 
 <script>
 let page = 0, size = 10;
+let token = sessionStorage.getItem('token');
+
+if (!token) {
+  window.location.href = 'login.html';
+}
+
+function logout() {
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('rol');
+  window.location.href = 'login.html';
+}
 
 function pintar(meds, totalPages) {
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = meds.map(m =>
     `<tr>
-       <td>${m.nombre}</td>
-       <td>€${m.precio.toFixed(2)}</td>
-       <td><a href="medicamento.html?id=${m.id}">Ver</a></td>
-     </tr>`).join('');
+      <td>${m.nombre}</td>
+      <td>€${m.precio.toFixed(2)}</td>
+      <td><a href="medicamento.html?id=${m.id}">Ver</a></td>
+    </tr>`
+  ).join('');
 
-  /* Paginación */
   document.getElementById('pagina').textContent = `Página ${page + 1} de ${totalPages}`;
   document.getElementById('prev').disabled = page === 0;
   document.getElementById('next').disabled = page + 1 >= totalPages;
@@ -62,12 +74,22 @@ function cargar() {
   const q = document.getElementById('buscador').value.trim();
   let url;
 
-  if (q) {                       // búsqueda directa
+  if (q) {
     url = `/medicamentos/nombre/${encodeURIComponent(q)}`;
-    fetch(url).then(r => r.json()).then(list => pintar(list, 1));
-  } else {                       // paginado
+    fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(r => r.json())
+    .then(list => pintar(list, 1))
+    .catch(() => alert('Error al cargar medicamentos.'));
+  } else {
     url = `/medicamentos/pag?page=${page}&size=${size}&sort=nombre,asc`;
-    fetch(url).then(r => r.json()).then(data => pintar(data.content, data.totalPages));
+    fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(r => r.json())
+    .then(data => pintar(data.content, data.totalPages))
+    .catch(() => alert('Error al cargar medicamentos.'));
   }
 }
 
@@ -76,5 +98,6 @@ function prev() { page--; cargar(); }
 
 window.onload = cargar;
 </script>
+
 </body>
 </html>

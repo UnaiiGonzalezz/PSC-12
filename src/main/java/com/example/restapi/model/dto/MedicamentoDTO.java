@@ -6,22 +6,15 @@ package com.example.restapi.model.dto;
  */
 public class MedicamentoDTO {
 
-    private Long id;           // Identificador único del medicamento
-    private String nombre;     // Nombre del medicamento
-    private double precio;     // Precio del medicamento
+    private Long id;         // ID del medicamento
+    private String nombre;   // Nombre del medicamento
+    private Double precio;   // Precio del medicamento
 
-    /**
-     * Constructor sin argumentos (necesario para deserialización de JSON).
-     */
-    public MedicamentoDTO() { }
+    public MedicamentoDTO() {
+        // Constructor vacío necesario para deserialización
+    }
 
-    /**
-     * Constructor con parámetros para inicializar el DTO.
-     * @param id El identificador único del medicamento.
-     * @param nombre El nombre del medicamento.
-     * @param precio El precio del medicamento.
-     */
-    public MedicamentoDTO(Long id, String nombre, double precio) {
+    public MedicamentoDTO(Long id, String nombre, Double precio) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
@@ -45,18 +38,14 @@ public class MedicamentoDTO {
         this.nombre = nombre;
     }
 
-    public double getPrecio() {
+    public Double getPrecio() {
         return precio;
     }
 
-    public void setPrecio(double precio) {
+    public void setPrecio(Double precio) {
         this.precio = precio;
     }
 
-    /**
-     * Método toString para representar el DTO en formato String.
-     * @return Cadena representando el DTO de Medicamento.
-     */
     @Override
     public String toString() {
         return "MedicamentoDTO{" +

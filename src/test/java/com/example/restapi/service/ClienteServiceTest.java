@@ -50,14 +50,15 @@ class ClienteServiceTest {
         Cliente guardado = clienteService.registrarCliente(registro);
 
         assertThat(guardado.getEmail()).isEqualTo("carlos@example.com");
+        assertThat(guardado.getRol()).isEqualTo("USER"); // Nuevo chequeo
         verify(clienteRepo).save(any(Cliente.class));
     }
 
     @Test
     void verificarCredenciales_contraseñaCorrecta() {
-        Cliente cliente = new Cliente("Ana", "López", "ana@example.com", "HASHED_PASS", "600", "Tarjeta");
+        Cliente cliente = new Cliente("Ana", "López", "ana@example.com", "HASHED_PASS", "600", "Tarjeta", "USER");
 
-        when(clienteRepo.findByEmail("ana@example.com")).thenReturn(Optional.of(cliente)); // <--- corregido aquí
+        when(clienteRepo.findByEmail("ana@example.com")).thenReturn(Optional.of(cliente));
         when(passwordEncoder.matches("1234", "HASHED_PASS")).thenReturn(true);
 
         boolean resultado = clienteService.verificarCredenciales("ana@example.com", "1234");

@@ -13,12 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import java.util.Optional;
-
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -28,20 +24,17 @@ public class MedicamentoController {
     @Autowired
     private MedicamentoService medicamentoService;
 
-    @Autowired 
+    @Autowired
     private StockMovimientoRepository movRepo;
 
     /* ---------- CRUD ---------- */
 
     @GetMapping
-    public List<Medicamento> getAllMedicamentos() {
-        return medicamentoService.getAllMedicamentos();
-    }
-
-    /* ---------- NUEVO: GET /medicamentos/pag ---------- */
-    @GetMapping("/pag")
-    public Page<MedicamentoDTO> getMedicamentosPaginados(Pageable pageable) {
-        return medicamentoService.getMedicamentos(pageable);
+    public List<MedicamentoDTO> getAllMedicamentos() {
+        return medicamentoService.getAllMedicamentos()
+                .stream()
+                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
+                .collect(Collectors.toList());
     }
 
     @PostMapping
@@ -51,8 +44,7 @@ public class MedicamentoController {
     }
 
     @PutMapping("/{id}")
-    public Medicamento updateMedicamento(@PathVariable Long id,
-                                         @RequestBody Medicamento body) {
+    public Medicamento updateMedicamento(@PathVariable Long id, @RequestBody Medicamento body) {
         try {
             return medicamentoService.updateMedicamento(id, body);
         } catch (IllegalArgumentException ex) {
@@ -66,24 +58,36 @@ public class MedicamentoController {
         try {
             medicamentoService.deleteMedicamento(id);
         } catch (Exception e) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Medicamento no encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicamento no encontrado");
         }
     }
 
-    /* ---------- filtros ---------- */
+    /* ---------- Paginado para catálogo ---------- */
+
+    @GetMapping("/pag")
+    public Page<MedicamentoDTO> getMedicamentosPaginados(Pageable pageable) {
+        return medicamentoService.getMedicamentos(pageable);
+    }
+
+    /* ---------- Filtros ---------- */
 
     @GetMapping("/nombre/{nombre}")
-    public List<Medicamento> getMedicamentosPorNombre(@PathVariable String nombre) {
-        return medicamentoService.getMedicamentosPorNombre(nombre);
+    public List<MedicamentoDTO> getMedicamentosPorNombre(@PathVariable String nombre) {
+        return medicamentoService.getMedicamentosPorNombre(nombre)
+                .stream()
+                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/categoria/{categoria}")
-    public List<Medicamento> getMedicamentosPorCategoria(@PathVariable String categoria) {
-        return medicamentoService.getMedicamentosPorCategoria(categoria);
+    public List<MedicamentoDTO> getMedicamentosPorCategoria(@PathVariable String categoria) {
+        return medicamentoService.getMedicamentosPorCategoria(categoria)
+                .stream()
+                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
+                .collect(Collectors.toList());
     }
 
-    /* ---------- disponibles ---------- */
+    /* ---------- Disponibles ---------- */
 
     @GetMapping("/disponibles")
     public List<MedicamentoDTO> getMedicamentosDisponibles() {
@@ -93,22 +97,23 @@ public class MedicamentoController {
                 .collect(Collectors.toList());
     }
 
+    /* ---------- Movimientos de stock ---------- */
 
     @GetMapping("/{id}/movimientos")
     public List<StockMovimiento> getMovimientos(@PathVariable Long id) {
         Medicamento med = medicamentoService.getMedicamentoById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Medicamento no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicamento no encontrado"));
         return movRepo.findByMedicamentoOrderByFechaDesc(med);
     }
-    
+
+    /* ---------- Buscar medicamento por ID ---------- */
+
     @GetMapping("/{id}")
-    public ResponseEntity<Medicamento> getMedicamentoById(@PathVariable Long id) {
+    public ResponseEntity<MedicamentoDTO> getMedicamentoById(@PathVariable Long id) {
         Optional<Medicamento> medicamento = medicamentoService.getMedicamentoById(id);
-            return medicamento.map(ResponseEntity::ok)
+        return medicamento.map(m -> ResponseEntity.ok(
+                        new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio())
+                ))
                 .orElseGet(() -> ResponseEntity.notFound().build());
-}
-
-
-    
+    }
 }

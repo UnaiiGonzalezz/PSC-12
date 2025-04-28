@@ -6,18 +6,20 @@ public class ClienteDTO {
     private String apellido;
     private String email;
     private String metodoPago;
+    private String rol; // ✅ Añadido campo rol
 
     public ClienteDTO() { }
 
-    public ClienteDTO(Long id, String nombre, String apellido, String email, String metodoPago) {
+    public ClienteDTO(Long id, String nombre, String apellido, String email, String metodoPago, String rol) {
         this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
         this.metodoPago = metodoPago;
+        this.rol = rol;
     }
 
-    // Getters y setters
+    // Getters
 
     public Long getId() {
         return id;
@@ -39,6 +41,12 @@ public class ClienteDTO {
         return metodoPago;
     }
 
+    public String getRol() {
+        return rol;
+    }
+
+    // Setters
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -57,5 +65,9 @@ public class ClienteDTO {
 
     public void setMetodoPago(String metodoPago) {
         this.metodoPago = metodoPago;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 }

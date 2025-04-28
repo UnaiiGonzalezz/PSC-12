@@ -10,34 +10,43 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    /* Clave simétrica (mínimo 256 bits). Almacénala en un vault en producción */
-    private static final String SECRET =
-            "e2ff2ab817d8430ea764af2ab817d8430ea764af2ab817d8430ea764af2ab817"; // 64 hex = 256 bits
-    private static final long   EXP_MS = 1000 * 60 * 60;                     // 1 hora
+    private static final String SECRET = "e2ff2ab817d8430ea764af2ab817d8430ea764af2ab817d8430ea764af2ab817"; // mínimo 256 bits
+    private static final long EXPIRATION_MS = 1000 * 60 * 60; // 1 hora
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String rol) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("rol", rol)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXP_MS))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String extractEmail(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        return parseClaims(token).getSubject();
+    }
+
+    public String extractRol(String token) {
+        return parseClaims(token).get("rol", String.class);
     }
 
     public boolean isTokenValid(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build()
-                    .parseClaimsJws(token);
+            parseClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

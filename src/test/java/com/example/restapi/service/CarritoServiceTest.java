@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class CarritoServiceTest {
@@ -40,7 +39,7 @@ class CarritoServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ana = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta");
+        ana = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta", "USER");
         ibup = new Medicamento("Ibuprofeno", "Analgésico", 5.0, 20, "Bayer");
         ibup.setId(1L);
     }
@@ -51,38 +50,32 @@ class CarritoServiceTest {
         when(medRepo.findById(1L)).thenReturn(Optional.of(ibup));
         when(carritoRepo.save(any(Carrito.class))).thenAnswer(invocation -> {
             Carrito carrito = invocation.getArgument(0);
-            carrito.addItem(ibup, 2); // <-- ¡Forzar añadir item antes de devolver!
+            carrito.addItem(ibup, 2);
             return carrito;
         });
 
         var dto = service.addMedicamento(ana, 1L, 2);
 
-        assertThat(dto.getTotal()).isEqualTo(10.0); // 5.0 * 2 = 10.0
+        assertThat(dto.getTotal()).isEqualTo(10.0);
     }
 
     @Test
     void checkout_descuentaStockYCreaCompra() {
         Carrito carrito = new Carrito(ana);
-        carrito.addItem(ibup, 2); // 2 unidades * 5.0€
+        carrito.addItem(ibup, 2);
 
         when(carritoRepo.findByCliente(ana)).thenReturn(Optional.of(carrito));
         when(medRepo.save(any(Medicamento.class))).thenAnswer(i -> i.getArgument(0));
 
-        Compra compra = new Compra(
-                ana,
-                carrito.getItems().stream().map(CarritoItem::getMedicamento).toList(),
-                LocalDate.now(),
-                2,
-                ana.getMetodoPago()
-        );
-        compra.setPago(10.0); 
+        Compra compra = new Compra(ana, carrito.getItems().stream().map(CarritoItem::getMedicamento).toList(), LocalDate.now(), 2, ana.getMetodoPago());
+        compra.setPago(10.0);
 
         when(compraService.crearDesdeCarrito(any())).thenReturn(compra);
 
         CheckoutResponseDTO dto = service.checkout(ana);
 
         assertThat(dto.getTotal()).isEqualTo(10.0);
-        verify(medRepo).save(argThat(m -> m.getStock() == 18)); // 20 - 2
+        verify(medRepo).save(argThat(m -> m.getStock() == 18));
         verify(carritoRepo).delete(carrito);
         verify(movRepo, atLeastOnce()).save(any(StockMovimiento.class));
     }
