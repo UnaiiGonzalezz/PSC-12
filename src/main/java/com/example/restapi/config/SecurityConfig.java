@@ -38,7 +38,8 @@ public class SecurityConfig {
                     "/js/**",
                     "/favicon.ico",
                     "/swagger-ui/**",
-                    "/v3/api-docs/**"
+                    "/v3/api-docs/**",
+                    "/medicamento.html/**"
                 ).permitAll()
 
                 // API de login y registro públicas
