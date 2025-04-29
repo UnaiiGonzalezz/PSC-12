@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Iniciar sesión</title>
+  <title>Registro de usuario</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
   <style>
@@ -88,8 +88,12 @@
 <body>
 
 <div class="login-container">
-  <h1>Iniciar sesión</h1>
-  <form onsubmit="login(); return false;">
+  <h1>Registrarse</h1>
+  <form onsubmit="registrar(); return false;">
+    <div class="input-group">
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <i class="fas fa-user"></i>
+    </div>
     <div class="input-group">
       <input type="email" id="email" placeholder="Correo electrónico" required>
       <i class="fas fa-envelope"></i>
@@ -98,34 +102,43 @@
       <input type="password" id="password" placeholder="Contraseña" required>
       <i class="fas fa-lock"></i>
     </div>
-    <button type="submit">Entrar</button>
+    <button type="submit" id="btnRegistrar">Registrarse</button>
   </form>
-  <a href="registro.html" class="register-link">¿No tienes cuenta? Regístrate</a>
+  <a href="login.html" class="register-link">¿Ya tienes cuenta? Inicia sesión</a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
-function login() {
+function registrar() {
+  const nombre = document.getElementById('nombre').value.trim();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
+  const boton = document.getElementById('btnRegistrar');
 
-  fetch('/auth/login', {
+  if (!nombre || !email || !password) {
+    showToast('Completa todos los campos', 'error');
+    return;
+  }
+
+  boton.disabled = true;
+  boton.textContent = 'Registrando...';
+
+  fetch('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ nombre, email, password })
   })
   .then(r => {
-    if (!r.ok) throw new Error('Credenciales incorrectas');
-    return r.json();
-  })
-  .then(data => {
-    sessionStorage.setItem('token', data.token);
-    sessionStorage.setItem('rol', data.rol);
-    showToast('Inicio de sesión correcto', 'success');
-    setTimeout(() => window.location.href = 'index.html', 1000);
+    if (!r.ok) throw new Error('Error en el registro');
+    showToast('Registro exitoso', 'success');
+    setTimeout(() => window.location.href = 'login.html', 1500);
   })
   .catch(() => {
-    showToast('Error al iniciar sesión', 'error');
+    showToast('Error al registrar', 'error');
+  })
+  .finally(() => {
+    boton.disabled = false;
+    boton.textContent = 'Registrarse';
   });
 }
 

@@ -29,7 +29,7 @@ public class CompraController {
     @Autowired
     private MedicamentoRepository medicamentoRepository;
 
-    // ✅ Crear compra desde email y devolver ID en JSON
+    // ✅ POST: Crear compra desde email
     @PostMapping("/crear-por-email")
     public ResponseEntity<Map<String, Object>> crearCompraDesdeEmail(@RequestBody CompraRequest request) {
         Cliente cliente = clienteService.findByEmail(request.getEmail())
@@ -58,7 +58,7 @@ public class CompraController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ Obtener detalles de compra (manejo correcto de 404 y 200)
+    // ✅ GET: Obtener detalles de compra (estado)
     @GetMapping("/{id}")
     public ResponseEntity<?> getEstadoCompra(@PathVariable Long id) {
         return compraService.getEstadoCompraDTO(id)
@@ -66,7 +66,19 @@ public class CompraController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Clase auxiliar para recibir JSON en POST
+    // ✅ PATCH: Cambiar estado de una compra
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<Compra> cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String nuevoEstado = body.get("estado");
+        if (nuevoEstado == null || nuevoEstado.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Compra actualizada = compraService.updateEstado(id, nuevoEstado);
+        return ResponseEntity.ok(actualizada);
+    }
+
+    // ✅ Clase auxiliar para recibir JSON en POST
     public static class CompraRequest {
         private String email;
         private List<Long> medicamentoIds;

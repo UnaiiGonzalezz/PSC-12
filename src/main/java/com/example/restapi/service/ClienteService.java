@@ -19,11 +19,13 @@ public class ClienteService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /* ✅ Verificar credenciales */
     public boolean verificarCredenciales(String email, String password) {
         Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
         return clienteOpt.isPresent() && passwordEncoder.matches(password, clienteOpt.get().getContrasena());
     }
 
+    /* ✅ Buscar cliente por email */
     public Cliente getClienteByEmail(String email) {
         return clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con email: " + email));
@@ -33,38 +35,42 @@ public class ClienteService {
         return clienteRepository.findByEmail(email);
     }
 
-    /**
-     * Registrar un nuevo cliente
-     * @param registroDTO DTO con los datos del nuevo cliente
-     * @return El cliente recién registrado
-     */
+    /* ✅ Verificar si un email ya existe */
+    public boolean emailYaExiste(String email) {
+        return clienteRepository.findByEmail(email).isPresent();
+    }
+
+    /* ✅ Registrar un cliente desde DTO */
     public Cliente registrarCliente(RegistroDTO registroDTO) {
         Cliente cliente = new Cliente();
         cliente.setNombre(registroDTO.getNombre());
         cliente.setApellido(registroDTO.getApellido());
         cliente.setEmail(registroDTO.getEmail());
         cliente.setTelefono(registroDTO.getTelefono());
-        cliente.setMetodoPago(registroDTO.getMetodoPago());
+        cliente.setMetodoPago(registroDTO.getMetodoPago() != null ? registroDTO.getMetodoPago() : "No especificado");
         cliente.setContrasena(passwordEncoder.encode(registroDTO.getContrasena()));
-        cliente.setRol("USER");  // ✅ Asignamos el rol "USER" al nuevo cliente
+        cliente.setRol("USER"); // 🔥 Siempre será USER
         return clienteRepository.save(cliente);
     }
 
+    /* ✅ Guardar directamente un Cliente (ya creado) */
+    public Cliente save(Cliente cliente) {
+        cliente.setContrasena(passwordEncoder.encode(cliente.getContrasena()));
+        return clienteRepository.save(cliente);
+    }
+
+    /* ✅ Obtener todos los clientes */
     public List<Cliente> getAllClientes() {
         return clienteRepository.findAll();
     }
 
+    /* ✅ Buscar cliente por ID */
     public Cliente getClienteById(Long id) {
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + id));
     }
 
-    /**
-     * Actualizar los datos de un cliente existente
-     * @param id El id del cliente a actualizar
-     * @param clienteDetails El objeto con los nuevos detalles del cliente
-     * @return El cliente actualizado
-     */
+    /* ✅ Actualizar datos de un cliente */
     public Cliente updateCliente(Long id, Cliente clienteDetails) {
         Cliente cliente = getClienteById(id);
         cliente.setNombre(clienteDetails.getNombre());
@@ -72,15 +78,11 @@ public class ClienteService {
         cliente.setEmail(clienteDetails.getEmail());
         cliente.setTelefono(clienteDetails.getTelefono());
         cliente.setMetodoPago(clienteDetails.getMetodoPago());
-        cliente.setRol(clienteDetails.getRol()); // ✅ También permite actualizar el rol
+        cliente.setRol(clienteDetails.getRol());
         return clienteRepository.save(cliente);
     }
 
-    /**
-     * Eliminar un cliente por su ID
-     * @param id El id del cliente a eliminar
-     * @return true si el cliente fue eliminado correctamente, false si no fue encontrado
-     */
+    /* ✅ Eliminar cliente */
     public boolean deleteCliente(Long id) {
         Optional<Cliente> clienteOpt = clienteRepository.findById(id);
         if (clienteOpt.isPresent()) {

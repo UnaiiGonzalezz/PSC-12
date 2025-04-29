@@ -2,54 +2,156 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Detalle de Medicamento</title>
+  <title>Detalle del Medicamento</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <style>
+    .detalle-medicamento {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+
+    .detalle-medicamento h2 {
+      text-align: center;
+      color: #005fa3;
+      margin-bottom: 20px;
+    }
+
+    .detalle-medicamento p {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .btn-comprar {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      background: linear-gradient(90deg, #0077cc, #005fa3);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .btn-comprar:hover {
+      background: linear-gradient(90deg, #005fa3, #0077cc);
+    }
+
+    .form-compra {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .form-compra input {
+      margin-bottom: 15px;
+      padding: 10px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 
 <nav>
   <a href="index.html">Catálogo</a>
- 
-  <a href="compra.html">Ver compra</a>
   <a href="nueva-compra.html">Nueva compra</a>
   <a href="admin.html">Admin</a>
 </nav>
 
-<a href="index.html" class="volver">← Volver al catálogo</a>
-<h1 id="titulo"></h1>
+<div class="detalle-medicamento" id="medicamentoContainer">
+  <h2>Cargando medicamento...</h2>
+</div>
 
-<ul id="info" class="detalle"></ul>
-
-<button class="logout-button" onclick="logout()">Cerrar sesión</button>
-
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
+const id = new URLSearchParams(window.location.search).get('id');
 const token = sessionStorage.getItem('token');
-if (!token) {
-  window.location.href = 'login.html';
+
+if (!id) {
+  document.getElementById('medicamentoContainer').innerHTML = '<p class="error">ID no proporcionado.</p>';
+} else {
+  fetch(`/medicamentos/${id}`, {
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("No encontrado");
+    return res.json();
+  })
+  .then(med => {
+    document.getElementById('medicamentoContainer').innerHTML = `
+      <h2>${med.nombre}</h2>
+      <p><strong>ID:</strong> ${med.id}</p>
+      <p><strong>Categoría:</strong> ${med.categoria}</p>
+      <p><strong>Precio:</strong> €${med.precio.toFixed(2)}</p>
+      <p><strong>Stock:</strong> ${med.stock}</p>
+      <p><strong>Proveedor:</strong> ${med.proveedor}</p>
+      <p><strong>Disponible:</strong> ${med.disponible ? 'Sí' : 'No'}</p>
+      <button class="btn-comprar" onclick="mostrarFormulario()">Comprar este medicamento</button>
+      <form class="form-compra" id="formCompra">
+        <input type="email" id="email" placeholder="Email del cliente" required>
+        <input type="number" id="cantidad" placeholder="Cantidad" min="1" max="${med.stock}" required>
+        <input type="text" id="metodoPago" placeholder="Método de pago" required>
+        <button type="submit" class="btn-comprar">Confirmar compra</button>
+      </form>
+    `;
+
+    document.getElementById('formCompra').onsubmit = function(e) {
+      e.preventDefault();
+      const datos = {
+        email: document.getElementById('email').value.trim(),
+        medicamentoIds: [med.id],
+        cantidad: parseInt(document.getElementById('cantidad').value),
+        metodoPago: document.getElementById('metodoPago').value.trim()
+      };
+
+      fetch('/compras/crear-por-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(datos)
+      })
+      .then(async r => {
+        if (!r.ok) throw new Error();
+        const json = await r.json();
+        Toastify({
+          text: `✅ Compra realizada - ID: ${json.id}`,
+          duration: 4000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+        }).showToast();
+        document.getElementById('formCompra').reset();
+      })
+      .catch(() => {
+        Toastify({
+          text: "❌ Error al realizar la compra",
+          duration: 4000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)"
+        }).showToast();
+      });
+    };
+  })
+  .catch(() => {
+    document.getElementById('medicamentoContainer').innerHTML = '<p class="error">Medicamento no encontrado.</p>';
+  });
 }
 
-function logout() {
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('rol');
-  window.location.href = 'login.html';
+function mostrarFormulario() {
+  document.querySelector('.form-compra').style.display = 'block';
 }
-
-const id = new URLSearchParams(location.search).get('id');
-
-fetch(`/medicamentos/${id}`, {
-  headers: { 'Authorization': 'Bearer ' + token }
-})
-.then(r => r.json())
-.then(m => {
-  document.getElementById('titulo').textContent = m.nombre;
-  document.getElementById('info').innerHTML = `
-    <li><strong>Categoría:</strong> ${m.categoria}</li>
-    <li><strong>Precio:</strong> €${m.precio.toFixed(2)}</li>
-    <li><strong>Stock:</strong> ${m.stock}</li>
-    <li><strong>Proveedor:</strong> ${m.proveedor}</li>
-    <li><strong>Disponible:</strong> ${m.disponible ? 'Sí' : 'No'}</li>`;
-})
-.catch(() => document.body.innerHTML = '<p class="error">Medicamento no encontrado.</p>');
 </script>
 
 </body>

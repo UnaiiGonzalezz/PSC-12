@@ -35,4 +35,14 @@ public class Cliente {
         this.metodoPago = metodoPago;
         this.rol = rol;
     }
+
+    // ✅ Alias para compatibilidad: setPassword -> realmente setea contrasena
+    public void setPassword(String password) {
+        this.contrasena = password;
+    }
+
+    // ✅ Alias para compatibilidad: getPassword -> realmente devuelve contrasena
+    public String getPassword() {
+        return this.contrasena;
+    }
 }
