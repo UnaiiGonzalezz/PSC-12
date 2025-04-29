@@ -67,7 +67,8 @@ public class CompraService {
                 .collect(Collectors.toList());
     }
 
-    /* ---------- estado detallado ---------- */
+    /* ---------- estado detallado (con @Transactional para evitar LazyInitializationException) ---------- */
+    @Transactional(readOnly = true)
     public Optional<EstadoCompraDTO> getEstadoCompraDTO(Long id) {
         return compraRepository.findById(id)
                 .map(this::mapToEstadoDTO);

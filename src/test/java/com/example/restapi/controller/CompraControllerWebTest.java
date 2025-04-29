@@ -21,9 +21,8 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CompraController.class)
 class CompraControllerWebTest {
@@ -40,28 +39,47 @@ class CompraControllerWebTest {
     @MockBean
     private JwtUtil jwtUtil;
 
+    private Compra compra;
+
     @BeforeEach
     void setUp() {
-        Compra compra = new Compra();
+        compra = new Compra();
         compra.setId(5L);
         compra.setEstado("Enviado");
-        Mockito.when(compraService.updateEstado(anyLong(), anyString()))
-               .thenReturn(compra);
 
+        // Mock PATCH actualización de estado
+        Mockito.when(compraService.updateEstado(anyLong(), anyString()))
+                .thenReturn(compra);
+
+        // Mock GET estado detallado
         EstadoCompraDTO dto = new EstadoCompraDTO(
                 5L, "Enviado", LocalDate.now(), null, null);
         Mockito.when(compraService.getEstadoCompraDTO(5L))
-               .thenReturn(Optional.of(dto));
+                .thenReturn(Optional.of(dto));
+
+        // Mock GET compra por ID
+        Mockito.when(compraService.getCompraById(5L))
+                .thenReturn(Optional.of(compra));
     }
 
     @Test
-    @WithMockUser // <--- Muy importante
+    @WithMockUser
     void cambiarEstado() throws Exception {
         mvc.perform(patch("/compras/5/estado")
-                .with(csrf()) // <--- CSRF token simulado
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"estado\":\"Enviado\"}"))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.estado").value("Enviado"));
+    }
+
+    @Test
+    @WithMockUser
+    void obtenerCompraPorId() throws Exception {
+        mvc.perform(get("/compras/5")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(5L))
             .andExpect(jsonPath("$.estado").value("Enviado"));
     }
 }

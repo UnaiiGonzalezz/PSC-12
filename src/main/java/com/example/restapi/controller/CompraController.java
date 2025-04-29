@@ -2,18 +2,22 @@ package com.example.restapi.controller;
 
 import com.example.restapi.model.Cliente;
 import com.example.restapi.model.Compra;
+import com.example.restapi.model.Medicamento;
 import com.example.restapi.model.dto.EstadoCompraDTO;
+import com.example.restapi.repository.MedicamentoRepository;
 import com.example.restapi.service.ClienteService;
 import com.example.restapi.service.CompraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/compras") // <- cambiado para que encaje con el test
+@RequestMapping("/compras")
 public class CompraController {
 
     @Autowired
@@ -22,24 +26,63 @@ public class CompraController {
     @Autowired
     private CompraService compraService;
 
-    // Esta ya estaba, pero ajustamos el path
-    @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<Compra>> comprasPorCliente(@PathVariable Long clienteId) {
-        Cliente cliente = clienteService.getClienteById(clienteId);
-        List<Compra> compras = compraService.findByCliente(cliente);
-        return ResponseEntity.ok(compras);
+    @Autowired
+    private MedicamentoRepository medicamentoRepository;
+
+    // ✅ Crear compra desde email y devolver ID en JSON
+    @PostMapping("/crear-por-email")
+    public ResponseEntity<Map<String, Object>> crearCompraDesdeEmail(@RequestBody CompraRequest request) {
+        Cliente cliente = clienteService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+        List<Medicamento> medicamentos = medicamentoRepository.findAllById(request.getMedicamentoIds());
+
+        if (medicamentos.isEmpty()) {
+            throw new RuntimeException("No se encontraron medicamentos con los IDs dados.");
+        }
+
+        Compra compra = new Compra(cliente, medicamentos,
+                LocalDate.now(), request.getCantidad(), request.getMetodoPago());
+
+        double total = medicamentos.stream()
+                .mapToDouble(Medicamento::getPrecio)
+                .sum();
+
+        compra.setPago(total * request.getCantidad());
+
+        Compra compraGuardada = compraService.saveCompra(compra);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", compraGuardada.getId());
+
+        return ResponseEntity.ok(response);
     }
 
-    // 🚀 Nuevo endpoint para actualizar el estado de una compra
-    @PatchMapping("/{compraId}/estado")
-    public ResponseEntity<EstadoCompraDTO> cambiarEstado(@PathVariable Long compraId, @RequestBody EstadoCompraDTO estadoCompraDTO) {
-        Compra compra = compraService.updateEstado(compraId, estadoCompraDTO.getEstado());
-        Optional<EstadoCompraDTO> updatedDto = compraService.getEstadoCompraDTO(compra.getId());
+    // ✅ Obtener detalles de compra (manejo correcto de 404 y 200)
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getEstadoCompra(@PathVariable Long id) {
+        return compraService.getEstadoCompraDTO(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
-        if (updatedDto.isPresent()) {
-            return ResponseEntity.ok(updatedDto.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    // Clase auxiliar para recibir JSON en POST
+    public static class CompraRequest {
+        private String email;
+        private List<Long> medicamentoIds;
+        private int cantidad;
+        private String metodoPago;
+
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+
+        public List<Long> getMedicamentoIds() { return medicamentoIds; }
+        public void setMedicamentoIds(List<Long> medicamentoIds) { this.medicamentoIds = medicamentoIds; }
+
+        public int getCantidad() { return cantidad; }
+        public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+
+        public String getMetodoPago() { return metodoPago; }
+        public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
     }
 }

@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <title>Realizar compra</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
 
 <nav>
   <a href="index.html">Catálogo</a>
-
   <a href="compra.html">Ver compra</a>
   <a href="nueva-compra.html">Nueva compra</a>
   <a href="admin.html">Admin</a>
@@ -35,6 +35,8 @@
 
 <button class="logout-button" onclick="logout()">Cerrar sesión</button>
 
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 <script>
 const token = sessionStorage.getItem('token');
 if (!token) {
@@ -50,10 +52,10 @@ function logout() {
 document.getElementById('formCompra').onsubmit = function(e) {
   e.preventDefault();
   const datos = {
-    email: document.getElementById('email').value,
+    email: document.getElementById('email').value.trim(),
     medicamentoIds: document.getElementById('ids').value.split(',').map(id => parseInt(id.trim())),
     cantidad: parseInt(document.getElementById('cantidad').value),
-    metodoPago: document.getElementById('metodoPago').value
+    metodoPago: document.getElementById('metodoPago').value.trim()
   };
 
   fetch('/compras/crear-por-email', {
@@ -64,9 +66,30 @@ document.getElementById('formCompra').onsubmit = function(e) {
     },
     body: JSON.stringify(datos)
   })
-  .then(r => r.text())
-  .then(msg => alert(msg))
-  .catch(() => alert('Error en la compra'));
+  .then(async r => {
+    if (!r.ok) throw new Error('Error al crear compra');
+    const resp = await r.json();
+    Toastify({
+      text: `✅ Compra realizada - ID generado: ${resp.id}`,
+      duration: 4000,
+      gravity: "top",
+      position: "right",
+      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+      stopOnFocus: true
+    }).showToast();
+    document.getElementById('formCompra').reset();
+    console.log('Compra ID creada:', resp.id);
+  })
+  .catch(() => {
+    Toastify({
+      text: "❌ Error al realizar la compra",
+      duration: 4000,
+      gravity: "top",
+      position: "right",
+      backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+      stopOnFocus: true
+    }).showToast();
+  });
 }
 </script>
 
