@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicamentoService {
@@ -22,8 +23,6 @@ public class MedicamentoService {
 
     @Autowired
     private StockMovimientoRepository movRepo;
-
-    /* ---------- CRUD básico ---------- */
 
     public List<Medicamento> getAllMedicamentos() {
         return medicamentoRepository.findAll();
@@ -36,27 +35,27 @@ public class MedicamentoService {
     public List<MedicamentoDTO> getMedicamentosDisponibles() {
         return medicamentoRepository.findByDisponibleTrue()
                 .stream()
-                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
-                .toList();
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    /* ---------- guardar ---------- */
     public Medicamento saveMedicamento(Medicamento med) {
         Medicamento guardado = medicamentoRepository.save(med);
-        // Registrar ENTRADA en stock
         movRepo.save(new StockMovimiento(
-                guardado, MovimientoTipo.ENTRADA,
-                guardado.getStock(), 0, guardado.getStock()));
+                guardado,
+                MovimientoTipo.ENTRADA,
+                guardado.getStock(),
+                0,
+                guardado.getStock()
+        ));
         return guardado;
     }
 
-    /* ---------- paginación ---------- */
     public Page<MedicamentoDTO> getMedicamentos(Pageable pageable) {
         return medicamentoRepository.findAll(pageable)
-                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()));
+                .map(this::convertToDTO);
     }
 
-    /* ---------- actualizar ---------- */
     public Medicamento updateMedicamento(Long id, Medicamento datos) {
         Medicamento existente = medicamentoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Medicamento no encontrado"));
@@ -74,23 +73,42 @@ public class MedicamentoService {
         Medicamento actualizado = medicamentoRepository.save(existente);
 
         if (stockAntes != stockDespues) {
-            movRepo.save(new StockMovimiento(actualizado, MovimientoTipo.AJUSTE,
-                    stockDespues - stockAntes, stockAntes, stockDespues));
+            movRepo.save(new StockMovimiento(
+                    actualizado,
+                    MovimientoTipo.AJUSTE,
+                    stockDespues - stockAntes,
+                    stockAntes,
+                    stockDespues
+            ));
         }
         return actualizado;
     }
 
-    /* ---------- eliminar ---------- */
     public void deleteMedicamento(Long id) {
-        medicamentoRepository.deleteById(id);
+        Medicamento medicamento = medicamentoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Medicamento no encontrado"));
+
+        movRepo.deleteByMedicamento(medicamento);
+        medicamentoRepository.delete(medicamento);
     }
 
-    /* ---------- búsquedas ---------- */
     public List<Medicamento> getMedicamentosPorNombre(String nombre) {
         return medicamentoRepository.findByNombreIgnoreCase(nombre);
     }
 
     public List<Medicamento> getMedicamentosPorCategoria(String categoria) {
         return medicamentoRepository.findByCategoriaIgnoreCase(categoria);
+    }
+
+    private MedicamentoDTO convertToDTO(Medicamento m) {
+        return new MedicamentoDTO(
+                m.getId(),
+                m.getNombre(),
+                m.getPrecio(),
+                m.getCategoria(),
+                m.getStock(),
+                m.getProveedor(),
+                m.isDisponible()
+        );
     }
 }

@@ -3,6 +3,7 @@ package com.example.restapi.config;
 import com.example.restapi.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -30,33 +31,35 @@ public class SecurityConfig {
                     "/index.html", 
                     "/login.html",
                     "/admin.html",
+                    "/admin-medicamentos.html",
                     "/cliente.html",
                     "/compra.html",
                     "/nueva-compra.html",
                     "/medicamento.html",
                     "/css/**", 
                     "/js/**", 
-                    "/favicon.ico",
-                    "/auth/**", 
-                    "/v3/api-docs/**", 
+                    "/auth/**",
+                    "/v3/api-docs/**",
                     "/swagger-ui/**"
-                ).permitAll() // ✨ todos estos recursos accesibles sin token
+                ).permitAll()
 
-                // Permitir acceso abierto a catálogo y búsquedas de medicamentos
-                .requestMatchers(
+                // Permitir acceso GET al catálogo de medicamentos sin login
+                .requestMatchers(HttpMethod.GET, 
                     "/medicamentos/pag",
                     "/medicamentos/nombre/**",
                     "/medicamentos/{id}",
                     "/medicamentos/disponibles"
                 ).permitAll()
 
-                // Proteger acciones sensibles de medicamentos (crear, actualizar, eliminar)
-                .requestMatchers("/medicamentos/**").hasAuthority("ADMIN")
+                // SOLO ADMIN puede hacer POST, PUT, DELETE en medicamentos
+                .requestMatchers(HttpMethod.POST, "/medicamentos/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/medicamentos/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/medicamentos/**").hasAuthority("ADMIN")
 
-                // Proteger API de clientes
+                // API de clientes protegida (login requerido)
                 .requestMatchers("/api/**").authenticated()
 
-                // Cualquier otra ruta necesita autenticación
+                // Cualquier otra ruta, autenticado
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

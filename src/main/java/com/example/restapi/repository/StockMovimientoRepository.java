@@ -9,5 +9,10 @@ import java.util.List;
 
 @Repository
 public interface StockMovimientoRepository extends JpaRepository<StockMovimiento, Long> {
+
+    // 🔵 Buscar movimientos por medicamento ordenados por fecha
     List<StockMovimiento> findByMedicamentoOrderByFechaDesc(Medicamento medicamento);
+
+    // 🔵 BORRAR movimientos de stock relacionados a un medicamento 
+    void deleteByMedicamento(Medicamento medicamento);
 }

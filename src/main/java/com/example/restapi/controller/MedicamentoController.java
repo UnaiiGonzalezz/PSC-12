@@ -33,7 +33,7 @@ public class MedicamentoController {
     public List<MedicamentoDTO> getAllMedicamentos() {
         return medicamentoService.getAllMedicamentos()
                 .stream()
-                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -53,12 +53,13 @@ public class MedicamentoController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMedicamento(@PathVariable Long id) {
+    public ResponseEntity<?> deleteMedicamento(@PathVariable Long id) {
         try {
             medicamentoService.deleteMedicamento(id);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicamento no encontrado");
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Medicamento no encontrado");
         }
     }
 
@@ -75,7 +76,7 @@ public class MedicamentoController {
     public List<MedicamentoDTO> getMedicamentosPorNombre(@PathVariable String nombre) {
         return medicamentoService.getMedicamentosPorNombre(nombre)
                 .stream()
-                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -83,7 +84,7 @@ public class MedicamentoController {
     public List<MedicamentoDTO> getMedicamentosPorCategoria(@PathVariable String categoria) {
         return medicamentoService.getMedicamentosPorCategoria(categoria)
                 .stream()
-                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -91,10 +92,7 @@ public class MedicamentoController {
 
     @GetMapping("/disponibles")
     public List<MedicamentoDTO> getMedicamentosDisponibles() {
-        return medicamentoService.getMedicamentosDisponibles()
-                .stream()
-                .map(m -> new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio()))
-                .collect(Collectors.toList());
+        return medicamentoService.getMedicamentosDisponibles();
     }
 
     /* ---------- Movimientos de stock ---------- */
@@ -111,9 +109,21 @@ public class MedicamentoController {
     @GetMapping("/{id}")
     public ResponseEntity<MedicamentoDTO> getMedicamentoById(@PathVariable Long id) {
         Optional<Medicamento> medicamento = medicamentoService.getMedicamentoById(id);
-        return medicamento.map(m -> ResponseEntity.ok(
-                        new MedicamentoDTO(m.getId(), m.getNombre(), m.getPrecio())
-                ))
+        return medicamento.map(m -> ResponseEntity.ok(convertToDTO(m)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /* ---------- Conversor privado Medicamento -> MedicamentoDTO ---------- */
+
+    private MedicamentoDTO convertToDTO(Medicamento m) {
+        return new MedicamentoDTO(
+                m.getId(),
+                m.getNombre(),
+                m.getPrecio(),
+                m.getCategoria(),
+                m.getStock(),
+                m.getProveedor(),
+                m.isDisponible()
+        );
     }
 }

@@ -246,3 +246,20 @@ tr:hover {
     width: 100%;
   }
 }
+
+.admin-button {
+  padding: 15px 30px;
+  margin: 20px;
+  font-size: 1.5rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.admin-button:hover {
+  background-color: #005c9e;
+  transform: scale(1.05);
+}

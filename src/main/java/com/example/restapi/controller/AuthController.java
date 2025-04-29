@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +28,12 @@ public class AuthController {
         boolean autenticado = clienteService.verificarCredenciales(loginDTO.getEmail(), loginDTO.getPassword());
         if (autenticado) {
             Cliente cliente = clienteService.getClienteByEmail(loginDTO.getEmail());
-            String token = jwtUtil.generateToken(cliente.getEmail(), cliente.getRol());
+
+            // 💥 CORREGIDO: pasar lista de roles
+            String token = jwtUtil.generateToken(
+                    cliente.getEmail(),
+                    Collections.singletonList(cliente.getRol()) // convertir rol simple a lista
+            );
 
             Map<String, String> response = new HashMap<>();
             response.put("token", token);

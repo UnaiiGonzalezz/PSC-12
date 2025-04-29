@@ -2,14 +2,38 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Farmacia - Catálogo</title>
+  <title>Catálogo de Medicamentos</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #logoutBtn {
+      background-color: crimson;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #logoutBtn:hover {
+      background-color: darkred;
+    }
+  </style>
 </head>
+
 <body>
 
 <nav>
   <a href="index.html">Catálogo</a>
-  <a href="cliente.html">Clientes</a>
+
   <a href="compra.html">Ver compra</a>
   <a href="nueva-compra.html">Nueva compra</a>
   <a href="admin.html">Admin</a>
@@ -18,7 +42,7 @@
 <h1>Medicamentos disponibles</h1>
 
 <div class="toolbar">
-  <input id="buscador" placeholder="Buscar por nombre...">
+  <input id="buscador" placeholder="Buscar por nombre..." />
   <button onclick="cargar()">Buscar</button>
 </div>
 
@@ -39,62 +63,82 @@
   <button onclick="next()" id="next">Siguiente &rarr;</button>
 </div>
 
-<button class="logout-button" onclick="logout()">Cerrar sesión</button>
+<button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script>
 let page = 0, size = 10;
-let token = sessionStorage.getItem('token');
+const token = sessionStorage.getItem('token');
 
 if (!token) {
   window.location.href = 'login.html';
 }
 
 function logout() {
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('rol');
-  window.location.href = 'login.html';
+  sessionStorage.clear();
+  Toastify({
+    text: "Sesión cerrada",
+    duration: 2000,
+    gravity: "top",
+    position: "center",
+    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)"
+  }).showToast();
+
+  setTimeout(() => window.location.href = 'login.html', 1500);
+}
+
+function cargar() {
+  const q = document.getElementById('buscador').value.trim();
+  let url = q
+    ? `/medicamentos/nombre/${encodeURIComponent(q)}`
+    : `/medicamentos/pag?page=${page}&size=${size}&sort=nombre,asc`;
+
+  fetch(url, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(data => {
+    if (q) {
+      pintar(data, 1);
+    } else {
+      pintar(data.content, data.totalPages);
+    }
+  })
+  .catch(() => {
+    Toastify({
+      text: "Error cargando medicamentos",
+      duration: 3000,
+      backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+      gravity: "top",
+      position: "center"
+    }).showToast();
+  });
 }
 
 function pintar(meds, totalPages) {
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = meds.map(m =>
     `<tr>
-      <td>${m.nombre}</td>
-      <td>€${m.precio.toFixed(2)}</td>
-      <td><a href="medicamento.html?id=${m.id}">Ver</a></td>
-    </tr>`
-  ).join('');
+       <td>${m.nombre}</td>
+       <td>€${m.precio.toFixed(2)}</td>
+       <td><a href="medicamento.html?id=${m.id}">Ver</a></td>
+     </tr>`).join('');
 
   document.getElementById('pagina').textContent = `Página ${page + 1} de ${totalPages}`;
   document.getElementById('prev').disabled = page === 0;
   document.getElementById('next').disabled = page + 1 >= totalPages;
 }
 
-function cargar() {
-  const q = document.getElementById('buscador').value.trim();
-  let url;
-
-  if (q) {
-    url = `/medicamentos/nombre/${encodeURIComponent(q)}`;
-    fetch(url, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(r => r.json())
-    .then(list => pintar(list, 1))
-    .catch(() => alert('Error al cargar medicamentos.'));
-  } else {
-    url = `/medicamentos/pag?page=${page}&size=${size}&sort=nombre,asc`;
-    fetch(url, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(r => r.json())
-    .then(data => pintar(data.content, data.totalPages))
-    .catch(() => alert('Error al cargar medicamentos.'));
-  }
+function next() {
+  page++;
+  cargar();
 }
 
-function next() { page++; cargar(); }
-function prev() { page--; cargar(); }
+function prev() {
+  page--;
+  cargar();
+}
 
 window.onload = cargar;
 </script>
