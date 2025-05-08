@@ -1,3 +1,4 @@
+// AuthControllerTest.java
 package com.example.restapi.controller;
 
 import com.example.restapi.model.Cliente;
@@ -7,12 +8,14 @@ import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.ClienteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class AuthControllerTest {

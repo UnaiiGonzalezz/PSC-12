@@ -9,8 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -21,8 +21,8 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -67,20 +67,20 @@ class CompraControllerWebTest {
     @WithMockUser
     void cambiarEstado() throws Exception {
         mvc.perform(patch("/compras/5/estado")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"estado\":\"Enviado\"}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(5))
-            .andExpect(jsonPath("$.estado").value("Enviado"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\":\"Enviado\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(5))
+                .andExpect(jsonPath("$.estado").value("Enviado"));
     }
 
     @Test
     @WithMockUser
     void obtenerCompraPorId() throws Exception {
         mvc.perform(get("/compras/5")
-                .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(5))
-            .andExpect(jsonPath("$.estado").value("Enviado"));
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(5))
+                .andExpect(jsonPath("$.estado").value("Enviado"));
     }
 }
