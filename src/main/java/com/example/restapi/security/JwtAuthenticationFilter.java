@@ -13,12 +13,17 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter implements Filter {
 
     private final JwtUtil jwtUtil;
+
+    private static final Set<String> PUBLIC_PATHS = Set.of(
+            "/", "/index.html", "/login.html", "/registro.html", "/favicon.ico"
+    );
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -33,7 +38,6 @@ public class JwtAuthenticationFilter implements Filter {
 
         String path = request.getServletPath();
 
-        // ✅ Permitir rutas públicas sin validar token
         if (isPublicPath(path)) {
             chain.doFilter(req, res);
             return;
@@ -47,13 +51,15 @@ public class JwtAuthenticationFilter implements Filter {
                 String email = jwtUtil.extractEmail(token);
                 List<String> roles = jwtUtil.extractRoles(token);
 
-                var authorities = roles.stream()
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role) // ✅ corregido
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-                var authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(email, null, authorities);
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 
@@ -62,15 +68,14 @@ public class JwtAuthenticationFilter implements Filter {
 
     private boolean isPublicPath(String path) {
         return path != null && (
-            path.equals("/") ||
-            path.startsWith("/auth") ||
-            path.endsWith(".html") ||
-            path.startsWith("/css/") ||
-            path.startsWith("/js/") ||
-            path.startsWith("/medicamentos/") ||
-            path.startsWith("/swagger-ui/") ||
-            path.startsWith("/v3/api-docs/") ||
-            path.equals("/favicon.ico")
+                PUBLIC_PATHS.contains(path)
+                || path.startsWith("/auth")
+                || path.startsWith("/css/")
+                || path.startsWith("/js/")
+                || path.startsWith("/medicamentos/")
+                || path.startsWith("/swagger-ui/")
+                || path.startsWith("/v3/api-docs/")
+                || path.endsWith(".html")
         );
     }
 }

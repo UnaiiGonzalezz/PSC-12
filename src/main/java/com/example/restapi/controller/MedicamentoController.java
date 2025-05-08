@@ -8,8 +8,8 @@ import com.example.restapi.service.MedicamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,21 +38,29 @@ public class MedicamentoController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Medicamento createMedicamento(@RequestBody Medicamento medicamento) {
-        return medicamentoService.saveMedicamento(medicamento);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Medicamento> createMedicamento(@RequestBody Medicamento medicamento) {
+        try {
+            Medicamento nuevo = medicamentoService.saveMedicamento(medicamento);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public Medicamento updateMedicamento(@PathVariable Long id, @RequestBody Medicamento body) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Medicamento> updateMedicamento(@PathVariable Long id, @RequestBody Medicamento body) {
         try {
-            return medicamentoService.updateMedicamento(id, body);
+            Medicamento actualizado = medicamentoService.updateMedicamento(id, body);
+            return ResponseEntity.ok(actualizado);
         } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteMedicamento(@PathVariable Long id) {
         try {
             medicamentoService.deleteMedicamento(id);
