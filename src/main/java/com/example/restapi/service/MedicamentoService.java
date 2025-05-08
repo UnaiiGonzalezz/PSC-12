@@ -100,6 +100,12 @@ public class MedicamentoService {
         return medicamentoRepository.findByCategoriaIgnoreCase(categoria);
     }
 
+    public List<StockMovimiento> getMovimientosDeMedicamento(Long id) {
+        Medicamento medicamento = medicamentoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Medicamento no encontrado"));
+        return movRepo.findByMedicamentoOrderByFechaDesc(medicamento);
+    }
+
     private MedicamentoDTO convertToDTO(Medicamento m) {
         return new MedicamentoDTO(
                 m.getId(),

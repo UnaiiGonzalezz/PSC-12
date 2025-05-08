@@ -3,7 +3,6 @@ package com.example.restapi.controller;
 import com.example.restapi.model.Medicamento;
 import com.example.restapi.model.dto.MedicamentoDTO;
 import com.example.restapi.model.stock.StockMovimiento;
-import com.example.restapi.repository.StockMovimientoRepository;
 import com.example.restapi.service.MedicamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,9 +21,6 @@ public class MedicamentoController {
 
     @Autowired
     private MedicamentoService medicamentoService;
-
-    @Autowired
-    private StockMovimientoRepository movRepo;
 
     /* ---------- CRUD ---------- */
 
@@ -107,9 +102,7 @@ public class MedicamentoController {
 
     @GetMapping("/{id}/movimientos")
     public List<StockMovimiento> getMovimientos(@PathVariable Long id) {
-        Medicamento med = medicamentoService.getMedicamentoById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicamento no encontrado"));
-        return movRepo.findByMedicamentoOrderByFechaDesc(med);
+        return medicamentoService.getMovimientosDeMedicamento(id);
     }
 
     /* ---------- Buscar medicamento por ID ---------- */

@@ -1,23 +1,20 @@
 package com.example.restapi.repository;
 
-import java.util.List;
-
+import com.example.restapi.model.Medicamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.restapi.model.Medicamento;
+import java.util.List;
 
 @Repository
 public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> {
 
-    // Obtiene todos los medicamentos disponibles (disponible = true)
+    // Medicamentos marcados como disponibles
     List<Medicamento> findByDisponibleTrue();
 
-    // Busca medicamentos por nombre, ignorando mayúsculas/minúsculas
+    // Búsqueda insensible a mayúsculas/minúsculas por nombre exacto
     List<Medicamento> findByNombreIgnoreCase(String nombre);
 
-    // Busca medicamentos por categoría, ignorando mayúsculas/minúsculas
+    // Búsqueda insensible por categoría exacta
     List<Medicamento> findByCategoriaIgnoreCase(String categoria);
-
-    // Eliminado: findByNombre(String nombre), porque es redundante si ya tienes findByNombreIgnoreCase
 }
