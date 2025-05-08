@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -23,49 +24,41 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas
+                // Públicas
                 .requestMatchers(
                     "/",
                     "/index.html",
                     "/login.html",
                     "/registro.html",
-                    "/compra.html",
-                    "/nueva-compra.html",
+                    "/favicon.ico",
                     "/css/**",
                     "/js/**",
-                    "/favicon.ico",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/medicamento.html/**"
+                    "/admin.html",
+                    "/admin-medicamentos.html",
+                    "/cliente.html"
                 ).permitAll()
 
-                // API de login y registro públicas
+                // Login y registro
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 
-                // Catálogo de medicamentos público (GET)
-                .requestMatchers(HttpMethod.GET,
-                    "/medicamentos/pag",
-                    "/medicamentos/nombre/**",
-                    "/medicamentos/{id}",
-                    "/medicamentos/disponibles"
-                ).permitAll()
+                // Medicamentos públicos
+                .requestMatchers(HttpMethod.GET, "/medicamentos/**").permitAll()
 
-                // Páginas de administración: deben ser públicas para cargar HTML, controladas por JS
-                .requestMatchers("/admin.html", "/admin-medicamentos.html", "/cliente.html").permitAll()
-
-                // API protegida
+                // Protegidos
                 .requestMatchers("/api/**").authenticated()
 
-                // Operaciones CRUD de medicamentos solo ADMIN
+                // Medicamento CRUD solo admin
                 .requestMatchers(HttpMethod.POST, "/medicamentos/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/medicamentos/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/medicamentos/**").hasAuthority("ADMIN")
 
-                // Todo lo demás: autenticado
+                // Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
