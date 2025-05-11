@@ -22,8 +22,7 @@ public class MedicamentoController {
     @Autowired
     private MedicamentoService medicamentoService;
 
-    /* ---------- CRUD ---------- */
-
+    // Obtener todos
     @GetMapping
     public List<MedicamentoDTO> getAllMedicamentos() {
         return medicamentoService.getAllMedicamentos()
@@ -32,30 +31,37 @@ public class MedicamentoController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Medicamento> createMedicamento(@RequestBody Medicamento medicamento) {
-        try {
-            Medicamento nuevo = medicamentoService.saveMedicamento(medicamento);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    // Obtener por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicamentoDTO> getMedicamentoById(@PathVariable Long id) {
+        Optional<Medicamento> medicamento = medicamentoService.getMedicamentoById(id);
+        return medicamento.map(m -> ResponseEntity.ok(convertToDTO(m)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // Crear nuevo
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Medicamento> createMedicamento(@RequestBody Medicamento medicamento) {
+        Medicamento nuevo = medicamentoService.saveMedicamento(medicamento);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+    }
+
+    // Actualizar existente
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Medicamento> updateMedicamento(@PathVariable Long id, @RequestBody Medicamento body) {
         try {
             Medicamento actualizado = medicamentoService.updateMedicamento(id, body);
             return ResponseEntity.ok(actualizado);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.notFound().build();
         }
     }
 
+    // Eliminar
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteMedicamento(@PathVariable Long id) {
         try {
             medicamentoService.deleteMedicamento(id);
@@ -66,15 +72,13 @@ public class MedicamentoController {
         }
     }
 
-    /* ---------- Paginado para catálogo ---------- */
-
+    // Paginado
     @GetMapping("/pag")
     public Page<MedicamentoDTO> getMedicamentosPaginados(Pageable pageable) {
         return medicamentoService.getMedicamentos(pageable);
     }
 
-    /* ---------- Filtros ---------- */
-
+    // Filtros
     @GetMapping("/nombre/{nombre}")
     public List<MedicamentoDTO> getMedicamentosPorNombre(@PathVariable String nombre) {
         return medicamentoService.getMedicamentosPorNombre(nombre)
@@ -91,31 +95,19 @@ public class MedicamentoController {
                 .collect(Collectors.toList());
     }
 
-    /* ---------- Disponibles ---------- */
-
+    // Medicamentos disponibles
     @GetMapping("/disponibles")
     public List<MedicamentoDTO> getMedicamentosDisponibles() {
         return medicamentoService.getMedicamentosDisponibles();
     }
 
-    /* ---------- Movimientos de stock ---------- */
-
+    // Movimientos de stock
     @GetMapping("/{id}/movimientos")
     public List<StockMovimiento> getMovimientos(@PathVariable Long id) {
         return medicamentoService.getMovimientosDeMedicamento(id);
     }
 
-    /* ---------- Buscar medicamento por ID ---------- */
-
-    @GetMapping("/{id}")
-    public ResponseEntity<MedicamentoDTO> getMedicamentoById(@PathVariable Long id) {
-        Optional<Medicamento> medicamento = medicamentoService.getMedicamentoById(id);
-        return medicamento.map(m -> ResponseEntity.ok(convertToDTO(m)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    /* ---------- Conversor privado Medicamento -> MedicamentoDTO ---------- */
-
+    // Conversión a DTO
     private MedicamentoDTO convertToDTO(Medicamento m) {
         return new MedicamentoDTO(
                 m.getId(),

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -31,8 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String servletPath = request.getServletPath();
-        // ⚠️ Permitir rutas públicas sin token
-        if (servletPath.equals("/index.html") || servletPath.equals("/login") || servletPath.equals("/register")) {
+
+        // Permitir acceso sin token a estas rutas
+        if (servletPath.equals("/index.html") ||
+            servletPath.equals("/login") ||
+            servletPath.equals("/register")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -58,7 +62,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
+        // ✅ Usar objeto User de Spring como principal
+        User userDetails = new User(email, "", authorities);
+
+        var auth = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(auth);
 
