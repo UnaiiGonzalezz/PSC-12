@@ -1,0 +1,27 @@
+var classcom_1_1example_1_1restapi_1_1model_1_1_medicamento =
+[
+    [ "Medicamento", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a429140a2f5615bf72da409c77acdccf0", null ],
+    [ "Medicamento", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a046e58f9f8f32d71eda26963740dc61f", null ],
+    [ "getCategoria", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a54b739f6a1bbc781e0952d192a1aaeca", null ],
+    [ "getId", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a74e3dd8e890a2c405c0ecdf5ab10d2ed", null ],
+    [ "getNombre", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a86578b938c8ef90612ea097608ad611f", null ],
+    [ "getPrecio", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a92c596f0a25f3aab0f721fa8595137b3", null ],
+    [ "getProveedor", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a901a5330726075bba6a2d120b63a437e", null ],
+    [ "getStock", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#ad1f02691b539fb2322de2f2c2131ad59", null ],
+    [ "isDisponible", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a1f6a1767d0fe431d0fd50e776c9ac93a", null ],
+    [ "setCategoria", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#aa04b171aa8138a584d71d292e2fb832c", null ],
+    [ "setDisponible", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#ada2cda7d6f0b49c7fe52a463ddc4b709", null ],
+    [ "setId", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a95057512b75b397a4ed9f3609ce12d5a", null ],
+    [ "setNombre", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a70dca61c438edf9ac9cfdf2ab91c6e57", null ],
+    [ "setPrecio", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#ad848745092e419e406f346596c4bdc83", null ],
+    [ "setProveedor", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a2b294ceabdd3761e66b87872cacbefe3", null ],
+    [ "setStock", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a0b3a9fae1fcc2b32f5196f02e856d1ce", null ],
+    [ "toString", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a2d6c687571c4f8b9d37c7c21c6febc11", null ],
+    [ "categoria", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a65cd4d53080a24e9f00b528309302fdb", null ],
+    [ "disponible", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a7ec50f58ffd4ab83052c5a9cee0e3913", null ],
+    [ "id", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a34b163f7bba59c064f7df582254793e5", null ],
+    [ "nombre", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#ad0fce6a7496d4e9faad2d710948b9474", null ],
+    [ "precio", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a66c809fb04236f4676ac4e42b54f10e2", null ],
+    [ "proveedor", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a33e1343cd3a52232ef38b3ae7903f9d1", null ],
+    [ "stock", "classcom_1_1example_1_1restapi_1_1model_1_1_medicamento.html#a7a31a9f67e871d8bbf7e640fc976c152", null ]
+];

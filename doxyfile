@@ -1,0 +1,23 @@
+# Doxyfile base
+
+# Entrada principal
+PROJECT_NAME           = "Gestión de Farmacia"
+OUTPUT_DIRECTORY       = docs
+INPUT                  = src/main/java
+FILE_PATTERNS          = *.java
+RECURSIVE              = YES
+
+# Tipos de documentación
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+# Generar HTML
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+
+# Generar LaTeX (lo podemos desactivar si no lo usamos)
+GENERATE_LATEX         = NO
+
+# Idioma 
+OUTPUT_LANGUAGE        = Spanish
