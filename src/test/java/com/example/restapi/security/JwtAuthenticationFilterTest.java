@@ -56,7 +56,8 @@ class JwtAuthenticationFilterTest {
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
         assertThat(auth).isNotNull();
-        assertThat(auth.getPrincipal()).isEqualTo("admin@demo.es");
+        assertThat(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
+            .isEqualTo("admin@demo.es");
         assertThat(auth.getAuthorities())
             .extracting(Object::toString)
             .containsExactly("ROLE_ADMIN");
