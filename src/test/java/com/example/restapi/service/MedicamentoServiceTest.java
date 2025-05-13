@@ -24,39 +24,83 @@ class MedicamentoServiceTest {
     @Mock
     private StockMovimientoRepository movRepo;
 
-    private Medicamento paracetamol;
+    private Medicamento medicamento;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        paracetamol = new Medicamento("Paracetamol", "Analgesico", 3.5, 50, "Bayer");
+        medicamento = new Medicamento("Paracetamol", "Analgésico", 3.0, 100, "Cinfa");
+        medicamento.setId(1L);
     }
 
     @Test
-    void saveMedicamento() {
-        when(repo.save(paracetamol)).thenReturn(paracetamol);
-        Medicamento saved = service.saveMedicamento(paracetamol);
+    void testSaveMedicamento() {
+        when(repo.save(medicamento)).thenReturn(medicamento);
 
-        assertThat(saved.getNombre()).isEqualTo("Paracetamol");
-        verify(repo).save(paracetamol);
-        verify(movRepo).save(any());  // Verifica movimiento de stock
+        Medicamento result = service.saveMedicamento(medicamento);
+
+        assertThat(result).isEqualTo(medicamento);
+        verify(repo).save(medicamento);
+        verify(movRepo).save(any());
     }
 
     @Test
-    void findById() {
-        when(repo.findById(1L)).thenReturn(Optional.of(paracetamol));
+    void testGetMedicamentoById_existente() {
+        when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
 
-        Optional<Medicamento> res = service.getMedicamentoById(1L);
+        Optional<Medicamento> result = service.getMedicamentoById(1L);
 
-        assertThat(res).isPresent();
+        assertThat(result).isPresent();
+        assertThat(result.get().getNombre()).isEqualTo("Paracetamol");
     }
 
     @Test
-    void filterByCategoria() {
-        when(repo.findByCategoriaIgnoreCase("Analgesico")).thenReturn(List.of(paracetamol));
+    void testGetMedicamentoById_noExiste() {
+        when(repo.findById(2L)).thenReturn(Optional.empty());
 
-        List<Medicamento> lista = service.getMedicamentosPorCategoria("Analgesico");
+        Optional<Medicamento> result = service.getMedicamentoById(2L);
 
-        assertThat(lista).hasSize(1);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void testGetMedicamentosPorCategoria() {
+        when(repo.findByCategoriaIgnoreCase("Analgésico")).thenReturn(List.of(medicamento));
+
+        List<Medicamento> result = service.getMedicamentosPorCategoria("Analgésico");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getNombre()).isEqualTo("Paracetamol");
+    }
+
+    @Test
+    void testUpdateMedicamento_existente() {
+        Medicamento updatedMedicamento = new Medicamento("Paracetamol", "Analgésico", 4.0, 120, "Cinfa");
+        updatedMedicamento.setId(1L);
+
+        // Mock para devolver el medicamento original
+        when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
+
+        // Mock para guardar el medicamento actualizado
+        when(repo.save(any(Medicamento.class))).thenReturn(updatedMedicamento);
+
+        // Llamada al método de servicio
+        Medicamento result = service.updateMedicamento(1L, updatedMedicamento);
+
+        // Asegurarse de que el medicamento devuelto sea el actualizado
+        assertThat(result).isNotNull();
+        assertThat(result.getPrecio()).isEqualTo(4.0); // Verificar el precio actualizado
+        assertThat(result.getStock()).isEqualTo(120);  // Verificar el stock actualizado
+        assertThat(result.getNombre()).isEqualTo("Paracetamol"); // Verificar el nombre
+    }
+
+    @Test
+    void testDeleteMedicamento() {
+        when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
+
+        service.deleteMedicamento(1L);
+
+        verify(repo).delete(medicamento);
+        verify(movRepo).deleteByMedicamento(medicamento);
     }
 }

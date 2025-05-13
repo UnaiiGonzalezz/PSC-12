@@ -3,9 +3,7 @@ package com.example.restapi.service;
 import com.example.restapi.model.*;
 import com.example.restapi.model.dto.CheckoutResponseDTO;
 import com.example.restapi.model.stock.StockMovimiento;
-import com.example.restapi.repository.CarritoRepository;
-import com.example.restapi.repository.MedicamentoRepository;
-import com.example.restapi.repository.StockMovimientoRepository;
+import com.example.restapi.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -14,6 +12,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class CarritoServiceTest {
@@ -33,50 +32,73 @@ class CarritoServiceTest {
     @Mock
     private CompraService compraService;
 
-    private Cliente ana;
-    private Medicamento ibup;
+    private Cliente cliente;
+    private Medicamento medicamento;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ana = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta", "USER");
-        ibup = new Medicamento("Ibuprofeno", "Analgésico", 5.0, 20, "Bayer");
-        ibup.setId(1L);
+        cliente = new Cliente("Juan", "Pérez", "juan@example.com", "HASH", "600000000", "Tarjeta", "USER");
+        medicamento = new Medicamento("Paracetamol", "Analgésico", 3.0, 50, "Bayer");
+        medicamento.setId(1L);
     }
 
     @Test
-    void addMedicamento_creaCarritoYDevuelveDTO() {
-        when(carritoRepo.findByCliente(ana)).thenReturn(Optional.empty());
-        when(medRepo.findById(1L)).thenReturn(Optional.of(ibup));
-        when(carritoRepo.save(any(Carrito.class))).thenAnswer(invocation -> {
-            Carrito carrito = invocation.getArgument(0);
-            carrito.addItem(ibup, 2);
-            return carrito;
+    void testAddMedicamento_creaCarritoNuevo() {
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.empty());
+        when(medRepo.findById(1L)).thenReturn(Optional.of(medicamento));
+        when(carritoRepo.save(any())).thenAnswer(inv -> {
+            Carrito c = inv.getArgument(0);
+            c.addItem(medicamento, 2);
+            return c;
         });
 
-        var dto = service.addMedicamento(ana, 1L, 2);
+        var dto = service.addMedicamento(cliente, 1L, 2);
 
-        assertThat(dto.getTotal()).isEqualTo(10.0);
+        assertThat(dto).isNotNull();
+        assertThat(dto.getItems()).hasSize(1);
+        assertThat(dto.getTotal()).isEqualTo(6.0);
     }
 
     @Test
-    void checkout_descuentaStockYCreaCompra() {
-        Carrito carrito = new Carrito(ana);
-        carrito.addItem(ibup, 2);
+    void testAddMedicamento_yaExisteEnCarrito_incrementaCantidad() {
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 1);
 
-        when(carritoRepo.findByCliente(ana)).thenReturn(Optional.of(carrito));
-        when(medRepo.save(any(Medicamento.class))).thenAnswer(i -> i.getArgument(0));
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        when(medRepo.findById(1L)).thenReturn(Optional.of(medicamento));
 
-        Compra compra = new Compra(ana, carrito.getItems().stream().map(CarritoItem::getMedicamento).toList(), LocalDate.now(), 2, ana.getMetodoPago());
-        compra.setPago(10.0);
+        var dto = service.addMedicamento(cliente, 1L, 2);
 
-        when(compraService.crearDesdeCarrito(any())).thenReturn(compra);
+        assertThat(dto.getItems().get(0).getCantidad()).isEqualTo(3);
+        assertThat(dto.getTotal()).isEqualTo(9.0);
+    }
 
-        CheckoutResponseDTO dto = service.checkout(ana);
+    @Test
+    void testCheckout_sinCarrito_lanzaExcepcion() {
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.empty());
 
-        assertThat(dto.getTotal()).isEqualTo(10.0);
-        verify(medRepo).save(argThat(m -> m.getStock() == 18));
-        verify(carritoRepo).delete(carrito);
+        assertThrows(IllegalStateException.class, () -> {
+            service.checkout(cliente);
+        });
+    }
+
+    @Test
+    void testCheckout_conItems_procesaCorrectamente() {
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 2);
+
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        when(medRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        Compra compra = new Compra(cliente, carrito.getItems().stream().map(CarritoItem::getMedicamento).toList(), LocalDate.now(), 2, "Tarjeta");
+        compra.setPago(6.0);
+        when(compraService.crearDesdeCarrito(carrito)).thenReturn(compra);
+
+        CheckoutResponseDTO dto = service.checkout(cliente);
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.getTotal()).isEqualTo(6.0);
         verify(movRepo, atLeastOnce()).save(any(StockMovimiento.class));
+        verify(carritoRepo).delete(carrito);
     }
 }

@@ -19,13 +19,13 @@ public class ClienteService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /* ✅ Verificar credenciales */
+    /*  Verificar credenciales */
     public boolean verificarCredenciales(String email, String password) {
         Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
         return clienteOpt.isPresent() && passwordEncoder.matches(password, clienteOpt.get().getContrasena());
     }
 
-    /* ✅ Buscar cliente por email */
+    /*  Buscar cliente por email */
     public Cliente getClienteByEmail(String email) {
         return clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con email: " + email));
@@ -35,12 +35,12 @@ public class ClienteService {
         return clienteRepository.findByEmail(email);
     }
 
-    /* ✅ Verificar si un email ya existe */
+    /*  Verificar si un email ya existe usando existsByEmail */
     public boolean emailYaExiste(String email) {
-        return clienteRepository.findByEmail(email).isPresent();
+        return clienteRepository.existsByEmail(email);
     }
 
-    /* ✅ Registrar un cliente desde DTO */
+    /*  Registrar un cliente desde DTO */
     public Cliente registrarCliente(RegistroDTO registroDTO) {
         Cliente cliente = new Cliente();
         cliente.setNombre(registroDTO.getNombre());
@@ -53,24 +53,24 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    /* ✅ Guardar directamente un Cliente (ya creado) */
+    /*  Guardar directamente un Cliente (ya creado) */
     public Cliente save(Cliente cliente) {
         cliente.setContrasena(passwordEncoder.encode(cliente.getContrasena()));
         return clienteRepository.save(cliente);
     }
 
-    /* ✅ Obtener todos los clientes */
+    /*  Obtener todos los clientes */
     public List<Cliente> getAllClientes() {
         return clienteRepository.findAll();
     }
 
-    /* ✅ Buscar cliente por ID */
+    /*  Buscar cliente por ID */
     public Cliente getClienteById(Long id) {
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + id));
     }
 
-    /* ✅ Actualizar datos de un cliente */
+    /*  Actualizar datos de un cliente */
     public Cliente updateCliente(Long id, Cliente clienteDetails) {
         Cliente cliente = getClienteById(id);
         cliente.setNombre(clienteDetails.getNombre());
@@ -82,7 +82,7 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    /* ✅ Eliminar cliente */
+    /*  Eliminar cliente */
     public boolean deleteCliente(Long id) {
         Optional<Cliente> clienteOpt = clienteRepository.findById(id);
         if (clienteOpt.isPresent()) {

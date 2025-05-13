@@ -24,39 +24,42 @@ public class CompraService {
     public List<Compra> getAllCompras() { 
         return compraRepository.findAll(); 
     }
-    
+
     public Optional<Compra> getCompraById(Long id) { 
         return compraRepository.findById(id); 
     }
-    
+
     public List<Compra> getComprasByEstado(String estado) { 
         return compraRepository.findByEstado(estado); 
     }
-    
+
     public Compra saveCompra(Compra compra) { 
         return compraRepository.save(compra); 
     }
-    
+
     public void deleteCompra(Long id) { 
         compraRepository.deleteById(id); 
     }
 
-    /* ---------- cambiar estado ---------- */
-    private static final Set<String> ESTADOS_VALIDOS = Set.of("Pendiente", "Enviado", "Entregado", "Cancelada");
+    /* ---------- Cambiar estado ---------- */
+    private static final Set<String> ESTADOS_VALIDOS = Set.of("Pendiente", "Enviado", "Entregado", "Cancelada", "Recibido");
 
     public Compra updateEstado(Long id, String nuevoEstado) {
         if (!ESTADOS_VALIDOS.contains(nuevoEstado)) {
             throw new IllegalArgumentException("Estado no válido");
         }
 
-        Compra compra = compraRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Compra no encontrada"));
+        Optional<Compra> compraOptional = compraRepository.findById(id);
+        if (compraOptional.isEmpty()) {
+            return null;  // Si no se encuentra la compra, retornar null
+        }
 
+        Compra compra = compraOptional.get();
         compra.setEstado(nuevoEstado);
-        return compraRepository.save(compra);
+        return compraRepository.save(compra);  // Se guarda la compra con el nuevo estado.
     }
 
-    /* ---------- historial de compras por cliente ---------- */
+    /* ---------- Historial de compras por cliente ---------- */
     public List<CompraResumenDTO> getHistorialPorCliente(Long clienteId) {
         return compraRepository.findByClienteId(clienteId).stream()
                 .map(c -> new CompraResumenDTO(
@@ -67,7 +70,7 @@ public class CompraService {
                 .collect(Collectors.toList());
     }
 
-    /* ---------- estado detallado (con @Transactional para evitar LazyInitializationException) ---------- */
+    /* ---------- Estado detallado (con @Transactional para evitar LazyInitializationException) ---------- */
     @Transactional(readOnly = true)
     public Optional<EstadoCompraDTO> getEstadoCompraDTO(Long id) {
         return compraRepository.findById(id)
@@ -93,7 +96,7 @@ public class CompraService {
                 medsInfo);
     }
 
-    /* ---------- crear compra desde carrito ---------- */
+    /* ---------- Crear compra desde carrito ---------- */
     @Transactional
     public Compra crearDesdeCarrito(Carrito carrito) {
         Cliente cliente = carrito.getCliente();
@@ -116,7 +119,7 @@ public class CompraService {
         return compraRepository.save(compra);
     }
 
-    /* ---------- buscar compras por cliente ---------- */
+    /* ---------- Buscar compras por cliente ---------- */
     public List<Compra> findByCliente(Cliente cliente) {
         return compraRepository.findByCliente(cliente);
     }

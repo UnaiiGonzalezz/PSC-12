@@ -1,30 +1,23 @@
 package com.example.restapi.controller;
 
 import com.example.restapi.model.Medicamento;
-import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.MedicamentoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = MedicamentoController.class)
-@AutoConfigureMockMvc
-@Import(MedicamentoControllerTest.TestSecurityConfig.class)
-class MedicamentoControllerTest {
+@WebMvcTest(MedicamentoController.class)  // Usa WebMvcTest para cargar solo el controlador
+public class MedicamentoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,17 +25,24 @@ class MedicamentoControllerTest {
     @MockBean
     private MedicamentoService medicamentoService;
 
-    @org.springframework.boot.test.context.TestConfiguration
-    static class TestSecurityConfig {
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http.csrf().disable().authorizeHttpRequests().anyRequest().permitAll().and().build();
-        }
+    @Test
+    void testCreateMedicamento() throws Exception {
+        Medicamento medicamento = new Medicamento();
+        medicamento.setNombre("Aspirina");
+        medicamento.setCategoria("Analgésico");
+        medicamento.setPrecio(2.5);
+        medicamento.setStock(100);
+        medicamento.setProveedor("Bayer");
 
-        @Bean
-        public JwtUtil jwtUtil() {
-            return new JwtUtil();
-        }
+        when(medicamentoService.saveMedicamento(medicamento)).thenReturn(medicamento);
+
+        mockMvc.perform(post("/medicamentos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nombre\": \"Aspirina\", \"categoria\": \"Analgésico\", \"precio\": 2.5, \"stock\": 100, \"proveedor\": \"Bayer\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nombre").value("Aspirina"))
+                .andExpect(jsonPath("$.precio").value(2.5))
+                .andExpect(jsonPath("$.categoria").value("Analgésico"));
     }
 
     @Test
