@@ -50,7 +50,7 @@ class ClienteServiceTest {
         Cliente guardado = clienteService.registrarCliente(registro);
 
         assertThat(guardado.getEmail()).isEqualTo("carlos@example.com");
-        assertThat(guardado.getRol()).isEqualTo("USER"); // Nuevo chequeo
+        assertThat(guardado.getRol()).isEqualTo("USER");
         verify(clienteRepo).save(any(Cliente.class));
     }
 

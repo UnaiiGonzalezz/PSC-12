@@ -1,4 +1,3 @@
-// AuthControllerTest.java
 package com.example.restapi.controller;
 
 import com.example.restapi.model.Cliente;
@@ -52,11 +51,8 @@ public class AuthControllerTest {
     @Test
     void login_fallido() {
         LoginDTO login = new LoginDTO("noexiste@demo.es", "badpass");
-
         when(clienteService.verificarCredenciales(any(), any())).thenReturn(false);
-
         ResponseEntity<?> res = controller.login(login);
-
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -83,9 +79,7 @@ public class AuthControllerTest {
     void register_conflicto() {
         RegistroDTO dto = new RegistroDTO();
         dto.setEmail("ya@existe.com");
-
         when(clienteService.emailYaExiste(dto.getEmail())).thenReturn(true);
-
         ResponseEntity<?> res = controller.register(dto);
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }

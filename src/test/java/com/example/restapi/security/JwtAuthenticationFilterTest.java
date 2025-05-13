@@ -48,7 +48,7 @@ class JwtAuthenticationFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
         when(jwtUtil.isTokenValid(token)).thenReturn(true);
         when(jwtUtil.extractEmail(token)).thenReturn("admin@demo.es");
-        when(jwtUtil.extractRoles(token)).thenReturn(List.of("ROLE_ADMIN")); // ✅ ya con prefijo
+        when(jwtUtil.extractRoles(token)).thenReturn(List.of("ROLE_ADMIN"));
 
         filter.doFilter(request, response, chain);
 

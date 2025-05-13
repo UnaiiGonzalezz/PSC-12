@@ -39,7 +39,7 @@ class MedicamentoServiceTest {
 
         assertThat(saved.getNombre()).isEqualTo("Paracetamol");
         verify(repo).save(paracetamol);
-        verify(movRepo).save(any());  // <-- nueva verificación importante
+        verify(movRepo).save(any());  // Verifica movimiento de stock
     }
 
     @Test

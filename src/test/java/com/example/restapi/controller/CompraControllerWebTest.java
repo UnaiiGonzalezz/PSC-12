@@ -59,6 +59,7 @@ class CompraControllerWebTest {
                 null,
                 null
         );
+
         Mockito.when(compraService.getEstadoCompraDTO(5L))
                 .thenReturn(Optional.of(estadoCompraDTO));
     }
