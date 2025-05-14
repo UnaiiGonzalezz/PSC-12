@@ -40,9 +40,9 @@
 
         <!-- Database -->
         <dependency>
-            <groupId>com.mysql</groupId>
+            <groupId>com.mysql</groupId>         <!-- ← el correcto para Boot 3.x -->
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.3.0</version>
+            <scope>runtime</scope>               <!-- versión la pone el BOM -->
         </dependency>
 
         <!-- JWT -->
