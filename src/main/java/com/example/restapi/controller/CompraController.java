@@ -4,6 +4,8 @@ import com.example.restapi.model.Cliente;
 import com.example.restapi.model.Compra;
 import com.example.restapi.model.Medicamento;
 import com.example.restapi.model.dto.EstadoCompraDTO;
+import com.example.restapi.model.dto.MedicamentoDTO;
+import com.example.restapi.model.dto.CompraDTO;
 import com.example.restapi.repository.MedicamentoRepository;
 import com.example.restapi.service.ClienteService;
 import com.example.restapi.service.CompraService;
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/compras")
@@ -28,6 +31,15 @@ public class CompraController {
 
     @Autowired
     private MedicamentoRepository medicamentoRepository;
+
+// Obtener todas
+    @GetMapping
+    public List<CompraDTO> getAllCompras() {
+        return compraService.getAllCompras()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     // ✅ POST: Crear compra desde email
     @PostMapping("/crear-por-email")
@@ -96,5 +108,31 @@ public class CompraController {
 
         public String getMetodoPago() { return metodoPago; }
         public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
+    }
+
+    // Conversión a DTO
+    private CompraDTO convertToDTO(Compra c) {
+    return new CompraDTO(
+        c.getId(),
+        c.getCliente().getId(),
+        c.getCliente().getNombre(),
+        c.getCliente().getApellido(),
+        c.getMedicamentos().stream()
+            .map(m -> new MedicamentoDTO(
+                m.getId(),
+                m.getNombre(),
+                m.getPrecio(),
+                m.getCategoria(),
+                m.getStock(),
+                m.getProveedor(),
+                m.isDisponible()
+            ))
+            .toList(),
+        c.getFechaCompra(),
+        c.getCantidad(),
+        c.getPago(),
+        c.getEstado(),
+        c.getMetodoPago()
+    );
     }
 }
