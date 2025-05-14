@@ -22,8 +22,7 @@ public class MedicamentoController {
     @Autowired
     private MedicamentoService medicamentoService;
 
-    // Obtener todos
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<MedicamentoDTO> getAllMedicamentos() {
         return medicamentoService.getAllMedicamentos()
                 .stream()
@@ -31,35 +30,31 @@ public class MedicamentoController {
                 .collect(Collectors.toList());
     }
 
-    // Obtener por ID
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MedicamentoDTO> getMedicamentoById(@PathVariable Long id) {
         Optional<Medicamento> medicamento = medicamentoService.getMedicamentoById(id);
-        return medicamento.map(m -> ResponseEntity.ok(convertToDTO(m)))
+        return medicamento.map(m -> ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(convertToDTO(m)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Crear nuevo
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Medicamento> createMedicamento(@RequestBody Medicamento medicamento) {
         Medicamento nuevo = medicamentoService.saveMedicamento(medicamento);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(nuevo);
     }
 
-    // Actualizar existente
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Medicamento> updateMedicamento(@PathVariable Long id, @RequestBody Medicamento body) {
         try {
             Medicamento actualizado = medicamentoService.updateMedicamento(id, body);
-            return ResponseEntity.ok(actualizado);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(actualizado);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // Eliminar
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteMedicamento(@PathVariable Long id) {
@@ -67,19 +62,16 @@ public class MedicamentoController {
             medicamentoService.deleteMedicamento(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Medicamento no encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medicamento no encontrado");
         }
     }
 
-    // Paginado
-    @GetMapping("/pag")
+    @GetMapping(value = "/pag", produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<MedicamentoDTO> getMedicamentosPaginados(Pageable pageable) {
         return medicamentoService.getMedicamentos(pageable);
     }
 
-    // Filtros
-    @GetMapping("/nombre/{nombre}")
+    @GetMapping(value = "/nombre/{nombre}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<MedicamentoDTO> getMedicamentosPorNombre(@PathVariable String nombre) {
         return medicamentoService.getMedicamentosPorNombre(nombre)
                 .stream()
@@ -87,7 +79,7 @@ public class MedicamentoController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/categoria/{categoria}")
+    @GetMapping(value = "/categoria/{categoria}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<MedicamentoDTO> getMedicamentosPorCategoria(@PathVariable String categoria) {
         return medicamentoService.getMedicamentosPorCategoria(categoria)
                 .stream()
@@ -95,19 +87,16 @@ public class MedicamentoController {
                 .collect(Collectors.toList());
     }
 
-    // Medicamentos disponibles
-    @GetMapping("/disponibles")
+    @GetMapping(value = "/disponibles", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<MedicamentoDTO> getMedicamentosDisponibles() {
         return medicamentoService.getMedicamentosDisponibles();
     }
 
-    // Movimientos de stock
-    @GetMapping("/{id}/movimientos")
+    @GetMapping(value = "/{id}/movimientos", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<StockMovimiento> getMovimientos(@PathVariable Long id) {
         return medicamentoService.getMovimientosDeMedicamento(id);
     }
 
-    // Conversión a DTO
     private MedicamentoDTO convertToDTO(Medicamento m) {
         return new MedicamentoDTO(
                 m.getId(),

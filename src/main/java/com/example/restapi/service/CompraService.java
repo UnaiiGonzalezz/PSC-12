@@ -21,24 +21,24 @@ public class CompraService {
     private CompraRepository compraRepository;
 
     /* ---------- CRUD básico ---------- */
-    public List<Compra> getAllCompras() { 
-        return compraRepository.findAll(); 
+    public List<Compra> getAllCompras() {
+        return compraRepository.findAll();
     }
 
-    public Optional<Compra> getCompraById(Long id) { 
-        return compraRepository.findById(id); 
+    public Optional<Compra> getCompraById(Long id) {
+        return compraRepository.findById(id);
     }
 
-    public List<Compra> getComprasByEstado(String estado) { 
-        return compraRepository.findByEstado(estado); 
+    public List<Compra> getComprasByEstado(String estado) {
+        return compraRepository.findByEstado(estado);
     }
 
-    public Compra saveCompra(Compra compra) { 
-        return compraRepository.save(compra); 
+    public Compra saveCompra(Compra compra) {
+        return compraRepository.save(compra);
     }
 
-    public void deleteCompra(Long id) { 
-        compraRepository.deleteById(id); 
+    public void deleteCompra(Long id) {
+        compraRepository.deleteById(id);
     }
 
     /* ---------- Cambiar estado ---------- */
@@ -51,12 +51,12 @@ public class CompraService {
 
         Optional<Compra> compraOptional = compraRepository.findById(id);
         if (compraOptional.isEmpty()) {
-            return null;  // Si no se encuentra la compra, retornar null
+            return null;
         }
 
         Compra compra = compraOptional.get();
         compra.setEstado(nuevoEstado);
-        return compraRepository.save(compra);  // Se guarda la compra con el nuevo estado.
+        return compraRepository.save(compra);
     }
 
     /* ---------- Historial de compras por cliente ---------- */
@@ -70,7 +70,7 @@ public class CompraService {
                 .collect(Collectors.toList());
     }
 
-    /* ---------- Estado detallado (con @Transactional para evitar LazyInitializationException) ---------- */
+    /* ---------- Estado detallado de compra ---------- */
     @Transactional(readOnly = true)
     public Optional<EstadoCompraDTO> getEstadoCompraDTO(Long id) {
         return compraRepository.findById(id)
@@ -78,28 +78,35 @@ public class CompraService {
     }
 
     private EstadoCompraDTO mapToEstadoDTO(Compra compra) {
-        var clienteInfo = new EstadoCompraDTO.ClienteInfo(
-                compra.getCliente().getNombre(),
-                compra.getCliente().getApellido(),
-                compra.getCliente().getEmail());
+        var cliente = compra.getCliente();
 
-        var medsInfo = compra.getMedicamentos().stream()
+        var clienteInfo = new EstadoCompraDTO.ClienteInfo(
+                cliente.getNombre(),
+                cliente.getApellido(),
+                cliente.getEmail()
+        );
+
+        var medicamentosInfo = compra.getMedicamentos().stream()
                 .map(m -> new EstadoCompraDTO.MedicamentoInfo(
-                        m.getNombre(), m.getPrecio()))
+                        m.getNombre(),
+                        m.getPrecio()))
                 .collect(Collectors.toList());
 
         return new EstadoCompraDTO(
                 compra.getId(),
                 compra.getEstado(),
                 compra.getFechaCompra(),
+                cliente.getId(), // ✅ Este campo es necesario
                 clienteInfo,
-                medsInfo);
+                medicamentosInfo
+        );
     }
 
     /* ---------- Crear compra desde carrito ---------- */
     @Transactional
     public Compra crearDesdeCarrito(Carrito carrito) {
         Cliente cliente = carrito.getCliente();
+
         int totalUnidades = carrito.getItems().stream()
                 .mapToInt(CarritoItem::getCantidad)
                 .sum();
@@ -114,6 +121,7 @@ public class CompraService {
         double pago = carrito.getItems().stream()
                 .mapToDouble(CarritoItem::getSubtotal)
                 .sum();
+
         compra.setPago(pago);
 
         return compraRepository.save(compra);

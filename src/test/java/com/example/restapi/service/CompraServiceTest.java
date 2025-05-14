@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class CompraServiceTest {
@@ -35,9 +36,14 @@ class CompraServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         cliente = new Cliente("Ana", "López", "ana@demo.es", "HASH", "600", "Tarjeta", "USER");
+        cliente.setId(1L);
+
         medicamento = new Medicamento("Ibuprofeno", "Analgésico", 5, 30, "Bayer");
+        medicamento.setId(10L);
+
         compra = new Compra(cliente, List.of(medicamento), LocalDate.now(), 2, cliente.getMetodoPago());
         compra.setId(1L);
+        compra.setEstado("Pendiente");
     }
 
     @Test
@@ -48,6 +54,8 @@ class CompraServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getEstado()).isEqualTo("Pendiente");
+
+        verify(compraRepo).findByClienteId(1L);
     }
 
     @Test
@@ -57,6 +65,7 @@ class CompraServiceTest {
         List<CompraResumenDTO> result = service.getHistorialPorCliente(2L);
 
         assertThat(result).isEmpty();
+        verify(compraRepo).findByClienteId(2L);
     }
 
     @Test
@@ -70,17 +79,22 @@ class CompraServiceTest {
 
         assertThat(result.getCliente()).isEqualTo(cliente);
         assertThat(result.getMedicamentos()).hasSize(1);
+        verify(compraRepo).save(any(Compra.class));
     }
 
     @Test
     void testUpdateEstado_existente() {
         compra.setEstado("Pendiente");
+
         when(compraRepo.findById(1L)).thenReturn(Optional.of(compra));
         when(compraRepo.save(any())).thenReturn(compra);
 
         Compra result = service.updateEstado(1L, "Entregado");
 
         assertThat(result.getEstado()).isEqualTo("Entregado");
+
+        verify(compraRepo).findById(1L);
+        verify(compraRepo).save(any());
     }
 
     @Test
@@ -89,7 +103,9 @@ class CompraServiceTest {
 
         Compra result = service.updateEstado(2L, "Recibido");
 
-        assertThat(result).isNull();  // Esperamos que retorne null ya que la compra no existe.
+        assertThat(result).isNull();
+        verify(compraRepo).findById(2L);
+        verify(compraRepo, never()).save(any());
     }
 
     @Test
@@ -105,10 +121,11 @@ class CompraServiceTest {
                 medicamento.getPrecio()
         );
 
-        EstadoCompraDTO estadoCompraDTO = new EstadoCompraDTO(
+        EstadoCompraDTO esperado = new EstadoCompraDTO(
                 compra.getId(),
                 compra.getEstado(),
                 compra.getFechaCompra(),
+                cliente.getId(), // nuevo campo clienteId
                 clienteInfo,
                 List.of(medicamentoInfo)
         );
@@ -119,6 +136,9 @@ class CompraServiceTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().getCliente().getEmail()).isEqualTo("ana@demo.es");
+        assertThat(result.get().getClienteId()).isEqualTo(1L);
+
+        verify(compraRepo).findById(1L);
     }
 
     @Test
@@ -128,5 +148,6 @@ class CompraServiceTest {
         Optional<EstadoCompraDTO> result = service.getEstadoCompraDTO(2L);
 
         assertThat(result).isEmpty();
+        verify(compraRepo).findById(2L);
     }
 }

@@ -1,36 +1,37 @@
 package com.example.restapi.controller;
 
+import com.example.restapi.model.Cliente;
 import com.example.restapi.model.Compra;
+import com.example.restapi.model.Medicamento;
 import com.example.restapi.model.dto.EstadoCompraDTO;
+import com.example.restapi.repository.MedicamentoRepository;
 import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.ClienteService;
 import com.example.restapi.service.CompraService;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.restapi.testconfig.TestSecurityConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.*;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class CompraControllerWebTest {
+@WebMvcTest(CompraController.class)
+@Import(TestSecurityConfig.class)
+public class CompraControllerWebTest {
 
     @Autowired
-    private MockMvc mvc;
+    private MockMvc mockMvc;
 
     @MockBean
     private CompraService compraService;
@@ -39,49 +40,81 @@ class CompraControllerWebTest {
     private ClienteService clienteService;
 
     @MockBean
+    private MedicamentoRepository medicamentoRepository;
+
+    @MockBean
     private JwtUtil jwtUtil;
 
-    private EstadoCompraDTO estadoCompraDTO;
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    @BeforeEach
-    void setUp() {
-        Compra compra = new Compra();
-        compra.setId(5L);
-        compra.setEstado("Enviado");
+    @Test
+    void obtenerCompraPorId() throws Exception {
+        EstadoCompraDTO estadoCompraDTO = new EstadoCompraDTO();
+        estadoCompraDTO.setId(99L);
+        estadoCompraDTO.setClienteId(1L);
+        estadoCompraDTO.setEstado("Pendiente");
 
-        Mockito.when(compraService.updateEstado(anyLong(), anyString()))
-                .thenReturn(compra);
+        when(compraService.getEstadoCompraDTO(99L)).thenReturn(Optional.of(estadoCompraDTO));
 
-        estadoCompraDTO = new EstadoCompraDTO(
-                5L,
-                "Enviado",
-                LocalDate.of(2025, 4, 28),
-                null,
-                null
+        mockMvc.perform(get("/compras/99"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(99))
+                .andExpect(jsonPath("$.clienteId").value(1))
+                .andExpect(jsonPath("$.estado").value("Pendiente"));
+    }
+
+    @Test
+    void cambiarEstado() throws Exception {
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+        cliente.setNombre("Laura");
+
+        Medicamento med = new Medicamento("Ibuprofeno", "Analgésico", 10.0, 20, "Bayer");
+        med.setId(15L);
+
+        Compra compra = new Compra(cliente, List.of(med), LocalDate.now(), 1, "Transferencia");
+        compra.setId(100L);
+        compra.setEstado("Completado");
+
+        when(compraService.updateEstado(100L, "Completado")).thenReturn(compra);
+
+        Map<String, String> estadoMap = Map.of("estado", "Completado");
+
+        mockMvc.perform(patch("/compras/100/estado")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(estadoMap)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("Completado"));
+    }
+
+    @Test
+    void crearCompraDesdeEmail() throws Exception {
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+        cliente.setNombre("Juan");
+
+        Medicamento medicamento = new Medicamento("Ibuprofeno", "Analgésico", 10.0, 50, "Bayer");
+        medicamento.setId(100L);
+
+        Compra compra = new Compra(cliente, List.of(medicamento), LocalDate.now(), 2, "Efectivo");
+        compra.setId(555L);
+        compra.setPago(20.0);
+
+        when(clienteService.findByEmail("juan@email.com")).thenReturn(Optional.of(cliente));
+        when(medicamentoRepository.findAllById(List.of(100L))).thenReturn(List.of(medicamento));
+        when(compraService.saveCompra(any(Compra.class))).thenReturn(compra);
+
+        Map<String, Object> body = Map.of(
+                "email", "juan@email.com",
+                "medicamentoIds", List.of(100),
+                "cantidad", 2,
+                "metodoPago", "Efectivo"
         );
 
-        Mockito.when(compraService.getEstadoCompraDTO(5L))
-                .thenReturn(Optional.of(estadoCompraDTO));
-    }
-
-    @Test
-    @WithMockUser
-    void cambiarEstado() throws Exception {
-        mvc.perform(patch("/compras/5/estado")
+        mockMvc.perform(post("/compras/crear-por-email")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"estado\":\"Enviado\"}"))
+                        .content(mapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.estado").value("Enviado"));
-    }
-
-    @Test
-    @WithMockUser
-    void obtenerCompraPorId() throws Exception {
-        mvc.perform(get("/compras/5")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.estado").value("Enviado"));
+                .andExpect(jsonPath("$.id").value(555));
     }
 }
