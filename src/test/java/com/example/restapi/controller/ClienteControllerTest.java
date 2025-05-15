@@ -1,12 +1,14 @@
 package com.example.restapi.controller;
-import org.springframework.context.annotation.Import;
-import com.example.restapi.testconfig.TestSecurityConfig;
-import org.springframework.context.annotation.Import;
+
+import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.ClienteService;
+import com.example.restapi.testconfig.TestSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -16,7 +18,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Import(TestSecurityConfig.class)
-@WebMvcTest(CarritoController.class)
+@WebMvcTest(ClienteController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class ClienteControllerTest {
 
     @Autowired
@@ -25,11 +28,14 @@ class ClienteControllerTest {
     @MockBean
     private ClienteService clienteService;
 
+    @MockBean
+    private JwtUtil jwtUtil;
+
     @Test
     void testGetAllClientes() throws Exception {
         when(clienteService.getAllClientes()).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/clientes"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/cliente"))
+               .andExpect(status().isOk());
     }
 }
