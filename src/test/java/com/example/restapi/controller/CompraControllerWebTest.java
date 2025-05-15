@@ -1,5 +1,7 @@
 package com.example.restapi.controller;
-
+import org.springframework.context.annotation.Import;
+import com.example.restapi.testconfig.TestSecurityConfig;
+import org.springframework.context.annotation.Import;
 import com.example.restapi.model.Cliente;
 import com.example.restapi.model.Compra;
 import com.example.restapi.model.Medicamento;
@@ -26,8 +28,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(CompraController.class)
 @Import(TestSecurityConfig.class)
+@WebMvcTest(CarritoController.class)
 public class CompraControllerWebTest {
 
     @Autowired

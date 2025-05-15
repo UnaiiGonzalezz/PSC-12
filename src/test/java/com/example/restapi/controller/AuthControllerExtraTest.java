@@ -1,5 +1,7 @@
 package com.example.restapi.controller;
-
+import org.springframework.context.annotation.Import;
+import com.example.restapi.testconfig.TestSecurityConfig;
+import org.springframework.context.annotation.Import;
 import com.example.restapi.model.Cliente;
 import com.example.restapi.model.dto.LoginDTO;
 import com.example.restapi.model.dto.RegistroDTO;

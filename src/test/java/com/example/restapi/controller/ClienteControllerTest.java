@@ -2,7 +2,7 @@ package com.example.restapi.controller;
 import org.springframework.context.annotation.Import;
 import com.example.restapi.testconfig.TestSecurityConfig;
 import org.springframework.context.annotation.Import;
-import com.example.restapi.service.MedicamentoService;
+import com.example.restapi.service.ClienteService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -17,19 +17,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(TestSecurityConfig.class)
 @WebMvcTest(CarritoController.class)
-class MedicamentoControllerTest {
+class ClienteControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private MedicamentoService medicamentoService;
+    private ClienteService clienteService;
 
     @Test
-    void testGetAllMedicamentos() throws Exception {
-        when(medicamentoService.getAllMedicamentos()).thenReturn(Collections.emptyList());
+    void testGetAllClientes() throws Exception {
+        when(clienteService.getAllClientes()).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/medicamentos"))
+        mockMvc.perform(get("/api/clientes"))
                 .andExpect(status().isOk());
     }
 }
