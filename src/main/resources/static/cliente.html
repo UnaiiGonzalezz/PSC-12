@@ -4,65 +4,229 @@
   <meta charset="UTF-8">
   <title>Gestionar Clientes</title>
   <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Estilos puntuales para modal / dark -->
+  <style>
+    .modal{
+      position:fixed; inset:0; display:none; justify-content:center; align-items:center;
+      background:rgba(0,0,0,.55); z-index:1000;
+    }
+    .modal-content{
+      background:#fff; padding:26px 36px; border-radius:12px; max-width:480px; width:90%;
+      box-shadow:0 8px 22px rgba(0,0,0,.25); position:relative;
+    }
+    .modal-content h3{ margin-bottom:18px; color:#005fa3; }
+    .close{ position:absolute; top:10px; right:15px; font-size:1.4rem; cursor:pointer; color:#888; }
+
+    body.dark{ background:#0f172a; color:#e2e8f0; }
+    body.dark .modal-content{ background:#1e293b; color:#e2e8f0; }
+  </style>
 </head>
-<body>
 
-<nav>
-  <a href="index.html">Catálogo</a>
+<body class="p-4 max-w-7xl mx-auto">
 
-  <a href="compra.html">Ver compra</a>
-  <a href="nueva-compra.html">Nueva compra</a>
-  <a href="admin.html">Admin</a>
-  <button id="logoutBtn" class="logout-button" onclick="logout()">Cerrar sesión</button>
-</nav>
+  <!-- NAVBAR incrustado -->
+  <nav class="navbar">
+    <div class="nav-links">
+      <a href="index.html">Catálogo</a>
+      <a href="compra.html">Ver compra</a>
+      <a href="nueva-compra.html">Nueva compra</a>
+      <a href="admin.html">Admin</a>
+    </div>
+    <button class="logout-button" onclick="logout()">Cerrar sesión</button>
+  </nav>
 
-<h1>Clientes Registrados</h1>
+  <h1>Clientes Registrados</h1>
 
-<table id="tablaClientes">
-  <thead>
-    <tr><th>Nombre</th><th>Apellido</th><th>Email</th><th>Método de Pago</th><th>Rol</th></tr>
-  </thead>
-  <tbody id="tbody-clientes"></tbody>
-</table>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input id="searchCliente" placeholder="Buscar cliente…" oninput="filtrarClientes()">
+    <button onclick="limpiarFiltro()">✖</button>
 
-<script>
-const token = sessionStorage.getItem('token');
-const rol = sessionStorage.getItem('rol');
+    <select id="pageSize" onchange="cambiarTamPagina()">
+      <option value="10">10 / pág</option>
+      <option value="25">25 / pág</option>
+      <option value="50">50 / pág</option>
+    </select>
 
-window.onload = function() {
-  if (!token || (rol !== 'ADMIN' && rol !== 'USER')) {
-    alert('Acceso denegado.');
-    window.location.href = 'login.html';
-  }
-  cargarClientes();
-};
+    <button onclick="exportarCSV()">Exportar CSV</button>
+    <button onclick="copiarTabla()">Copiar</button>
+    <button onclick="eliminarSeleccionados()">Eliminar seleccionados</button>
+    <button onclick="toggleDark()">🌙 / ☀️</button>
 
-function logout() {
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('rol');
-  window.location.href = 'login.html';
-}
+    <span id="totalClientes" style="margin-left:auto;"></span>
+  </div>
 
-function cargarClientes() {
-  fetch('/api/cliente', {
-    headers: { 'Authorization': 'Bearer ' + token }
-  })
-  .then(r => r.json())
-  .then(clientes => {
-    const tbody = document.getElementById('tbody-clientes');
-    tbody.innerHTML = clientes.map(c => `
+  <!-- Tabla -->
+  <table id="tablaClientes">
+    <thead>
       <tr>
-        <td>${c.nombre}</td>
-        <td>${c.apellido}</td>
-        <td>${c.email}</td>
-        <td>${c.metodoPago}</td>
-        <td>${c.rol}</td>
+        <th><input type="checkbox" id="checkAll" onchange="toggleTodos(this)"></th>
+        <th data-col="nombre">Nombre</th>
+        <th data-col="apellido">Apellido</th>
+        <th data-col="email">Email</th>
+        <th data-col="metodoPago">Método de Pago</th>
+        <th data-col="rol">Rol</th>
       </tr>
-    `).join('');
-  })
-  .catch(() => alert('Error cargando clientes.'));
-}
-</script>
+    </thead>
+    <tbody id="tbody-clientes"></tbody>
+  </table>
 
+  <!-- Paginación -->
+  <div class="paginacion">
+    <button onclick="prevPag()" id="prevPag">&larr; Anterior</button>
+    <span id="indicadorPagina"></span>
+    <button onclick="nextPag()" id="nextPag">Siguiente &rarr;</button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">×</span>
+      <h3>Detalle del cliente</h3>
+      <ul id="detalleCliente" class="detalle"></ul>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    /* ---------- Seguridad ---------- */
+    const token = sessionStorage.getItem('token');
+    if (!token) location.href = 'login.html';
+    function logout(){ sessionStorage.clear(); location.href = 'login.html'; }
+
+    /* ---------- Estado ---------- */
+    let clientes = [];
+    let filtrados = [];
+    let pageSize = 10;
+    let pagina   = 0;
+
+    window.onload = () => {
+      fetch('/api/cliente', { headers:{ Authorization:'Bearer '+token } })
+        .then(r => r.json())
+        .then(data => { clientes = data; aplicarFiltro(); })
+        .catch(() => alert('Error cargando clientes'));
+    };
+
+    /* ---------- Filtro ---------- */
+    function filtrarClientes(){
+      const q = document.getElementById('searchCliente').value.toLowerCase();
+      filtrados = clientes.filter(c =>
+        Object.values(c).some(v => String(v).toLowerCase().includes(q))
+      );
+      pagina = 0;
+      renderTabla();
+    }
+    function limpiarFiltro(){
+      document.getElementById('searchCliente').value = '';
+      filtrarClientes();
+    }
+    function aplicarFiltro(){ filtrados = [...clientes]; renderTabla(); }
+
+    /* ---------- Paginación ---------- */
+    function cambiarTamPagina(){
+      pageSize = +document.getElementById('pageSize').value;
+      pagina = 0;
+      renderTabla();
+    }
+    const totalPaginas = () => Math.max(1, Math.ceil(filtrados.length / pageSize));
+    function nextPag(){ if (pagina + 1 < totalPaginas()){ pagina++; renderTabla(); } }
+    function prevPag(){ if (pagina > 0){ pagina--; renderTabla(); } }
+
+    /* ---------- Render tabla ---------- */
+    function renderTabla(){
+      const inicio = pagina * pageSize;
+      const datos  = filtrados.slice(inicio, inicio + pageSize);
+
+      document.getElementById('tbody-clientes').innerHTML = datos.map(c => `
+        <tr onclick="verDetalle(${c.id})">
+          <td><input type="checkbox" value="${c.id}" onclick="event.stopPropagation()"></td>
+          <td>${c.nombre}</td>
+          <td>${c.apellido}</td>
+          <td>${c.email}</td>
+          <td>${c.metodoPago}</td>
+          <td>${c.rol}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('totalClientes').textContent = 'Total: ' + clientes.length;
+      document.getElementById('indicadorPagina').textContent =
+        `Página ${pagina + 1} de ${totalPaginas()}`;
+
+      document.getElementById('prevPag').disabled = pagina === 0;
+      document.getElementById('nextPag').disabled = pagina + 1 >= totalPaginas();
+      document.getElementById('checkAll').checked = false;
+    }
+
+    /* ---------- Ordenar ---------- */
+    document.querySelectorAll('#tablaClientes th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        clientes.sort((a,b) => a[col].localeCompare(b[col],'es',{sensitivity:'base'}));
+        if (th.classList.toggle('desc')) clientes.reverse();
+        filtrarClientes();
+      });
+    });
+
+    /* ---------- CSV ---------- */
+    function exportarCSV(){
+      const filas = [
+        ['Nombre','Apellido','Email','Método de Pago','Rol'],
+        ...filtrados.map(c => [c.nombre,c.apellido,c.email,c.metodoPago,c.rol])
+      ];
+      const csv  = filas.map(f => f.map(v => `"${v}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type:'text/csv' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'clientes.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /* ---------- Copiar ---------- */
+    function copiarTabla(){
+      const texto = filtrados
+        .map(c => `${c.nombre}\t${c.apellido}\t${c.email}`)
+        .join('\n');
+      navigator.clipboard.writeText(texto).then(() => alert('Copiado ✔'));
+    }
+
+    /* ---------- Selección múltiple ---------- */
+    function toggleTodos(chk){
+      document.querySelectorAll('#tbody-clientes input[type=checkbox]')
+        .forEach(c => c.checked = chk.checked);
+    }
+    function eliminarSeleccionados(){
+      const ids = [...document.querySelectorAll('#tbody-clientes input:checked')]
+                  .map(c => c.value);
+      if (!ids.length || !confirm('¿Eliminar los clientes seleccionados?')) return;
+      Promise.all(ids.map(id =>
+        fetch('/api/cliente/'+id,{
+          method:'DELETE', headers:{ Authorization:'Bearer '+token }
+        })
+      ))
+      .then(() => {
+        clientes = clientes.filter(c => !ids.includes(String(c.id)));
+        filtrarClientes();
+      })
+      .catch(() => alert('Error al eliminar'));
+    }
+
+    /* ---------- Modal detalle ---------- */
+    function verDetalle(id){
+      const c = clientes.find(c => c.id === id);
+      if (!c) return;
+      document.getElementById('detalleCliente').innerHTML = `
+        <li><strong>Nombre:</strong> ${c.nombre}</li>
+        <li><strong>Apellido:</strong> ${c.apellido}</li>
+        <li><strong>Email:</strong> ${c.email}</li>
+        <li><strong>Método Pago:</strong> ${c.metodoPago}</li>
+        <li><strong>Rol:</strong> ${c.rol}</li>`;
+      document.getElementById('modal').style.display = 'flex';
+    }
+    function cerrarModal(){ document.getElementById('modal').style.display = 'none'; }
+
+    /* ---------- Dark-mode ---------- */
+    function toggleDark(){ document.body.classList.toggle('dark'); }
+  </script>
 </body>
 </html>

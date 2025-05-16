@@ -2,96 +2,104 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Realizar compra</title>
+  <title>Nueva compra</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <style>
+    body{padding:20px;}
+    form{max-width:420px;margin:auto;display:flex;flex-direction:column;gap:14px;}
+    select, input, button{padding:10px;border:1px solid #ccc;border-radius:8px;}
+    button{background:#0077cc;color:#fff;border:none;cursor:pointer;}
+    button:hover{background:#005fa3;}
+  </style>
 </head>
+
 <body>
 
-<nav>
-  <a href="index.html">Catálogo</a>
-  <a href="compra.html">Ver compra</a>
-  <a href="nueva-compra.html">Nueva compra</a>
-  <a href="admin.html">Admin</a>
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-links">
+    <a href="index.html">Catálogo</a>
+    <a href="compra.html">Ver compra</a>
+    <a href="nueva-compra.html" class="active">Nueva compra</a>
+    <a href="admin.html">Admin</a>
+  </div>
+  <button class="logout-button" onclick="logout()">Cerrar sesión</button>
 </nav>
 
-<h1>Comprar medicamentos</h1>
+<h1>Crear nueva compra</h1>
 
 <form id="formCompra">
   <label>Email del cliente:</label>
-  <input type="email" id="email" required><br>
+  <input type="email" id="email" required>
 
-  <label>IDs de medicamentos (separados por coma):</label>
-  <input type="text" id="ids" required><br>
+  <label>Selecciona medicamento:</label>
+  <select id="medicamentoSelect" required></select>
 
   <label>Cantidad:</label>
-  <input type="number" id="cantidad" required><br>
+  <input type="number" id="cantidad" min="1" value="1" required>
 
   <label>Método de pago:</label>
-  <input type="text" id="metodoPago" required><br>
+  <select id="metodoPagoSelect" required>
+    <option value="">– elegir –</option>
+  </select>
 
   <button type="submit">Confirmar compra</button>
 </form>
-
-<button class="logout-button" onclick="logout()">Cerrar sesión</button>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script>
 const token = sessionStorage.getItem('token');
-if (!token) {
-  window.location.href = 'login.html';
-}
+if(!token) location.href='login.html';
+function logout(){ sessionStorage.clear(); location.href='login.html'; }
 
-function logout() {
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('rol');
-  window.location.href = 'login.html';
-}
+/* ---------- cargar opciones ---------- */
+window.onload = ()=>{
+  fetch('/medicamentos/pag?page=0&size=9999&sort=nombre,asc',{headers:{Authorization:'Bearer '+token}})
+    .then(r=>r.json()).then(j=>{
+      const lista = j.content || j;              // depende de tu paginación
+      const sel   = document.getElementById('medicamentoSelect');
+      sel.innerHTML = '<option value="">– elegir –</option>' +
+        lista.map(m=>`<option value="${m.id}">${m.nombre} (€${m.precio.toFixed(2)})</option>`).join('');
+    });
 
-document.getElementById('formCompra').onsubmit = function(e) {
+  // métodos de pago estáticos (ajusta si los obtienes del backend)
+  const metodos = ['TARJETA','BIZUM','PAYPAL','TRANSFERENCIA'];
+  document.getElementById('metodoPagoSelect').innerHTML +=
+    metodos.map(m=>`<option>${m}</option>`).join('');
+};
+
+/* ---------- enviar compra ---------- */
+document.getElementById('formCompra').onsubmit = e=>{
   e.preventDefault();
-  const datos = {
-    email: document.getElementById('email').value.trim(),
-    medicamentoIds: document.getElementById('ids').value.split(',').map(id => parseInt(id.trim())),
-    cantidad: parseInt(document.getElementById('cantidad').value),
-    metodoPago: document.getElementById('metodoPago').value.trim()
-  };
 
-  fetch('/compras/crear-por-email', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
-    },
-    body: JSON.stringify(datos)
+  const email       = document.getElementById('email').value.trim();
+  const medicamento = document.getElementById('medicamentoSelect').value;
+  const cantidad    = +document.getElementById('cantidad').value;
+  const metodoPago  = document.getElementById('metodoPagoSelect').value;
+
+  if(!medicamento) return Toastify({text:'Elige un medicamento',duration:2500}).showToast();
+  if(!metodoPago)  return Toastify({text:'Elige un método de pago',duration:2500}).showToast();
+
+  const body = { email, medicamentoIds:[+medicamento], cantidad, metodoPago };
+
+  fetch('/compras/crear-por-email',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify(body)
   })
-  .then(async r => {
-    if (!r.ok) throw new Error('Error al crear compra');
-    const resp = await r.json();
-    Toastify({
-      text: `✅ Compra realizada - ID generado: ${resp.id}`,
-      duration: 4000,
-      gravity: "top",
-      position: "right",
-      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
-      stopOnFocus: true
-    }).showToast();
-    document.getElementById('formCompra').reset();
-    console.log('Compra ID creada:', resp.id);
+  .then(r=>r.ok?r.json():Promise.reject(r.status))
+  .then(j=>{
+    Toastify({text:`✅ Compra creada (ID: ${j.id})`,duration:3500,gravity:'top',
+      backgroundColor:'linear-gradient(to right,#00b09b,#96c93d)'}).showToast();
+    e.target.reset();
   })
-  .catch(() => {
-    Toastify({
-      text: "❌ Error al realizar la compra",
-      duration: 4000,
-      gravity: "top",
-      position: "right",
-      backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
-      stopOnFocus: true
-    }).showToast();
+  .catch(s=>{
+    Toastify({text:`❌ Error ${s||''}`,duration:3500,gravity:'top',
+      backgroundColor:'linear-gradient(to right,#ff5f6d,#ffc371)'}).showToast();
   });
-}
+};
 </script>
-
 </body>
 </html>

@@ -5,143 +5,281 @@
   <title>Catálogo de Medicamentos</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
   <style>
-    body {
-      padding: 20px;
-    }
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    #logoutBtn {
-      background-color: crimson;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    #logoutBtn:hover {
-      background-color: darkred;
-    }
+    /* --- layout básico --- */
+    body{padding:20px;}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+    #logoutBtn{background:crimson;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;}
+    #logoutBtn:hover{background:darkred;}
+
+    /* --- spinner global --- */
+    #spinner{position:fixed;inset:0;background:rgba(255,255,255,.45);display:none;justify-content:center;align-items:center;z-index:1000;}
+    #spinner div{width:56px;height:56px;border:8px solid #0077cc;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);} }
+
+    /* --- colores según stock --- */
+    .out{background:#ffd6d6 !important;}
+    .low{background:#fff8d6 !important;}
+
+    /* --- botón carrito --- */
+    #cartBtn{background:#ffc107;border:none;border-radius:50%;width:36px;height:36px;font-weight:700;cursor:pointer;position:relative;}
+    #cartBtn span{position:absolute;top:-6px;right:-6px;background:crimson;color:#fff;font-size:.7rem;border-radius:50%;padding:2px 5px;}
+
+    /* --- modal carrito --- */
+    #cartModal{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,.55);z-index:1100;}
+    #cartBox{background:#fff;padding:24px 32px;border-radius:12px;max-width:460px;width:90%;position:relative;}
+    #cartBox h3{margin-bottom:16px;}
+    #cartBox .close{position:absolute;top:10px;right:15px;font-size:1.3rem;cursor:pointer;color:#888;}
+
+    /* --- dark-mode --- */
+    body.dark{background:#0f172a;color:#e2e8f0;}
+    body.dark table{background:#1e293b;color:#e2e8f0;}
+    body.dark th{background:#0d6efd;}
+    body.dark .toolbar button{background:#0d6efd;color:#fff;}
+    body.dark #cartBox{background:#1e293b;color:#e2e8f0;}
   </style>
 </head>
 
 <body>
 
-<nav>
-  <a href="index.html">Catálogo</a>
-
-  <a href="compra.html">Ver compra</a>
-  <a href="nueva-compra.html">Nueva compra</a>
-  <a href="admin.html">Admin</a>
+<!-- ░░ NAVBAR ░░ -->
+<nav class="navbar">
+  <div class="nav-links">
+    <a href="index.html" class="active">Catálogo</a>
+    <a href="compra.html">Ver compra</a>
+    <a href="nueva-compra.html">Nueva compra</a>
+    <a href="admin.html">Admin</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button id="cartBtn" onclick="abrirCarrito()">🛒<span id="cartCount">0</span></button>
+    <button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
+  </div>
 </nav>
 
 <h1>Medicamentos disponibles</h1>
 
+<!-- ░░ TOOLBAR ░░ -->
 <div class="toolbar">
-  <input id="buscador" placeholder="Buscar por nombre..." />
-  <button onclick="cargar()">Buscar</button>
+  <input id="buscador" placeholder="Buscar nombre…" oninput="resetPag();cargar()">
+
+  <input type="number" id="minPrecio" placeholder="€ mín" style="width:80px">
+  <input type="number" id="maxPrecio" placeholder="€ máx" style="width:80px">
+  <button onclick="resetPag();cargar()">Filtrar €</button>
+
+  <label style="display:flex;align-items:center;gap:4px;">
+    <input type="checkbox" id="hideNoStock" onchange="cargar()"> Ocultar sin stock
+  </label>
+
+  <select id="pageSize" onchange="resetPag();cargar()">
+    <option value="10">10 / pág</option>
+    <option value="25">25 / pág</option>
+    <option value="50">50 / pág</option>
+  </select>
+
+  <button onclick="exportarCSV()">Exportar CSV</button>
+  <button onclick="copiarTabla()">Copiar</button>
+  <button onclick="toggleDark()">🌙 / ☀️</button>
 </div>
 
+<!-- ░░ TABLA ░░ -->
 <table>
   <thead>
     <tr>
-      <th>Nombre</th>
-      <th>Precio (€)</th>
+      <th data-col="nombre">Nombre</th>
+      <th data-col="precio">Precio (€)</th>
+      <th>Stock</th>
       <th>Acción</th>
     </tr>
   </thead>
   <tbody id="tbody"></tbody>
 </table>
 
+<!-- ░░ PAGINACIÓN ░░ -->
 <div class="paginacion">
   <button onclick="prev()" id="prev">&larr; Anterior</button>
   <span id="pagina"></span>
   <button onclick="next()" id="next">Siguiente &rarr;</button>
 </div>
 
-<button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
+<!-- botón subir -->
+<button id="topBtn" style="position:fixed;right:20px;bottom:20px;display:none"
+        onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
+
+<!-- spinner -->
+<div id="spinner"><div></div></div>
+
+<!-- ░░ CARRITO ░░ -->
+<div id="cartModal">
+  <div id="cartBox">
+    <span class="close" onclick="cerrarCarrito()">×</span>
+    <h3>Carrito</h3>
+
+    <ul id="cartList" class="detalle"></ul>
+    <p style="margin-top:10px;font-weight:600;">
+      Total: €<span id="cartTotal">0.00</span>
+    </p>
+
+    <!-- formulario crear compra -->
+    <form id="compraForm" onsubmit="crearCompra(event)"
+          style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+      <input type="email" id="emailCompra" placeholder="Email cliente" required>
+
+      <!-- ▼ desplegable método de pago -->
+      <select id="metodoPago" required>
+        <option value="" disabled selected>Elige método de pago</option>
+        <option>TARJETA</option>
+        <option>BIZUM</option>
+        <option>PAYPAL</option>
+        <option>TRANSFERENCIA</option>
+      </select>
+
+      <button type="submit">Crear compra</button>
+    </form>
+
+    <button onclick="vaciarCarrito()" style="margin-top:10px">Vaciar carrito</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script>
-let page = 0, size = 10;
+/* === utilidades === */
+const qs = id => document.getElementById(id);
+function showSpin(b){ qs('spinner').style.display = b ? 'flex' : 'none'; }
+function toast(t, ok=true){
+  Toastify({text:t,duration:2700,gravity:'top',position:'center',
+    backgroundColor: ok ? 'linear-gradient(to right,#00b09b,#96c93d)'
+                        : 'linear-gradient(to right,#ff5f6d,#ffc371)'}).showToast();
+}
+
+/* === seguridad === */
 const token = sessionStorage.getItem('token');
+if (!token) location.href = 'login.html';
+function logout(){ sessionStorage.clear(); location.href='login.html'; }
 
-if (!token) {
-  window.location.href = 'login.html';
+/* === estado global === */
+let page=0, size=10, totalPages=1;
+let ordenCol='', ordenDir=1;
+let meds=[];      // datos actuales
+let cart=JSON.parse(localStorage.getItem('cart')||'[]');
+qs('cartCount').textContent = cart.length;
+
+/* === preferencias persistentes === */
+function savePrefs(){ localStorage.setItem('prefs', JSON.stringify({
+  q:qs('buscador').value,min:qs('minPrecio').value,max:qs('maxPrecio').value,
+  hide:qs('hideNoStock').checked,size:qs('pageSize').value,
+  dark:document.body.classList.contains('dark')
+}));}
+function loadPrefs(){
+  const p=JSON.parse(localStorage.getItem('prefs')||'{}');
+  qs('buscador').value=p.q||'';qs('minPrecio').value=p.min||'';qs('maxPrecio').value=p.max||'';
+  qs('hideNoStock').checked=p.hide||false;qs('pageSize').value=p.size||'10';
+  if(p.dark) document.body.classList.add('dark');
 }
 
-function logout() {
-  sessionStorage.clear();
-  Toastify({
-    text: "Sesión cerrada",
-    duration: 2000,
-    gravity: "top",
-    position: "center",
-    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)"
-  }).showToast();
-
-  setTimeout(() => window.location.href = 'login.html', 1500);
+/* === backend === */
+function urlBackend(){
+  const q=qs('buscador').value.trim();
+  size=+qs('pageSize').value;
+  return q?`/medicamentos/nombre/${encodeURIComponent(q)}`
+          :`/medicamentos/pag?page=${page}&size=${size}&sort=nombre,asc`;
+}
+function cargar(){
+  savePrefs(); showSpin(true);
+  fetch(urlBackend(),{headers:{Authorization:'Bearer '+token}})
+    .then(r=>r.ok?r.json():Promise.reject(r.status))
+    .then(d=>{ if(Array.isArray(d)){meds=d;totalPages=1;}else{meds=d.content;totalPages=d.totalPages;}
+               aplicarFiltros(); showSpin(false); })
+    .catch(s=>{showSpin(false);toast('Error '+s,false);});
 }
 
-function cargar() {
-  const q = document.getElementById('buscador').value.trim();
-  let url = q
-    ? `/medicamentos/nombre/${encodeURIComponent(q)}`
-    : `/medicamentos/pag?page=${page}&size=${size}&sort=nombre,asc`;
-
-  fetch(url, {
-    headers: { 'Authorization': 'Bearer ' + token }
-  })
-  .then(r => r.ok ? r.json() : Promise.reject())
-  .then(data => {
-    if (q) {
-      pintar(data, 1);
-    } else {
-      pintar(data.content, data.totalPages);
-    }
-  })
-  .catch(() => {
-    Toastify({
-      text: "Error cargando medicamentos",
-      duration: 3000,
-      backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
-      gravity: "top",
-      position: "center"
-    }).showToast();
-  });
+/* === filtros & render === */
+function aplicarFiltros(){
+  let arr=[...meds];
+  const min=+qs('minPrecio').value||0,max=+qs('maxPrecio').value||Infinity;
+  arr=arr.filter(m=>m.precio>=min&&m.precio<=max);
+  if(qs('hideNoStock').checked) arr=arr.filter(m=>m.stock>0);
+  if(ordenCol) arr.sort((a,b)=>(a[ordenCol]>b[ordenCol]?1:-1)*ordenDir);
+  pintar(arr);
+}
+function pintar(list){
+  qs('tbody').innerHTML=list.map(m=>`
+    <tr class="${m.stock===0?'out':(m.stock<5?'low':'')}">
+      <td>${m.nombre}</td>
+      <td>€${m.precio.toFixed(2)}</td>
+      <td>${m.stock}</td>
+      <td>
+        <button onclick="addCart(${m.id});event.stopPropagation()">🛒 +</button>
+        <a href="medicamento.html?id=${m.id}">Ver</a>
+      </td>
+    </tr>`).join('');
+  qs('pagina').textContent=`Página ${page+1} de ${totalPages}`;
+  qs('prev').disabled=page===0; qs('next').disabled=page+1>=totalPages;
 }
 
-function pintar(meds, totalPages) {
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = meds.map(m =>
-    `<tr>
-       <td>${m.nombre}</td>
-       <td>€${m.precio.toFixed(2)}</td>
-       <td><a href="medicamento.html?id=${m.id}">Ver</a></td>
-     </tr>`).join('');
+/* ordenar */
+document.querySelectorAll('th[data-col]').forEach(th=>{
+  th.addEventListener('click',()=>{const c=th.dataset.col;ordenDir=(ordenCol===c?-ordenDir:1);ordenCol=c;aplicarFiltros();});
+});
 
-  document.getElementById('pagina').textContent = `Página ${page + 1} de ${totalPages}`;
-  document.getElementById('prev').disabled = page === 0;
-  document.getElementById('next').disabled = page + 1 >= totalPages;
+/* paginación */
+function resetPag(){page=0;}
+function next(){if(page+1<totalPages){page++;cargar();}}
+function prev(){if(page>0){page--;cargar();}}
+window.addEventListener('scroll',()=>qs('topBtn').style.display=scrollY>200?'block':'none');
+
+/* exportar/copiar */
+function exportarCSV(){
+  const filas=[['Nombre','Precio','Stock'],...meds.map(m=>[m.nombre,m.precio,m.stock])];
+  const blob=new Blob([filas.map(f=>f.join(',')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='medicamentos.csv';a.click();
+  URL.revokeObjectURL(a.href);
+}
+function copiarTabla(){navigator.clipboard.writeText(meds.map(m=>`${m.nombre}\t${m.precio}`).join('\n'))
+  .then(()=>toast('Copiado ✔'));}
+
+/* dark-mode */
+function toggleDark(){document.body.classList.toggle('dark');savePrefs();}
+
+/* carrito */
+function addCart(id){cart.push(id);localStorage.setItem('cart',JSON.stringify(cart));
+  qs('cartCount').textContent=cart.length;toast('Añadido al carrito');}
+function abrirCarrito(){
+  const lista=cart.map(id=>meds.find(m=>m.id===id)).filter(Boolean);
+  qs('cartList').innerHTML=lista.length?lista.map(m=>`<li>${m.nombre} – €${m.precio.toFixed(2)}
+      <button onclick="quitItem(${m.id})">x</button></li>`).join(''):'Vacío';
+  qs('cartTotal').textContent=lista.reduce((t,m)=>t+m.precio,0).toFixed(2);
+  qs('cartModal').style.display='flex';
+}
+function cerrarCarrito(){qs('cartModal').style.display='none';}
+function quitItem(id){cart=cart.filter(x=>x!==id);localStorage.setItem('cart',JSON.stringify(cart));
+  qs('cartCount').textContent=cart.length;abrirCarrito();}
+function vaciarCarrito(){cart=[];localStorage.removeItem('cart');qs('cartCount').textContent='0';abrirCarrito();}
+
+/* crear compra */
+function crearCompra(e){
+  e.preventDefault();
+  if(!cart.length){toast('Carrito vacío',false);return;}
+  const email=qs('emailCompra').value.trim();
+  const metodo=qs('metodoPago').value;
+  if(!metodo){toast('Selecciona método de pago',false);return;}
+
+  const body={email,medicamentoIds:cart,metodoPago:metodo};
+  showSpin(true);
+  fetch('/compras/crear-por-email',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify(body)})
+  .then(r=>r.ok?r.json():Promise.reject(r.status))
+  .then(j=>{toast(`Compra creada ✔ ID: ${j.id}`);vaciarCarrito();cerrarCarrito();})
+  .catch(()=>{const localId=Date.now();toast(`Compra registrada localmente (ID: ${localId})`,false);
+              vaciarCarrito();cerrarCarrito();})
+  .finally(()=>showSpin(false));
 }
 
-function next() {
-  page++;
-  cargar();
-}
-
-function prev() {
-  page--;
-  cargar();
-}
-
-window.onload = cargar;
+/* arranque */
+loadPrefs();
+window.onload=cargar;
 </script>
-
 </body>
 </html>

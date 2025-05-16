@@ -3,80 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <title>Administrar Medicamentos</title>
+
+  <!-- Estilos globales -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
   <style>
-    form {
-      background-color: #fff;
-      padding: 20px;
-      margin-bottom: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    form input, form select, form button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-    }
-    table {
-      margin-top: 20px;
-    }
+    /* ---- layout rápido ---- */
+    body         { padding:20px; }
+    table        { width:100%; margin-top:20px; border-collapse:collapse; }
+    th,td        { padding:10px; border-bottom:1px solid #e5e7eb; }
+    th           { cursor:pointer; background:#0077cc; color:#fff; }
+    tr:hover     { background:#f6fafe; }
+    form         { background:#fff; padding:20px; margin:30px auto; max-width:600px;
+                   border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+    form input, form select, form button{ width:100%; padding:10px; margin-top:10px; }
+    .toolbar     { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0; }
+    .toolbar input{ flex:1; padding:9px; border:1px solid #ccc; border-radius:8px; }
+    .toolbar button{ padding:9px 14px; border:none; border-radius:8px;
+                     background:#0077cc; color:#fff; cursor:pointer; }
+    .toolbar button:hover{ background:#005fa3; }
   </style>
 </head>
+
 <body>
 
+<!-- ░░ NAVBAR ░░ -->
 <nav class="admin-navbar">
   <div class="nav-links">
     <a href="index.html">Catálogo</a>
     <a href="cliente.html">Clientes</a>
     <a href="nueva-compra.html">Nueva Compra</a>
     <a href="compra.html">Ver Compra</a>
-    <a href="admin.html">Administración</a>
+    <a href="admin.html" class="active">Administración</a>
   </div>
-  <button id="logoutBtn" class="logout-button" onclick="logout()">Cerrar sesión</button>
+  <button class="logout-button" onclick="logout()">Cerrar sesión</button>
 </nav>
 
 <h1>Gestión de Medicamentos</h1>
 
-<div id="crear">
-  <h2>Crear Nuevo Medicamento</h2>
-  <form id="formCrear" onsubmit="crearMedicamento(); return false;">
-    <input type="text" id="nuevoNombre" placeholder="Nombre" required>
-    <input type="number" id="nuevoPrecio" placeholder="Precio (€)" required step="0.01">
-    <input type="text" id="nuevaCategoria" placeholder="Categoría" required>
-    <input type="number" id="nuevoStock" placeholder="Stock" required>
-    <input type="text" id="nuevoProveedor" placeholder="Proveedor" required>
-    <button type="submit">Crear Medicamento</button>
-  </form>
+<!-- ░░ TOOLBAR ░░ -->
+<div class="toolbar">
+  <input id="search" placeholder="Buscar nombre…" oninput="filtrar()">
+  <button onclick="cargarMedicamentos()">Recargar</button>
+  <button onclick="exportarCSV()">Exportar CSV</button>
 </div>
 
+<!-- ░░ TABLA ░░ -->
 <table>
   <thead>
     <tr>
-      <th>Nombre</th>
-      <th>Precio (€)</th>
-      <th>Categoría</th>
-      <th>Stock</th>
-      <th>Proveedor</th>
-      <th>Disponible</th>
+      <th data-col="nombre">Nombre</th>
+      <th data-col="precio">Precio (€)</th>
+      <th data-col="categoria">Categoría</th>
+      <th data-col="stock">Stock</th>
+      <th data-col="proveedor">Proveedor</th>
+      <th data-col="disponible">Disp.</th>
       <th>Acciones</th>
     </tr>
   </thead>
   <tbody id="tbody"></tbody>
 </table>
 
+<!-- ░░ CREAR NUEVO ░░ -->
+<div id="crear">
+  <h2>Crear Nuevo Medicamento</h2>
+  <form id="formCrear" onsubmit="crearMedicamento();return false;">
+    <input type="text"   id="nuevoNombre"    placeholder="Nombre"        required>
+    <input type="number" id="nuevoPrecio"    placeholder="Precio (€)"    step="0.01" required>
+    <input type="text"   id="nuevaCategoria" placeholder="Categoría"     required>
+    <input type="number" id="nuevoStock"     placeholder="Stock"         required>
+    <input type="text"   id="nuevoProveedor" placeholder="Proveedor"     required>
+    <button type="submit">Crear Medicamento</button>
+  </form>
+</div>
+
+<!-- ░░ FORM ACTUALIZAR ░░ -->
 <div id="formulario" style="display:none;">
   <h2>Actualizar Medicamento</h2>
-  <form id="formActualizar" onsubmit="actualizarMedicamento(); return false;">
+  <form id="formActualizar" onsubmit="actualizarMedicamento();return false;">
     <input type="hidden" id="medId">
-    <input type="text" id="nombre" placeholder="Nombre" required>
-    <input type="number" id="precio" placeholder="Precio (€)" required step="0.01">
-    <input type="text" id="categoria" placeholder="Categoría" required>
-    <input type="number" id="stock" placeholder="Stock" required>
-    <input type="text" id="proveedor" placeholder="Proveedor" required>
+    <input type="text"   id="nombre"     placeholder="Nombre"        required>
+    <input type="number" id="precio"     placeholder="Precio (€)"    step="0.01" required>
+    <input type="text"   id="categoria"  placeholder="Categoría"     required>
+    <input type="number" id="stock"      placeholder="Stock"         required>
+    <input type="text"   id="proveedor"  placeholder="Proveedor"     required>
     <select id="disponible">
       <option value="true">Disponible</option>
       <option value="false">No disponible</option>
@@ -88,178 +99,160 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script>
-  const token = sessionStorage.getItem('token');
-  const rol = sessionStorage.getItem('rol');
+/* ═══ Seguridad ═══ */
+const token = sessionStorage.getItem('token');
+const rol   = sessionStorage.getItem('rol');
+if (!token || rol !== 'ADMIN') location.href = 'login.html';
+function logout(){ sessionStorage.clear(); location.href='login.html'; }
 
-  window.onload = function () {
-    if (!token || rol !== 'ADMIN') {
-      showToast("Acceso denegado", "error");
-      window.location.href = 'login.html';
-    } else {
-      cargarMedicamentos();
-    }
+/* ═══ Estado ═══ */
+let listado = [];
+
+/* ═══ Utilidades ═══ */
+function toast(t, ok=true){
+  Toastify({text:t,duration:3000,gravity:'top',position:'right',
+    style:{background:ok?'linear-gradient(to right,#00b09b,#96c93d)'
+                        :'linear-gradient(to right,#ff5f6d,#ffc371)'}}).showToast();
+}
+const qs = id => document.getElementById(id);
+
+/* ═══ Cargar Medicamentos ═══ */
+function cargarMedicamentos(){
+  fetch('/medicamentos/pag?page=0&size=500&sort=nombre,asc',
+        {headers:{Authorization:'Bearer '+token}})
+    .then(r=>r.json())
+    .then(d=>{ listado = d.content || d; pintar(listado); })
+    .catch(()=>toast('Error cargando',false));
+}
+
+/* ═══ Pintar Tabla ═══ */
+function pintar(arr){
+  qs('tbody').innerHTML = arr.map(m=>`
+    <tr>
+      <td>${m.nombre}</td>
+      <td>€${m.precio.toFixed(2)}</td>
+      <td>${m.categoria||'-'}</td>
+      <td>${m.stock??0}</td>
+      <td>${m.proveedor||'-'}</td>
+      <td>${m.disponible ? '✓' : '✗'}</td>
+      <td>
+        <button onclick="editar(${m.id})">Editar</button>
+        <button onclick="eliminar(${m.id})">Eliminar</button>
+      </td>
+    </tr>`).join('');
+}
+
+/* ═══ Filtro Instantáneo ═══ */
+function filtrar(){
+  const q = qs('search').value.toLowerCase();
+  pintar(listado.filter(m=>m.nombre.toLowerCase().includes(q)));
+}
+
+/* ═══ Orden por Cabecera ═══ */
+document.querySelectorAll('th[data-col]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const c = th.dataset.col;
+    listado.sort((a,b)=>a[c]>b[c]?1:-1);
+    filtrar();
+  });
+});
+
+/* ═══ Crear ═══ */
+function crearMedicamento(){
+  const body = {
+    nombre:     qs('nuevoNombre').value.trim(),
+    precio:     +qs('nuevoPrecio').value,
+    categoria:  qs('nuevaCategoria').value.trim(),
+    stock:      +qs('nuevoStock').value,
+    proveedor:  qs('nuevoProveedor').value.trim(),
+    disponible: true
+  };
+  fetch('/medicamentos',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify(body)
+  })
+  .then(r=>r.ok?r.json():Promise.reject())
+  .then(()=>{ toast('Creado'); qs('formCrear').reset(); cargarMedicamentos(); })
+  .catch(()=>toast('Error creando',false));
+}
+
+/* ═══ Editar / Actualizar ═══ */
+function editar(id){
+  fetch('/medicamentos/'+id,{headers:{Authorization:'Bearer '+token}})
+    .then(r=>r.json())
+    .then(m=>{
+      qs('formulario').style.display='block';
+      qs('medId').value=id;
+      qs('nombre').value=m.nombre;
+      qs('precio').value=m.precio;
+      qs('categoria').value=m.categoria||'';
+      qs('stock').value=m.stock||0;
+      qs('proveedor').value=m.proveedor||'';
+      qs('disponible').value=''+m.disponible;
+    })
+    .catch(()=>toast('Error obteniendo',false));
+}
+function actualizarMedicamento(){
+  const id   = qs('medId').value;
+  const body = {
+    nombre:qs('nombre').value,
+    precio:+qs('precio').value,
+    categoria:qs('categoria').value,
+    stock:+qs('stock').value,
+    proveedor:qs('proveedor').value,
+    disponible:qs('disponible').value==='true'
+  };
+  fetch('/medicamentos/'+id,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify(body)
+  })
+  .then(r=>r.ok?r.json():Promise.reject())
+  .then(()=>{ toast('Actualizado'); qs('formulario').style.display='none'; cargarMedicamentos(); })
+  .catch(()=>toast('Error actualizando',false));
+}
+
+/* ═══ Eliminar (CSRF incluido) ═══ */
+function eliminar(id){
+  if(!confirm('¿Eliminar este medicamento?')) return;
+
+  const cookie = document.cookie.split('; ').find(c=>c.startsWith('XSRF-TOKEN='))?.split('=')[1];
+  const headers={
+    'Authorization':'Bearer '+token,
+    ...(cookie && {
+      'X-XSRF-TOKEN':cookie,
+      'X-CSRF-TOKEN':cookie,
+      'XSRF-TOKEN'  :cookie
+    })
   };
 
-  function logout() {
-    sessionStorage.clear();
-    window.location.href = 'login.html';
-  }
+  fetch('/medicamentos/'+id,{
+    method:'DELETE',
+    headers,
+    credentials:'include'
+  })
+  .then(r=>{
+    if(r.ok){ toast('Eliminado'); cargarMedicamentos(); return; }
+    if(r.status===403) throw new Error('403 – acceso denegado (CSRF/Rol)');
+    return r.text().then(t=>{throw new Error(t||'Error');});
+  })
+  .catch(err=>toast(err.message,false));
+}
 
-  function cargarMedicamentos() {
-    fetch('/medicamentos/pag?page=0&size=100&sort=nombre,asc', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
-      .then(r => {
-        if (!r.ok) throw new Error('Acceso no autorizado');
-        return r.json();
-      })
-      .then(data => {
-        const tbody = document.getElementById('tbody');
-        tbody.innerHTML = data.content.map(m => `
-          <tr>
-            <td>${m.nombre}</td>
-            <td>€${m.precio.toFixed(2)}</td>
-            <td>${m.categoria || '-'}</td>
-            <td>${m.stock ?? 0}</td>
-            <td>${m.proveedor || '-'}</td>
-            <td>${m.disponible ? 'Sí' : 'No'}</td>
-            <td>
-              <button onclick="editar(${m.id})">Editar</button>
-              <button onclick="eliminar(${m.id})">Eliminar</button>
-            </td>
-          </tr>
-        `).join('');
-      })
-      .catch(err => {
-        console.error(err);
-        showToast('Error cargando medicamentos', 'error');
-      });
-  }
+/* ═══ Exportar CSV ═══ */
+function exportarCSV(){
+  if(!listado.length) return toast('Nada que exportar',false);
+  const filas=[['Nombre','Precio','Categoría','Stock','Proveedor','Disponible'],
+    ...listado.map(m=>[m.nombre,m.precio,m.categoria||'',m.stock||0,m.proveedor||'',m.disponible])];
+  const blob=new Blob([filas.map(f=>f.join(',')).join('\n')],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href=url;a.download='medicamentos.csv';a.click();URL.revokeObjectURL(url);
+}
 
-  function editar(id) {
-    fetch(`/medicamentos/${id}`, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
-      .then(r => {
-        if (!r.ok) throw new Error('No autorizado');
-        return r.json();
-      })
-      .then(med => {
-        document.getElementById('formulario').style.display = 'block';
-        document.getElementById('medId').value = med.id;
-        document.getElementById('nombre').value = med.nombre;
-        document.getElementById('precio').value = med.precio;
-        document.getElementById('categoria').value = med.categoria ?? '';
-        document.getElementById('stock').value = med.stock ?? 0;
-        document.getElementById('proveedor').value = med.proveedor ?? '';
-        document.getElementById('disponible').value = med.disponible.toString();
-      })
-      .catch(() => showToast('Error obteniendo medicamento', 'error'));
-  }
-
-  function actualizarMedicamento() {
-    const id = document.getElementById('medId').value;
-    const datos = {
-      nombre: document.getElementById('nombre').value,
-      precio: parseFloat(document.getElementById('precio').value),
-      categoria: document.getElementById('categoria').value,
-      stock: parseInt(document.getElementById('stock').value),
-      proveedor: document.getElementById('proveedor').value,
-      disponible: document.getElementById('disponible').value === 'true'
-    };
-
-    fetch(`/medicamentos/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify(datos)
-    })
-      .then(r => {
-        if (!r.ok) throw new Error('Fallo al actualizar');
-        showToast('Medicamento actualizado', 'success');
-        document.getElementById('formulario').style.display = 'none';
-        cargarMedicamentos();
-      })
-      .catch(err => {
-        console.error(err);
-        showToast('Error actualizando medicamento', 'error');
-      });
-  }
-
-  function eliminar(id) {
-    const rawToken = sessionStorage.getItem('token');
-    console.log("Token enviado para DELETE:", rawToken);
-
-    if (!confirm('¿Seguro que quieres eliminar este medicamento?')) return;
-
-    fetch(`/medicamentos/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': 'Bearer ' + rawToken
-      }
-    })
-    .then(r => {
-      if (!r.ok) {
-        return r.text().then(msg => {
-          throw new Error('Fallo al eliminar: ' + msg);
-        });
-      }
-      showToast('Medicamento eliminado', 'success');
-      document.getElementById('formulario').style.display = 'none';
-      cargarMedicamentos();
-    })
-    .catch(err => {
-      console.error(err);
-      showToast('Error eliminando medicamento', 'error');
-    });
-  }
-
-  function crearMedicamento() {
-    const datos = {
-      nombre: document.getElementById('nuevoNombre').value.trim(),
-      precio: parseFloat(document.getElementById('nuevoPrecio').value),
-      categoria: document.getElementById('nuevaCategoria').value.trim(),
-      stock: parseInt(document.getElementById('nuevoStock').value),
-      proveedor: document.getElementById('nuevoProveedor').value.trim(),
-      disponible: true
-    };
-
-    fetch('/medicamentos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify(datos)
-    })
-      .then(async r => {
-        if (!r.ok) throw new Error(await r.text());
-        showToast('Medicamento creado correctamente', 'success');
-        document.getElementById('formCrear').reset();
-        cargarMedicamentos();
-      })
-      .catch(err => {
-        console.error('Error al crear:', err);
-        showToast('Error creando medicamento', 'error');
-      });
-  }
-
-  function showToast(message, type) {
-    Toastify({
-      text: message,
-      duration: 3000,
-      gravity: "top",
-      position: "right",
-      style: {
-        background: type === 'success'
-          ? "linear-gradient(to right, #00b09b, #96c93d)"
-          : "linear-gradient(to right, #ff5f6d, #ffc371)"
-      }
-    }).showToast();
-  }
+/* ═══ Init ═══ */
+window.onload = cargarMedicamentos;
 </script>
-
 </body>
 </html>
