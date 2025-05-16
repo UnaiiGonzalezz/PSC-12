@@ -1,279 +1,386 @@
-/* 🔵 RESET Y BASE */
+/* =====================================================
+   PROFESSIONAL PHARMACY UI – GLOBAL THEME
+   Author: ChatGPT – May 2025
+   ===================================================== */
+
+/* 🔵 CSS CUSTOM PROPERTIES */
+:root {
+  /* palette */
+  --clr-primary: #1e88e5;
+  --clr-primary-dark: #1565c0;
+  --clr-primary-light: #42a5f5;
+  --clr-accent: #00bfa5;
+  --clr-danger: #d32f2f;
+  --clr-bg: #f9fafb;
+  --clr-surface: #ffffff;
+  --clr-text: #333333;
+  --clr-text-light: #666666;
+  --clr-border: #e0e0e0;
+
+  /* elevation & radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, .07);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, .12);
+
+  /* motion */
+  --bezier: cubic-bezier(.4, 0, .2, 1);
+  --dur: .3s;
+}
+
+/* =====================================================
+   RESET & BASE
+   ===================================================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9fafb;
-  color: #333;
-  padding: 20px;
-  min-height: 100vh;
+html {
+  scroll-behavior: smooth;
 }
 
-/* 🔵 NAVBAR */
+body {
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  background-color: var(--clr-bg);
+  color: var(--clr-text);
+  line-height: 1.6;
+  padding: 2rem;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--clr-primary-dark);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+h1 { font-size: 2.75rem; }
+h2 { font-size: 2rem; }
+
+p {
+  margin-bottom: 1rem;
+  color: var(--clr-text-light);
+}
+
+/* =====================================================
+   NAVBAR
+   ===================================================== */
 nav {
-  background: linear-gradient(90deg, #0077cc, #005fa3);
-  padding: 15px 30px;
-  border-radius: 12px;
+  background: linear-gradient(90deg, var(--clr-primary) 0%, var(--clr-primary-dark) 100%);
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  gap: 1.5rem;
   flex-wrap: wrap;
+  color: var(--clr-surface);
+}
+
+nav .nav-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 nav .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 1rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 nav a {
-  color: white;
+  color: var(--clr-surface);
   text-decoration: none;
+  padding: .5rem 1rem;
+  border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 1.1rem;
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: background 0.3s, transform 0.3s;
+  transition: background var(--dur) var(--bezier), transform var(--dur) var(--bezier);
 }
 
-nav a:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
+nav a:hover,
+nav a:focus-visible {
+  background: rgba(255, 255, 255, .15);
+  transform: translateY(-2px);
 }
 
-/* 🔵 TITULOS */
-h1, h2 {
-  margin-bottom: 20px;
-  color: #005fa3;
-  text-align: center;
+/* =====================================================
+   BUTTONS
+   ===================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background var(--dur) var(--bezier), transform var(--dur) var(--bezier), box-shadow var(--dur) var(--bezier);
 }
 
-h1 {
-  font-size: 2.5rem;
+.btn-primary {
+  background: var(--clr-primary);
+  color: var(--clr-surface);
 }
 
-/* 🔵 FORMULARIOS */
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--clr-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--clr-primary-dark);
+  border: 2px solid var(--clr-primary);
+}
+
+.btn-outline:hover,
+.btn-outline:focus-visible {
+  background: var(--clr-primary);
+  color: var(--clr-surface);
+}
+
+.btn-danger {
+  background: var(--clr-danger);
+  color: var(--clr-surface);
+}
+
+.btn-danger:hover,
+.btn-danger:focus-visible {
+  background: #b71c1c;
+}
+
+/* Use .btn-danger for logout */
+.logout-button { @apply btn btn-danger; }
+
+/* =====================================================
+   FORMS
+   ===================================================== */
 form {
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  background: var(--clr-surface);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   max-width: 600px;
-  margin: auto;
+  margin-inline: auto;
 }
 
 form label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: .5rem;
   font-weight: 600;
 }
 
-form input, form select, form button {
+form input,
+form select {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: .75rem 1rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
+  transition: border-color var(--dur) var(--bezier), box-shadow var(--dur) var(--bezier);
 }
 
-form button {
-  background: linear-gradient(90deg, #0077cc, #005fa3);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.3s;
+form input:focus,
+form select:focus {
+  border-color: var(--clr-primary);
+  box-shadow: 0 0 0 3px rgba(30, 136, 229, .25);
+  outline: none;
 }
 
-form button:hover {
-  background: linear-gradient(90deg, #005fa3, #0077cc);
-}
+form button { @apply btn btn-primary; }
 
-/* 🔵 TABLAS */
+/* =====================================================
+   TABLES
+   ===================================================== */
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  margin-top: 30px;
-  border-radius: 10px;
+  background: var(--clr-surface);
+  margin-top: 2rem;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
 }
 
-th, td {
-  padding: 15px;
+th,
+td {
+  padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--clr-border);
+  font-size: 0.95rem;
 }
 
 th {
-  background: #0077cc;
-  color: white;
-  font-weight: bold;
-  font-size: 1.05rem;
+  background: var(--clr-primary);
+  color: var(--clr-surface);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+tr:nth-child(even) {
+  background-color: #f3f7ff;
 }
 
 tr:hover {
-  background-color: #f0f8ff;
+  background-color: #e8f1ff;
 }
 
-/* 🔵 PAGINACIÓN */
+/* =====================================================
+   PAGINATION
+   ===================================================== */
 .paginacion {
-  margin-top: 20px;
+  margin-top: 1.5rem;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 1rem;
 }
 
 .paginacion button {
-  padding: 10px 20px;
-  background: white;
-  color: #0077cc;
-  border: 2px solid #0077cc;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.paginacion button:hover {
-  background: #0077cc;
-  color: white;
+  @apply btn btn-outline;
+  min-width: 120px;
 }
 
 .paginacion button:disabled {
-  opacity: 0.6;
+  opacity: .5;
   cursor: not-allowed;
 }
 
-/* 🔵 BOTÓN LOGOUT */
-.logout-button {
-  background: crimson;
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 50px;
-  font-weight: bold;
-  font-size: 1rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
-}
-
-.logout-button:hover {
-  background: darkred;
-  transform: scale(1.05);
-}
-
-/* 🔵 DETALLES */
+/* =====================================================
+   DETAIL LIST
+   ===================================================== */
 .detalle {
-  margin-top: 30px;
+  margin-top: 2rem;
   list-style: none;
   padding: 0;
 }
 
 .detalle li {
-  margin-bottom: 10px;
-  font-size: 1.1rem;
+  margin-bottom: .75rem;
+  font-size: 1.05rem;
 }
 
 .detalle li strong {
-  color: #0077cc;
+  color: var(--clr-primary-dark);
 }
 
-/* 🔵 TOOLBAR DE BÚSQUEDA */
+/* =====================================================
+   TOOLBAR – SEARCH
+   ===================================================== */
 .toolbar {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: .75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .toolbar input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 300px;
+  flex: 1 1 300px;
+  padding: .75rem 1rem;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--dur) var(--bezier), box-shadow var(--dur) var(--bezier);
 }
 
-.toolbar button {
-  padding: 10px 20px;
-  background: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s;
+.toolbar input:focus {
+  border-color: var(--clr-primary);
+  box-shadow: 0 0 0 3px rgba(30, 136, 229, .25);
+  outline: none;
 }
 
-.toolbar button:hover {
-  background: #005fa3;
-}
+.toolbar button { @apply btn btn-primary; }
 
-/* 🔵 ADMIN BUTTONS */
+/* =====================================================
+   ADMIN BUTTONS
+   ===================================================== */
 .admin-buttons {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  margin-top: 50px;
+  gap: 1.25rem;
+  margin-top: 3rem;
 }
 
 .admin-buttons button {
   width: 260px;
-  padding: 15px;
-  font-size: 1.2rem;
-  background: linear-gradient(90deg, #0077cc, #005fa3);
-  border: none;
-  color: white;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  @apply btn btn-primary;
+  font-size: 1.1rem;
 }
 
-.admin-buttons button:hover {
-  background: linear-gradient(90deg, #005fa3, #0077cc);
-  transform: scale(1.05);
-}
-
-/* 🔵 RESPONSIVE */
+/* =====================================================
+   RESPONSIVE UTILITIES
+   ===================================================== */
 @media (max-width: 768px) {
   nav {
     flex-direction: column;
-    align-items: center;
-    gap: 20px;
+    align-items: stretch;
   }
 
   nav .nav-links {
-    flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     width: 100%;
   }
 
   nav a {
-    width: 80%;
+    flex: 1 1 auto;
     text-align: center;
   }
 
   .toolbar {
     flex-direction: column;
-    gap: 10px;
-  }
-
-  .toolbar input {
-    width: 100%;
   }
 
   table {
     display: block;
     overflow-x: auto;
   }
+}
+
+/* =====================================================
+   DARK MODE (optional – toggled via `dark` class on <html>)
+   ===================================================== */
+html.dark {
+  --clr-bg: #121212;
+  --clr-surface: #1e1e1e;
+  --clr-text: #e0e0e0;
+  --clr-text-light: #bdbdbd;
+  --clr-border: #333333;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, .6);
+}
+
+html.dark tr:nth-child(even) {
+  background-color: #1a1f29;
+}
+
+html.dark tr:hover {
+  background-color: #223046;
+}
+
+html.dark nav a:hover,
+html.dark nav a:focus-visible {
+  background: rgba(255, 255, 255, .1);
 }
