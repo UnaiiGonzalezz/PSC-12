@@ -43,6 +43,45 @@ Si no hay errores, la aplicación se ejecutará en:
 [http://localhost:8080](http://localhost:8080)  
 Para detenerla, presiona `Ctrl+C`.
 
+### 5. Ejecución de tests
+Para ejecutar los tests unitarios y de integración definidos en el proyecto, utiliza el siguiente comando:
+
+```bash
+mvn test
+```
+
+Este comando compilará el proyecto (si es necesario) y ejecutará todos los tests definidos con frameworks como JUnit y Mockito.
+Al finalizar, se mostrará un resumen de los resultados de los tests en la consola.
+
+Si también ejecutas mvn site, los resultados detallados de los tests estarán disponibles en:
+
+```bash
+target/site/jacoco/index.html
+```
+
+Puedes abrir este archivo en tu navegador para consultar los resultados de cada test.
+
+### 6. Generación de documentación
+Maven permite generar documentación automática del proyecto mediante el siguiente comando:
+
+```bash
+mvn site
+```
+
+Este comando genera un sitio web estático con:
+
+- Información general del proyecto
+- Dependencias
+- Resultados de los tests
+- Informes de calidad del código
+
+Los archivos generados se ubican en el directorio:
+
+```bash
+docs/html/index.html
+```
+
+Puedes abrir el archivo index.html con cualquier navegador para visualizar la documentación.
 ---
 
 REST API
