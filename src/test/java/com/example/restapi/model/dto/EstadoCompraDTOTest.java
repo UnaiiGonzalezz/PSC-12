@@ -1,58 +1,95 @@
 package com.example.restapi.model.dto;
-import java.util.List;
-
 
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class EstadoCompraDTOTest {
 
     @Test
-    void testMainDTO() {
-        EstadoCompraDTO.ClienteInfo cliente = new EstadoCompraDTO.ClienteInfo("Luis", "Pérez", "luis@mail.com");
-        EstadoCompraDTO.MedicamentoInfo med = new EstadoCompraDTO.MedicamentoInfo("Ibuprofeno", 4.25);
+    void testConstructorVacioYSetters() {
+        EstadoCompraDTO dto = new EstadoCompraDTO();
 
-        EstadoCompraDTO dto = new EstadoCompraDTO(9L, "PAGADO", LocalDate.of(2024, 6, 10), 3L, cliente, Collections.singletonList(med));
+        dto.setId(1L);
+        dto.setEstado("ENVIADO");
+        dto.setFechaCompra(LocalDate.of(2024, 5, 17));
+        dto.setClienteId(101L);
 
-        assertEquals(9L, dto.getId());
-        assertEquals("PAGADO", dto.getEstado());
-        assertEquals(LocalDate.of(2024, 6, 10), dto.getFechaCompra());
-        assertEquals(3L, dto.getClienteId());
-        assertEquals(cliente, dto.getCliente());
-        assertEquals(1, dto.getMedicamentos().size());
-        assertEquals(med, dto.getMedicamentos().get(0));
-    }
-
-    @Test
-    void testClienteInfo() {
         EstadoCompraDTO.ClienteInfo cliente = new EstadoCompraDTO.ClienteInfo();
-        cliente.setNombre("Ana");
-        cliente.setApellido("Gómez");
-        cliente.setEmail("ana@example.com");
+        cliente.setNombre("Carlos");
+        cliente.setApellido("Ramírez");
+        cliente.setEmail("carlos@mail.com");
+        dto.setCliente(cliente);
 
-        assertEquals("Ana", cliente.getNombre());
-        assertEquals("Gómez", cliente.getApellido());
-        assertEquals("ana@example.com", cliente.getEmail());
-    }
-
-    @Test
-    void testMedicamentoInfo() {
         EstadoCompraDTO.MedicamentoInfo med = new EstadoCompraDTO.MedicamentoInfo();
-        med.setNombre("Paracetamol");
-        med.setPrecio(2.5);
+        med.setNombre("Amoxicilina");
+        med.setPrecio(7.5);
+        List<EstadoCompraDTO.MedicamentoInfo> medicamentos = new ArrayList<>();
+        medicamentos.add(med);
+        dto.setMedicamentos(medicamentos);
 
-        assertEquals("Paracetamol", med.getNombre());
-        assertEquals(2.5, med.getPrecio());
+        assertEquals(1L, dto.getId());
+        assertEquals("ENVIADO", dto.getEstado());
+        assertEquals(LocalDate.of(2024, 5, 17), dto.getFechaCompra());
+        assertEquals(101L, dto.getClienteId());
+        assertEquals("Carlos", dto.getCliente().getNombre());
+        assertEquals("Ramírez", dto.getCliente().getApellido());
+        assertEquals("carlos@mail.com", dto.getCliente().getEmail());
+        assertEquals(1, dto.getMedicamentos().size());
+        assertEquals("Amoxicilina", dto.getMedicamentos().get(0).getNombre());
+        assertEquals(7.5, dto.getMedicamentos().get(0).getPrecio());
     }
 
     @Test
-    void testConstructorCompleto() {
-        EstadoCompraDTO.ClienteInfo cliente = new EstadoCompraDTO.ClienteInfo("A", "B", "a@b.com");
-        EstadoCompraDTO.MedicamentoInfo med = new EstadoCompraDTO.MedicamentoInfo("X", 1.0);
-        EstadoCompraDTO dto = new EstadoCompraDTO(1L, "ENTREGADO", LocalDate.of(2024, 5, 15), 7L, cliente, List.of(med));
+    void testConstructorConArgumentos() {
+        EstadoCompraDTO.ClienteInfo cliente = new EstadoCompraDTO.ClienteInfo("Lucía", "Méndez", "lucia@mail.com");
+        EstadoCompraDTO.MedicamentoInfo med = new EstadoCompraDTO.MedicamentoInfo("Ibuprofeno", 5.75);
+        List<EstadoCompraDTO.MedicamentoInfo> medicamentos = new ArrayList<>();
+        medicamentos.add(med);
 
-        assertNotNull(dto);
+        EstadoCompraDTO dto = new EstadoCompraDTO(2L, "PAGADO", LocalDate.of(2024, 6, 1), 102L, cliente, medicamentos);
+
+        assertEquals(2L, dto.getId());
+        assertEquals("PAGADO", dto.getEstado());
+        assertEquals(LocalDate.of(2024, 6, 1), dto.getFechaCompra());
+        assertEquals(102L, dto.getClienteId());
+        assertEquals("Lucía", dto.getCliente().getNombre());
+        assertEquals("Méndez", dto.getCliente().getApellido());
+        assertEquals("lucia@mail.com", dto.getCliente().getEmail());
+        assertEquals(1, dto.getMedicamentos().size());
+        assertEquals("Ibuprofeno", dto.getMedicamentos().get(0).getNombre());
+        assertEquals(5.75, dto.getMedicamentos().get(0).getPrecio());
+    }
+
+    @Test
+    void testClienteInfoIndependiente() {
+        EstadoCompraDTO.ClienteInfo cliente = new EstadoCompraDTO.ClienteInfo("Ana", "Lopez", "ana@mail.com");
+        assertEquals("Ana", cliente.getNombre());
+        assertEquals("Lopez", cliente.getApellido());
+        assertEquals("ana@mail.com", cliente.getEmail());
+
+        cliente.setNombre("Elena");
+        cliente.setApellido("Martínez");
+        cliente.setEmail("elena@mail.com");
+
+        assertEquals("Elena", cliente.getNombre());
+        assertEquals("Martínez", cliente.getApellido());
+        assertEquals("elena@mail.com", cliente.getEmail());
+    }
+
+    @Test
+    void testMedicamentoInfoIndependiente() {
+        EstadoCompraDTO.MedicamentoInfo med = new EstadoCompraDTO.MedicamentoInfo("Paracetamol", 2.25);
+        assertEquals("Paracetamol", med.getNombre());
+        assertEquals(2.25, med.getPrecio());
+
+        med.setNombre("Naproxeno");
+        med.setPrecio(3.5);
+
+        assertEquals("Naproxeno", med.getNombre());
+        assertEquals(3.5, med.getPrecio());
     }
 }
