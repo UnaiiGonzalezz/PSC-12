@@ -94,4 +94,26 @@ class BookManagerTest {
 
         verify(restTemplate).delete(BASE_URL + "/" + bookId);
     }
+
+    @Test
+    void registerBook_failure() {
+        Book book = new Book("Title", "Author", "ISBN123");
+        when(restTemplate.postForEntity(eq(BASE_URL), eq(book), eq(Void.class)))
+                .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+
+        bookManager.registerBook(book);
+
+        verify(restTemplate).postForEntity(eq(BASE_URL), eq(book), eq(Void.class));
+    }
+
+    @Test
+    void getAllBooks_failure() {
+        when(restTemplate.getForEntity(BASE_URL, Book[].class))
+                .thenReturn(new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR));
+
+        List<Book> result = bookManager.getAllBooks();
+
+        assertThat(result).isEmpty();
+    }
+
 }
