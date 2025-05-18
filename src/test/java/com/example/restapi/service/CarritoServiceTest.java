@@ -77,10 +77,31 @@ class CarritoServiceTest {
     @Test
     void testCheckout_sinCarrito_lanzaExcepcion() {
         when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.empty());
+        assertThrows(IllegalStateException.class, () -> service.checkout(cliente));
+    }
 
-        assertThrows(IllegalStateException.class, () -> {
-            service.checkout(cliente);
-        });
+    @Test
+    void testCheckout_medicamentoNoDisponible() {
+        medicamento.setDisponible(false);
+        medicamento.setStock(10);
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 1);
+
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        when(compraService.crearDesdeCarrito(any())).thenThrow(new IllegalStateException("Medicamento no disponible"));
+
+        assertThrows(IllegalStateException.class, () -> service.checkout(cliente));
+    }
+
+    @Test
+    void testCheckout_stockInsuficiente() {
+        medicamento.setStock(0);
+        medicamento.setDisponible(true);
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 1);
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+
+        assertThrows(IllegalStateException.class, () -> service.checkout(cliente));
     }
 
     @Test
@@ -100,5 +121,51 @@ class CarritoServiceTest {
         assertThat(dto.getTotal()).isEqualTo(6.0);
         verify(movRepo, atLeastOnce()).save(any(StockMovimiento.class));
         verify(carritoRepo).delete(carrito);
+    }
+
+    @Test
+    void testRemoveMedicamento() {
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 2);
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        when(medRepo.findById(1L)).thenReturn(Optional.of(medicamento));
+        service.removeMedicamento(cliente, 1L);
+        assertThat(carrito.getItems()).isEmpty();
+    }
+
+    @Test
+    void testVaciarCarrito() {
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 2);
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+
+        service.vaciarCarrito(cliente);
+
+        verify(carritoRepo).delete(carrito); // Verificamos solo la eliminación
+    }
+
+    @Test
+    void testGetTotal() {
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 2);
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        double total = service.getTotal(cliente);
+        assertThat(total).isEqualTo(6.0);
+    }
+
+    @Test
+    void testGetCarritoDTO() {
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 1);
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        assertThat(service.getCarritoDTO(cliente)).isNotNull();
+    }
+
+    @Test
+    void testGetOrCreateCarrito() {
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.empty());
+        when(carritoRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        Carrito carrito = service.getOrCreateCarrito(cliente);
+        assertThat(carrito).isNotNull();
     }
 }

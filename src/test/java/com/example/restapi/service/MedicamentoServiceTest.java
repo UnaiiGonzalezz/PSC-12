@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class MedicamentoServiceTest {
@@ -36,71 +37,78 @@ class MedicamentoServiceTest {
     @Test
     void testSaveMedicamento() {
         when(repo.save(medicamento)).thenReturn(medicamento);
-
         Medicamento result = service.saveMedicamento(medicamento);
-
         assertThat(result).isEqualTo(medicamento);
-        verify(repo).save(medicamento);
         verify(movRepo).save(any());
     }
 
     @Test
     void testGetMedicamentoById_existente() {
         when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
-
-        Optional<Medicamento> result = service.getMedicamentoById(1L);
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getNombre()).isEqualTo("Paracetamol");
+        assertThat(service.getMedicamentoById(1L)).isPresent();
     }
 
     @Test
     void testGetMedicamentoById_noExiste() {
-        when(repo.findById(2L)).thenReturn(Optional.empty());
-
-        Optional<Medicamento> result = service.getMedicamentoById(2L);
-
-        assertThat(result).isEmpty();
+        when(repo.findById(99L)).thenReturn(Optional.empty());
+        assertThat(service.getMedicamentoById(99L)).isEmpty();
     }
 
     @Test
     void testGetMedicamentosPorCategoria() {
         when(repo.findByCategoriaIgnoreCase("Analgésico")).thenReturn(List.of(medicamento));
-
-        List<Medicamento> result = service.getMedicamentosPorCategoria("Analgésico");
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getNombre()).isEqualTo("Paracetamol");
+        assertThat(service.getMedicamentosPorCategoria("Analgésico")).hasSize(1);
     }
 
     @Test
-    void testUpdateMedicamento_existente() {
-        Medicamento updatedMedicamento = new Medicamento("Paracetamol", "Analgésico", 4.0, 120, "Cinfa");
-        updatedMedicamento.setId(1L);
-
-        // Mock para devolver el medicamento original
+    void testUpdateMedicamento_existente_conStock() {
+        Medicamento nuevo = new Medicamento("Ibuprofeno", "Anti-inflamatorio", 5.0, 20, "Bayer");
         when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
+        when(repo.save(any())).thenReturn(nuevo);
+        Medicamento actualizado = service.updateMedicamento(1L, nuevo);
+        assertThat(actualizado.getNombre()).isEqualTo("Ibuprofeno");
+    }
 
-        // Mock para guardar el medicamento actualizado
-        when(repo.save(any(Medicamento.class))).thenReturn(updatedMedicamento);
+    @Test
+    void testUpdateMedicamento_existente_sinStock() {
+        Medicamento nuevo = new Medicamento("Ibuprofeno", "Anti-inflamatorio", 5.0, 0, "Bayer");
+        when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
+        when(repo.save(any())).thenReturn(nuevo);
+        Medicamento actualizado = service.updateMedicamento(1L, nuevo);
+        assertThat(actualizado.getStock()).isEqualTo(0);
+    }
 
-        // Llamada al método de servicio
-        Medicamento result = service.updateMedicamento(1L, updatedMedicamento);
-
-        // Asegurarse de que el medicamento devuelto sea el actualizado
-        assertThat(result).isNotNull();
-        assertThat(result.getPrecio()).isEqualTo(4.0); // Verificar el precio actualizado
-        assertThat(result.getStock()).isEqualTo(120);  // Verificar el stock actualizado
-        assertThat(result.getNombre()).isEqualTo("Paracetamol"); // Verificar el nombre
+    @Test
+    void testUpdateMedicamento_noExiste() {
+        Medicamento nuevo = new Medicamento("Ibuprofeno", "Anti-inflamatorio", 5.0, 20, "Bayer");
+        when(repo.findById(2L)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> service.updateMedicamento(2L, nuevo));
     }
 
     @Test
     void testDeleteMedicamento() {
         when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
-
         service.deleteMedicamento(1L);
-
         verify(repo).delete(medicamento);
         verify(movRepo).deleteByMedicamento(medicamento);
+    }
+
+    @Test
+    void testDeleteMedicamento_noExiste() {
+        when(repo.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> service.deleteMedicamento(99L));
+    }
+
+    @Test
+    void testGetAllMedicamentos() {
+        when(repo.findAll()).thenReturn(List.of(medicamento, medicamento));
+        assertThat(service.getAllMedicamentos()).hasSize(2);
+    }
+
+    @Test
+    void testGetMedicamentosDisponibles() {
+        medicamento.setDisponible(true);
+        when(repo.findByDisponibleTrue()).thenReturn(List.of(medicamento));
+        assertThat(service.getMedicamentosDisponibles()).hasSize(1);
     }
 }

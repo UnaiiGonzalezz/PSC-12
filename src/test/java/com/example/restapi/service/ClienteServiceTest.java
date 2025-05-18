@@ -56,6 +56,26 @@ class ClienteServiceTest {
     }
 
     @Test
+    void registrarCliente_emailExistente_sigueGuardandoCliente() {
+        RegistroDTO dto = new RegistroDTO();
+        dto.setNombre("Ana");
+        dto.setApellido("López");
+        dto.setEmail("repetido@example.com");
+        dto.setContrasena("1234");
+        dto.setTelefono("600123456");
+        dto.setMetodoPago("Tarjeta");
+
+        when(clienteRepo.existsByEmail("repetido@example.com")).thenReturn(true);
+        when(passwordEncoder.encode("1234")).thenReturn("HASHED");
+        when(clienteRepo.save(any(Cliente.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Cliente resultado = clienteService.registrarCliente(dto);
+
+        assertThat(resultado).isNotNull();
+        verify(clienteRepo).save(any());
+    }
+
+    @Test
     void verificarCredenciales_validas() {
         Cliente cliente = new Cliente("Ana", "López", "ana@example.com", "HASH", "600", "Tarjeta", "USER");
 
@@ -80,38 +100,69 @@ class ClienteServiceTest {
     }
 
     @Test
+    void verificarCredenciales_noExiste() {
+        when(clienteRepo.findByEmail("no@existe.com")).thenReturn(Optional.empty());
+        boolean ok = clienteService.verificarCredenciales("no@existe.com", "1234");
+        assertThat(ok).isFalse();
+    }
+
+    @Test
     void getClienteByEmail_existente() {
-        Cliente cliente = new Cliente("Ana", "López", "ana@example.com", "HASH", "600", "Tarjeta", "USER");
-
+        Cliente cliente = new Cliente();
+        cliente.setEmail("ana@example.com");
         when(clienteRepo.findByEmail("ana@example.com")).thenReturn(Optional.of(cliente));
-
         Cliente result = clienteService.getClienteByEmail("ana@example.com");
-
-        assertThat(result).isNotNull();
         assertThat(result.getEmail()).isEqualTo("ana@example.com");
     }
 
     @Test
-    void getClienteByEmail_noExiste_lanzaExcepcion() {
+    void getClienteByEmail_noExiste() {
         when(clienteRepo.findByEmail("no@existe.com")).thenReturn(Optional.empty());
-
-        assertThrows(RuntimeException.class, () -> {
-            clienteService.getClienteByEmail("no@existe.com");
-        });
+        assertThrows(RuntimeException.class, () -> clienteService.getClienteByEmail("no@existe.com"));
     }
 
     @Test
     void emailYaExiste_true() {
-        String email = "ya@existe.com";
-        when(clienteRepo.existsByEmail(email)).thenReturn(true);
-
-        boolean result = clienteService.emailYaExiste(email);
-        assertThat(result).isTrue();
+        when(clienteRepo.existsByEmail("existente@correo.com")).thenReturn(true);
+        assertThat(clienteService.emailYaExiste("existente@correo.com")).isTrue();
     }
 
     @Test
     void emailYaExiste_false() {
         when(clienteRepo.existsByEmail("nuevo@correo.com")).thenReturn(false);
         assertThat(clienteService.emailYaExiste("nuevo@correo.com")).isFalse();
+    }
+
+    @Test
+    void deleteCliente_existente() {
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+        when(clienteRepo.findById(1L)).thenReturn(Optional.of(cliente));
+        clienteService.deleteCliente(1L);
+        verify(clienteRepo).delete(cliente);
+    }
+
+    @Test
+    void deleteCliente_noExiste() {
+        when(clienteRepo.findById(2L)).thenReturn(Optional.empty());
+        clienteService.deleteCliente(2L);
+        verify(clienteRepo, never()).delete(any());
+    }
+
+    @Test
+    void updateCliente_existente() {
+        Cliente original = new Cliente("Juan", "Pérez", "juan@correo.com", "HASH", "600", "Tarjeta", "USER");
+        Cliente nuevo = new Cliente("Juan Actualizado", "Pérez", "juan@correo.com", "HASH", "600", "Efectivo", "USER");
+        when(clienteRepo.findById(1L)).thenReturn(Optional.of(original));
+        when(clienteRepo.save(original)).thenReturn(original);
+        Cliente actualizado = clienteService.updateCliente(1L, nuevo);
+        assertThat(actualizado.getNombre()).isEqualTo("Juan Actualizado");
+    }
+
+    @Test
+    void updateCliente_noExiste() {
+        Cliente nuevo = new Cliente();
+        when(clienteRepo.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> clienteService.updateCliente(99L, nuevo));
     }
 }
