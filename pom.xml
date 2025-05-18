@@ -45,6 +45,14 @@
             <scope>runtime</scope>               <!-- versión la pone el BOM -->
         </dependency>
 
+        <dependency>
+            <groupId>com.github.noconnor</groupId>
+            <artifactId>junitperf</artifactId>
+            <version>1.11.0</version>
+            <scope>test</scope>
+        </dependency>
+        
+
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
