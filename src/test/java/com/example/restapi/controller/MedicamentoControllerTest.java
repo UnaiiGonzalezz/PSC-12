@@ -1,14 +1,15 @@
 package com.example.restapi.controller;
 
-import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.MedicamentoService;
-import com.example.restapi.testconfig.TestSecurityConfig;
+import com.example.restapi.security.JwtUtil;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -17,9 +18,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestSecurityConfig.class)
 @WebMvcTest(MedicamentoController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc(addFilters = false)  // filtros deshabilitados para no interferir
+@Tag("controller")
 class MedicamentoControllerTest {
 
     @Autowired
@@ -28,7 +29,7 @@ class MedicamentoControllerTest {
     @MockBean
     private MedicamentoService medicamentoService;
 
-    @MockBean
+    @MockBean  // Esto es crucial para que JwtUtil esté disponible y no falle el contexto
     private JwtUtil jwtUtil;
 
     @Test

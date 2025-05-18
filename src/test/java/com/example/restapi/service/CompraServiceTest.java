@@ -4,7 +4,9 @@ import com.example.restapi.model.*;
 import com.example.restapi.model.dto.CompraResumenDTO;
 import com.example.restapi.model.dto.EstadoCompraDTO;
 import com.example.restapi.repository.CompraRepository;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
@@ -15,8 +17,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Tag("service")
 class CompraServiceTest {
 
     @InjectMocks

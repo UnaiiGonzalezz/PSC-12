@@ -2,32 +2,50 @@ package com.example.restapi.service;
 
 import com.example.restapi.model.*;
 import com.example.restapi.model.dto.CompraResumenDTO;
-import com.example.restapi.model.stock.StockMovimiento;
 import com.example.restapi.repository.*;
 import com.example.restapi.security.JwtUtil;
-import io.jsonwebtoken.JwtException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.*;
 
-import java.time.LocalDate;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+@Tag("service")
+@ExtendWith(MockitoExtension.class)
 public class ExtraCoverageTests {
 
-    @InjectMocks private CarritoService carritoService;
-    @Mock private CarritoRepository carritoRepo;
-    @Mock private MedicamentoRepository medicamentoRepo;
-    @Mock private StockMovimientoRepository movimientoRepo;
-    @Mock private CompraService compraService;
+    @InjectMocks
+    private CarritoService carritoService;
 
-    @InjectMocks private CompraService compraSvc;
-    @Mock private CompraRepository compraRepo;
+    @Mock
+    private CarritoRepository carritoRepo;
+
+    @Mock
+    private MedicamentoRepository medicamentoRepo;
+
+    @Mock
+    private StockMovimientoRepository movimientoRepo;
+
+    @Mock
+    private CompraService compraService;
+
+    @InjectMocks
+    private CompraService compraSvc;
+
+    @Mock
+    private CompraRepository compraRepo;
 
     private JwtUtil jwtUtil;
     private Cliente cliente;
@@ -35,7 +53,6 @@ public class ExtraCoverageTests {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         cliente = new Cliente("Eva", "Martín", "eva@demo.es", "HASH", "600123456", "Tarjeta", "USER");
         medicamento = new Medicamento("Paracetamol", "Analgésico", 2.5, 50, "Cinfa");
         jwtUtil = new JwtUtil();
@@ -57,9 +74,7 @@ public class ExtraCoverageTests {
     void test_checkout_sinCarrito_lanzaExcepcion() {
         when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.empty());
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
-            carritoService.checkout(cliente);
-        });
+        assertThrows(IllegalStateException.class, () -> carritoService.checkout(cliente));
     }
 
     @Test
@@ -67,6 +82,7 @@ public class ExtraCoverageTests {
         when(compraRepo.findByClienteId(99L)).thenReturn(Collections.emptyList());
 
         List<CompraResumenDTO> result = compraSvc.getHistorialPorCliente(99L);
+
         assertThat(result).isEmpty();
     }
 
@@ -74,10 +90,12 @@ public class ExtraCoverageTests {
     void test_crearDesdeCarrito() {
         Carrito carrito = new Carrito(cliente);
         carrito.addItem(medicamento, 1);
+
         when(compraRepo.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Compra c = compraSvc.crearDesdeCarrito(carrito);
-        assertThat(c.getCliente()).isEqualTo(cliente);
+        Compra compra = compraSvc.crearDesdeCarrito(carrito);
+
+        assertThat(compra.getCliente()).isEqualTo(cliente);
     }
 
     @Test

@@ -1,12 +1,13 @@
 package com.example.restapi.controller;
-import org.springframework.context.annotation.Import;
-import com.example.restapi.testconfig.TestSecurityConfig;
-import org.springframework.context.annotation.Import;
+
 import com.example.restapi.client.BookManager;
 import com.example.restapi.model.Book;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;  // Import correcto para JUnit 5 Tag
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Tag("controller")  
 class BookManagerTest {
 
     @Mock
@@ -35,9 +37,8 @@ class BookManagerTest {
         MockitoAnnotations.openMocks(this);
         bookManager = new BookManager(hostname, port);
         // Override the default RestTemplate with mock
-        java.lang.reflect.Field restTemplateField;
         try {
-            restTemplateField = BookManager.class.getDeclaredField("restTemplate");
+            var restTemplateField = BookManager.class.getDeclaredField("restTemplate");
             restTemplateField.setAccessible(true);
             restTemplateField.set(bookManager, restTemplate);
         } catch (Exception e) {
@@ -115,5 +116,4 @@ class BookManagerTest {
 
         assertThat(result).isEmpty();
     }
-
 }

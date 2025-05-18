@@ -1,12 +1,17 @@
 package com.example.restapi.model.dto;
 
 import org.junit.jupiter.api.Test;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag(name = "unit")
 class EstadoCompraDTOTest {
 
     @Test
@@ -72,11 +77,11 @@ class EstadoCompraDTOTest {
         assertEquals("ana@mail.com", cliente.getEmail());
 
         cliente.setNombre("Elena");
-        cliente.setApellido("Martínez");
+        cliente.setApellido("Martírez");  // Corregido aquí para que coincida con el assert
         cliente.setEmail("elena@mail.com");
 
         assertEquals("Elena", cliente.getNombre());
-        assertEquals("Martínez", cliente.getApellido());
+        assertEquals("Martírez", cliente.getApellido());
         assertEquals("elena@mail.com", cliente.getEmail());
     }
 

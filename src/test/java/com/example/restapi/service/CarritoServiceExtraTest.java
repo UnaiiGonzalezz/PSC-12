@@ -1,21 +1,20 @@
 package com.example.restapi.service;
 
-import com.example.restapi.model.Carrito;
-import com.example.restapi.model.Cliente;
-import com.example.restapi.model.Medicamento;
-import com.example.restapi.repository.CarritoRepository;
-import com.example.restapi.repository.CompraRepository;
-import com.example.restapi.repository.MedicamentoRepository;
-import com.example.restapi.repository.StockMovimientoRepository;
+import com.example.restapi.model.*;
+import com.example.restapi.repository.*;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+@Tag("service")
 class CarritoServiceExtraTest {
 
     @InjectMocks
@@ -59,8 +58,6 @@ class CarritoServiceExtraTest {
     void checkout_carritoNoExiste_lanzaExcepcion() {
         when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.empty());
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
-            carritoService.checkout(cliente);
-        });
+        assertThrows(IllegalStateException.class, () -> carritoService.checkout(cliente));
     }
 }

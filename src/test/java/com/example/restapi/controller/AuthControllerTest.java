@@ -1,13 +1,13 @@
 package com.example.restapi.controller;
-import org.springframework.context.annotation.Import;
-import com.example.restapi.testconfig.TestSecurityConfig;
-import org.springframework.context.annotation.Import;
+
 import com.example.restapi.model.Cliente;
 import com.example.restapi.model.dto.LoginDTO;
 import com.example.restapi.model.dto.RegistroDTO;
 import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.ClienteService;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Tag("controller")
 public class AuthControllerTest {
 
     @InjectMocks
@@ -34,7 +35,7 @@ public class AuthControllerTest {
     void init() {
         MockitoAnnotations.openMocks(this);
     }
-
+    
     @Test
     void login_exitoso() {
         LoginDTO login = new LoginDTO("admin@demo.es", "1234");

@@ -4,8 +4,10 @@ import com.example.restapi.model.Medicamento;
 import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.MedicamentoService;
 import com.example.restapi.testconfig.TestSecurityConfig;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;  // <-- Import correcto de JUnit
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestSecurityConfig.class)
 @WebMvcTest(MedicamentoController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Tag("controller") 
 class MedicamentoControllerExtraTest {
 
     @Autowired

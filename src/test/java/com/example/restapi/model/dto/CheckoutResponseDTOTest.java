@@ -1,10 +1,14 @@
 package com.example.restapi.model.dto;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
 import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 class CheckoutResponseDTOTest {
 
     @Test

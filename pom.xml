@@ -40,18 +40,18 @@
 
         <!-- Database -->
         <dependency>
-            <groupId>com.mysql</groupId>         <!-- ← el correcto para Boot 3.x -->
+            <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>               <!-- versión la pone el BOM -->
+            <scope>runtime</scope>
         </dependency>
 
+        <!-- JUnitPerf -->
         <dependency>
             <groupId>com.github.noconnor</groupId>
             <artifactId>junitperf</artifactId>
             <version>1.11.0</version>
             <scope>test</scope>
         </dependency>
-        
 
         <!-- JWT -->
         <dependency>
@@ -121,34 +121,40 @@
             <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- JaCoCo -->
+            <!-- JaCoCo Code Coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <executions>
                     <execution>
-                        <goals><goal>prepare-agent</goal></goals>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>report</id>
                         <phase>test</phase>
-                        <goals><goal>report</goal></goals>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>check</id>
                         <phase>verify</phase>
-                        <goals><goal>check</goal></goals>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
                         <configuration>
                             <rules>
                                 <rule implementation="org.jacoco.maven.RuleConfiguration">
@@ -172,7 +178,7 @@
                 </executions>
             </plugin>
 
-            <!-- Doxygen -->
+            <!-- Doxygen for documentation -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -181,7 +187,9 @@
                     <execution>
                         <id>doxygen-doc</id>
                         <phase>site</phase>
-                        <goals><goal>exec</goal></goals>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
                         <configuration>
                             <executable>doxygen</executable>
                             <arguments>
@@ -192,17 +200,15 @@
                 </executions>
             </plugin>
 
+            <!-- Surefire Plugin para filtrar por tags -->
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
                 <configuration>
-                    <excludes>
-                        <exclude>com/example/restapi/client/BookManagerConsoleUI*</exclude>
-                    </excludes>
+                    <groups>${groups}</groups> <!-- Ejecuta tests con un tag específico -->
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>

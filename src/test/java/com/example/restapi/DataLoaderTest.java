@@ -6,6 +6,9 @@ import com.example.restapi.model.Medicamento;
 import com.example.restapi.repository.ClienteRepository;
 import com.example.restapi.repository.CompraRepository;
 import com.example.restapi.repository.MedicamentoRepository;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,10 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 class DataLoaderTest {
-
+    @Tag(name = "unit")
     @Test
     void testInitDatabase_runsWithoutErrors() throws Exception {
         // Mocks

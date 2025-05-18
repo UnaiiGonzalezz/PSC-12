@@ -4,10 +4,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 
 import java.util.List;
 
@@ -15,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Tag("security")
+@ExtendWith(MockitoExtension.class)
 class JwtAuthenticationFilterTest {
 
     @Mock private JwtUtil jwtUtil;
@@ -26,7 +32,6 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         filter = new JwtAuthenticationFilter(jwtUtil);
         SecurityContextHolder.clearContext();
     }
@@ -44,6 +49,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void doFilter_conTokenValido_autenticado() throws Exception {
         String token = "valid.jwt.token";
+
         when(request.getServletPath()).thenReturn("/medicamentos/8");
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
         when(jwtUtil.isTokenValid(token)).thenReturn(true);
@@ -56,8 +62,7 @@ class JwtAuthenticationFilterTest {
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
         assertThat(auth).isNotNull();
-        assertThat(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
-            .isEqualTo("admin@demo.es");
+        assertThat(((User) auth.getPrincipal()).getUsername()).isEqualTo("admin@demo.es");
         assertThat(auth.getAuthorities())
             .extracting(Object::toString)
             .containsExactly("ROLE_ADMIN");

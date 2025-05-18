@@ -3,6 +3,8 @@ package com.example.restapi.controller;
 import com.example.restapi.model.Cliente;
 import com.example.restapi.model.Compra;
 import com.example.restapi.service.CompraService;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Pruebas de integración para {@link CompraController}.
- */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)   // desactiva filtros de Spring-Security
+@Tag("controller")
 class CompraControllerExtraTest {
 
     @Autowired
@@ -33,7 +33,6 @@ class CompraControllerExtraTest {
     @MockBean
     private CompraService compraService;
 
-    /* -------- helper -------- */
     private Compra dummyCompra() {
         Cliente cli = new Cliente();
         cli.setId(1L);
@@ -41,12 +40,10 @@ class CompraControllerExtraTest {
 
         Compra c = new Compra();
         c.setId(1L);
-        c.setCliente(cli);          // ← ¡imprescindible para evitar el NPE!
-        // cualquier otro campo que tu DTO requiera puede inicializarse aquí
+        c.setCliente(cli);
         return c;
     }
 
-    /* ---------------- LISTAR ---------------- */
     @Test
     void getAllCompras_ok() throws Exception {
         when(compraService.getAllCompras()).thenReturn(List.of(dummyCompra()));
@@ -56,14 +53,12 @@ class CompraControllerExtraTest {
                .andExpect(jsonPath("$", hasSize(1)));
     }
 
-    /* -------------- ESTADO COMPRA ------------ */
     @Nested
     class Estado {
 
         @Test
         void getEstadoCompra_notFound() throws Exception {
-            when(compraService.getCompraById(anyLong()))
-                    .thenReturn(Optional.empty());
+            when(compraService.getCompraById(anyLong())).thenReturn(Optional.empty());
 
             mockMvc.perform(get("/compras/estado/99"))
                    .andExpect(status().isNotFound());

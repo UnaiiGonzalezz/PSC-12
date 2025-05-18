@@ -11,6 +11,7 @@ import java.io.File;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @Tag(name = "service")
 public class BookServicePerformanceWithReportTest {
 
     // Inyección del servicio que se quiere medir

@@ -3,28 +3,39 @@ package com.example.restapi.service;
 import com.example.restapi.model.*;
 import com.example.restapi.model.dto.CheckoutResponseDTO;
 import com.example.restapi.model.dto.CompraResumenDTO;
-import com.example.restapi.model.stock.StockMovimiento;
 import com.example.restapi.repository.*;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+@Tag("service")
+@ExtendWith(MockitoExtension.class)
 class ExtraTestsSuite {
 
-    @InjectMocks private CarritoService carritoService;
+    @InjectMocks
+    private CarritoService carritoService;
+
     @Mock private CarritoRepository carritoRepo;
     @Mock private MedicamentoRepository medicamentoRepo;
     @Mock private StockMovimientoRepository movimientoRepo;
     @Mock private CompraService compraService;
 
-    @InjectMocks private CompraService compraSvc;
+    @InjectMocks
+    private CompraService compraServiceReal;
+
     @Mock private CompraRepository compraRepo;
 
     private Cliente cliente;
@@ -32,7 +43,6 @@ class ExtraTestsSuite {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
         cliente = new Cliente("Eva", "Martín", "eva@demo.es", "HASH", "600123456", "Tarjeta", "USER");
         medicamento = new Medicamento("Paracetamol", "Analgésico", 2.5, 50, "Cinfa");
     }
@@ -66,7 +76,7 @@ class ExtraTestsSuite {
         Compra compra = new Compra(cliente, List.of(medicamento), LocalDate.now(), 1, "Tarjeta");
         when(compraRepo.save(any())).thenReturn(compra);
 
-        Compra result = compraSvc.crearDesdeCarrito(carrito);
+        Compra result = compraServiceReal.crearDesdeCarrito(carrito);
         assertThat(result.getCliente().getEmail()).isEqualTo("eva@demo.es");
     }
 
@@ -74,8 +84,7 @@ class ExtraTestsSuite {
     void getHistorialPorCliente_vacio() {
         when(compraRepo.findByClienteId(9L)).thenReturn(List.of());
 
-        List<CompraResumenDTO> historial = compraSvc.getHistorialPorCliente(9L);
-
+        List<CompraResumenDTO> historial = compraServiceReal.getHistorialPorCliente(9L);
         assertThat(historial).isEmpty();
     }
 }

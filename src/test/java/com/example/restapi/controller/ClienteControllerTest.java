@@ -3,6 +3,8 @@ package com.example.restapi.controller;
 import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.ClienteService;
 import com.example.restapi.testconfig.TestSecurityConfig;
+
+import org.junit.jupiter.api.Tag;  // CORRECTO: Import de JUnit 5 Tag para tests
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestSecurityConfig.class)
 @WebMvcTest(ClienteController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Tag("controller") 
 class ClienteControllerTest {
 
     @Autowired

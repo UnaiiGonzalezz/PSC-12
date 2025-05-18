@@ -1,9 +1,13 @@
 package com.example.restapi.model.dto;
 
 import com.example.restapi.model.dto.CarritoDTO.ItemDTO;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ItemDTOTest {
 
     @Test

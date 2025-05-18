@@ -1,12 +1,15 @@
 package com.example.restapi.model.stock;
 
 import com.example.restapi.model.Medicamento;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 class StockMovimientoTest {
 
     @Test
@@ -34,7 +37,7 @@ class StockMovimientoTest {
         Medicamento medicamento = new Medicamento("Paracetamol", "Analgésico", 2.5, 30, "ProveedorY");
         movimiento.setId(101L);
         movimiento.setMedicamento(medicamento);
-        movimiento.setTipo(MovimientoTipo.AJUSTE);  // ✅ Enum válido
+        movimiento.setTipo(MovimientoTipo.AJUSTE);
         movimiento.setCantidad(5);
         movimiento.setStockAntes(30);
         movimiento.setStockDespues(25);
@@ -53,7 +56,7 @@ class StockMovimientoTest {
     @Test
     void testToString() {
         Medicamento medicamento = new Medicamento("Amoxicilina", "Antibiótico", 7.2, 40, "ProveedorZ");
-        StockMovimiento movimiento = new StockMovimiento(medicamento, MovimientoTipo.VENTA, 15, 40, 25);  // ✅ Enum válido
+        StockMovimiento movimiento = new StockMovimiento(medicamento, MovimientoTipo.VENTA, 15, 40, 25);
 
         String result = movimiento.toString();
 

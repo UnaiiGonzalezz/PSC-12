@@ -5,7 +5,9 @@ import com.example.restapi.model.dto.RegistroDTO;
 import com.example.restapi.security.JwtUtil;
 import com.example.restapi.service.ClienteService;
 import com.example.restapi.testconfig.TestSecurityConfig;
+
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;  // CORRECTO: import JUnit5 Tag
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestSecurityConfig.class)
 @WebMvcTest(ClienteController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Tag("controller")  
 class ClienteControllerExtraTest {
 
     @Autowired

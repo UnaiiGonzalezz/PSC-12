@@ -2,27 +2,27 @@ package com.example.restapi.service;
 
 import com.example.restapi.model.*;
 import com.example.restapi.model.dto.CompraResumenDTO;
-import com.example.restapi.model.dto.LoginDTO;
-import com.example.restapi.model.dto.RegistroDTO;
-import com.example.restapi.model.stock.StockMovimiento;
 import com.example.restapi.repository.*;
 import com.example.restapi.security.JwtUtil;
-import com.example.restapi.service.*;
-import io.jsonwebtoken.JwtException;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Tag("service")
+@ExtendWith(MockitoExtension.class)
 public class ExtendedTestSuite {
 
     @InjectMocks private CarritoService carritoService;
@@ -39,13 +39,11 @@ public class ExtendedTestSuite {
     @Mock private PasswordEncoder passwordEncoder;
 
     private JwtUtil jwtUtil;
-
     private Cliente cliente;
     private Medicamento medicamento;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         cliente = new Cliente("Eva", "Martín", "eva@demo.es", "HASH", "600123456", "Tarjeta", "USER");
         medicamento = new Medicamento("Paracetamol", "Analgésico", 2.5, 50, "Cinfa");
         jwtUtil = new JwtUtil();
@@ -121,8 +119,8 @@ public class ExtendedTestSuite {
         when(clienteRepo.findByEmail("a@b.com")).thenReturn(Optional.of(c));
         when(passwordEncoder.matches("wrong", "HASHED")).thenReturn(false);
 
-        boolean ok = clienteService.verificarCredenciales("a@b.com", "wrong");
-        assertThat(ok).isFalse();
+        boolean result = clienteService.verificarCredenciales("a@b.com", "wrong");
+        assertThat(result).isFalse();
     }
 
     // ====== JwtUtil ======
@@ -136,7 +134,7 @@ public class ExtendedTestSuite {
 
     @Test
     void token_expirado_devuelveInvalido() {
-        // Crear un token con fecha de expiración antigua (manual malformado token)
+        // Token con expiración antigua
         String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0IiwiZXhwIjoxNjAwMDAwMDAwLCJyb2xlcyI6WyJST0xFX1VTRVIiXX0.dummy-signature";
         assertThat(jwtUtil.isTokenValid(expiredToken)).isFalse();
     }

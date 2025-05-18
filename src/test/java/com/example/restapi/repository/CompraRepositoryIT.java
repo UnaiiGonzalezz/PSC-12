@@ -3,7 +3,9 @@ package com.example.restapi.repository;
 import com.example.restapi.model.Cliente;
 import com.example.restapi.model.Compra;
 import com.example.restapi.model.Medicamento;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -13,6 +15,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("repository")
 @DataJpaTest
 class CompraRepositoryIT {
 

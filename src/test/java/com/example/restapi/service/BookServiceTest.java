@@ -2,7 +2,9 @@ package com.example.restapi.service;
 
 import com.example.restapi.model.Book;
 import com.example.restapi.repository.BookRepository;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Tag("service")
 class BookServiceTest {
 
     @Mock
@@ -75,6 +78,7 @@ class BookServiceTest {
 
         assertEquals("New Title", existing.getTitle());
         assertEquals("New Author", existing.getAuthor());
+        assertEquals(existing, result);
     }
 
     @Test
