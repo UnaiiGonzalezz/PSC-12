@@ -3,7 +3,6 @@ package com.example.restapi.controller;
 import com.example.restapi.model.Cliente;
 import com.example.restapi.model.Compra;
 import com.example.restapi.model.Medicamento;
-import com.example.restapi.model.dto.EstadoCompraDTO;
 import com.example.restapi.model.dto.MedicamentoDTO;
 import com.example.restapi.model.dto.CompraDTO;
 import com.example.restapi.repository.MedicamentoRepository;
