@@ -37,7 +37,7 @@ public class SecurityConfig {
                     "/nueva-compra.html", "/ver-compra.html",
                     "/admin.html", "/admin-medicamentos.html",
                     "/favicon.ico", "/css/**", "/js/**",
-                    "/swagger-ui/**", "/v3/api-docs/**"
+                    "/swagger-ui/**", "/v3/api-docs/**","/img/logo.png/**"
                 ).permitAll()
 
                 // Autenticación

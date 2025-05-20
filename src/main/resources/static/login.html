@@ -7,14 +7,25 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
   <style>
     body {
-      background: linear-gradient(135deg, #0077cc, #005fa3);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      /* Fondo animado */
+      background: linear-gradient(-45deg, #0077cc, #39cba7, #56c6e6, #005fa3);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
     .login-container {
       background: white;
       padding: 40px 30px;
@@ -23,6 +34,16 @@
       width: 100%;
       max-width: 400px;
       text-align: center;
+      position: relative;
+    }
+    .logo {
+      margin-bottom: 25px;
+    }
+    .logo img {
+      width: 110px;
+      /* ajusta el tamaño si lo necesitas */
+      display: block;
+      margin: 0 auto;
     }
     .login-container h1 {
       color: #005fa3;
@@ -80,7 +101,10 @@
     }
     @media (max-width: 480px) {
       .login-container {
-        padding: 30px 20px;
+        padding: 30px 10px;
+      }
+      .logo img {
+        width: 80px;
       }
     }
   </style>
@@ -88,6 +112,9 @@
 <body>
 
 <div class="login-container">
+  <div class="logo">
+    <img src="img/logo.png" alt="Biocura Pharmacy Logo">
+  </div>
   <h1>Iniciar sesión</h1>
   <form onsubmit="login(); return false;">
     <div class="input-group">
