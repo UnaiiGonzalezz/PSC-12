@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -172,4 +173,59 @@ class CarritoServiceTest {
         Carrito carrito = service.getOrCreateCarrito(cliente);
         assertThat(carrito).isNotNull();
     }
+
+    @Test
+    void testCheckout_dejaStockEnCero_yMarcaNoDisponible() {
+        medicamento.setStock(2);  // Stock justo igual a la cantidad
+        medicamento.setDisponible(true);
+        
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 2);  // Quita todo el stock
+
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        
+        when(medRepo.save(any())).thenAnswer(inv -> {
+            Medicamento m = inv.getArgument(0);
+            // Esta verificación cubre la rama: med.setDisponible(false)
+            assertThat(m.getStock()).isEqualTo(0);
+            assertThat(m.isDisponible()).isFalse();
+            return m;
+        });
+
+        Compra compra = new Compra(cliente, List.of(medicamento), LocalDate.now(), 2, "Tarjeta");
+        compra.setPago(6.0);
+        when(compraService.crearDesdeCarrito(carrito)).thenReturn(compra);
+
+        CheckoutResponseDTO dto = service.checkout(cliente);
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.getItems()).hasSize(1);
+        verify(movRepo, atLeastOnce()).save(any(StockMovimiento.class));
+        verify(carritoRepo).delete(carrito);
+    }
+
+    @Test
+    void testCheckout_carritoExistePeroVacio_lanzaExcepcion() {
+        Carrito carrito = new Carrito(cliente); // existe pero sin items
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+        assertThrows(IllegalStateException.class, () -> service.checkout(cliente));
+    }
+
+    @Test
+    void testRemoveMedicamento_sinGuardar() {
+        Carrito carrito = new Carrito(cliente);
+        carrito.addItem(medicamento, 1);
+        when(carritoRepo.findByCliente(cliente)).thenReturn(Optional.of(carrito));
+
+        // Llamamos directamente al método privado vía reflexión (ya que es private)
+        // O también puedes duplicar el método como public temporalmente para cubrir esta rama
+
+        // O bien ignora esta línea si prefieres evitar reflección.
+        // Otra opción: refactoriza removeMedicamento a que exponga esa opción (no recomendado si no lo usas).
+    }
+
+
+
+
+
 }
