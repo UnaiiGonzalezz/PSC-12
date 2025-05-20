@@ -5,6 +5,7 @@ import com.example.restapi.model.dto.RegistroDTO;
 import com.example.restapi.repository.ClienteRepository;
 import com.example.restapi.repository.CompraRepository;
 
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,7 @@ class ClienteServiceTest {
 
         assertThat(guardado.getEmail()).isEqualTo("carlos@example.com");
         assertThat(guardado.getRol()).isEqualTo("USER");
+        
         verify(clienteRepo).save(any(Cliente.class));
     }
 
@@ -76,6 +78,7 @@ class ClienteServiceTest {
         Cliente resultado = clienteService.registrarCliente(dto);
 
         assertThat(resultado).isNotNull();
+        assertThat(resultado.getRol()).isEqualTo("USER");
         verify(clienteRepo).save(any());
     }
 
@@ -169,4 +172,56 @@ class ClienteServiceTest {
         when(clienteRepo.findById(99L)).thenReturn(Optional.empty());
         assertThrows(RuntimeException.class, () -> clienteService.updateCliente(99L, nuevo));
     }
+
+    @Test
+    void updateCliente_actualizaCamposCompletos() {
+        Cliente original = new Cliente("Juan", "Pérez", "juan@correo.com", "HASH", "600", "Tarjeta", "USER");
+        Cliente nuevo = new Cliente("Juan", "Gómez", "juan@correo.com", "HASH", "700", "Bizum", "USER");
+
+        when(clienteRepo.findById(1L)).thenReturn(Optional.of(original));
+        when(clienteRepo.save(original)).thenReturn(original);
+
+        Cliente actualizado = clienteService.updateCliente(1L, nuevo);
+
+        assertThat(actualizado.getApellido()).isEqualTo("Gómez");
+        assertThat(actualizado.getTelefono()).isEqualTo("700");
+        assertThat(actualizado.getMetodoPago()).isEqualTo("Bizum");
+    }
+
+    @Test
+    void findByEmail_existente() {
+        Cliente cliente = new Cliente();
+        cliente.setEmail("test@example.com");
+
+        when(clienteRepo.findByEmail("test@example.com")).thenReturn(Optional.of(cliente));
+        Optional<Cliente> result = clienteService.findByEmail("test@example.com");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getEmail()).isEqualTo("test@example.com");
+    }
+
+    @Test
+    void findByEmail_noExiste() {
+        when(clienteRepo.findByEmail("no@correo.com")).thenReturn(Optional.empty());
+        Optional<Cliente> result = clienteService.findByEmail("no@correo.com");
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void save_clienteConPasswordEnTextoPlano_loGuardaConHash() {
+        Cliente cliente = new Cliente();
+        cliente.setContrasena("1234");
+
+        when(passwordEncoder.encode("1234")).thenReturn("HASHED");
+        when(clienteRepo.save(cliente)).thenReturn(cliente);
+
+        Cliente guardado = clienteService.save(cliente);
+        assertThat(guardado.getContrasena()).isEqualTo("HASHED");
+        verify(clienteRepo).save(cliente);
+    }
+
+    
+
+
+
 }
