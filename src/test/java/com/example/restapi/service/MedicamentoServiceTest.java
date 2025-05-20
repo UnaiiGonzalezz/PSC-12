@@ -1,6 +1,8 @@
 package com.example.restapi.service;
 
 import com.example.restapi.model.Medicamento;
+import com.example.restapi.model.dto.MedicamentoDTO;
+import com.example.restapi.model.stock.StockMovimiento;
 import com.example.restapi.repository.MedicamentoRepository;
 import com.example.restapi.repository.StockMovimientoRepository;
 
@@ -16,6 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @Tag("service")
 class MedicamentoServiceTest {
@@ -114,5 +120,43 @@ class MedicamentoServiceTest {
         medicamento.setDisponible(true);
         when(repo.findByDisponibleTrue()).thenReturn(List.of(medicamento));
         assertThat(service.getMedicamentosDisponibles()).hasSize(1);
+    }
+
+
+    @Test
+    void testGetMedicamentosPorNombre() {
+        when(repo.findByNombreIgnoreCase("Paracetamol")).thenReturn(List.of(medicamento));
+        assertThat(service.getMedicamentosPorNombre("Paracetamol")).hasSize(1);
+    }
+
+    @Test
+    void testGetMovimientosDeMedicamento_existente() {
+        when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
+        when(movRepo.findByMedicamentoOrderByFechaDesc(medicamento)).thenReturn(List.of(new StockMovimiento()));
+        assertThat(service.getMovimientosDeMedicamento(1L)).hasSize(1);
+    }
+
+    @Test
+    void testGetMovimientosDeMedicamento_noExiste() {
+        when(repo.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> service.getMovimientosDeMedicamento(99L));
+    }
+
+    @Test
+    void testUpdateMedicamento_mismoStock_noGuardaMovimiento() {
+        Medicamento nuevo = new Medicamento("Ibuprofeno", "Anti-inflamatorio", 5.0, 100, "Bayer"); // mismo stock = 100
+        when(repo.findById(1L)).thenReturn(Optional.of(medicamento));
+        when(repo.save(any())).thenReturn(nuevo);
+        service.updateMedicamento(1L, nuevo);
+        verify(movRepo, never()).save(any()); // no guarda movimiento porque no cambia el stock
+    }
+
+    @Test
+    void testGetMedicamentosConPaginacion() {
+        PageRequest pageable = PageRequest.of(0, 10);
+        Page<Medicamento> page = new PageImpl<>(List.of(medicamento));
+        when(repo.findAll(pageable)).thenReturn(page);
+        Page<MedicamentoDTO> result = service.getMedicamentos(pageable);
+        assertThat(result.getContent()).hasSize(1);
     }
 }
