@@ -7,26 +7,47 @@ import java.util.Scanner;
 
 public class BookManagerConsoleUI {
 
+    private BookManager bookManager;
+
     public static void main(String[] args) {
+        new BookManagerConsoleUI().start(args);
+    }
+
+    public BookManagerConsoleUI() {}
+
+    public BookManagerConsoleUI(BookManager bookManager) {
+        this.bookManager = bookManager;
+    }
+
+    public void start(String[] args) {
         if (args.length != 2) {
             System.out.println("Usage: java BookManagerConsoleUI <hostname> <port>");
-            System.exit(0);
+        } else {
+            run(args[0], args[1]);
+        }
+    }
+
+    public void run(String hostname, String port) {
+        if (bookManager == null) {
+            this.bookManager = new BookManager(hostname, port);
         }
 
-        String hostname = args[0];
-        String port = args[1];
-
-        BookManager bookManager = new BookManager(hostname, port);
         Scanner scanner = new Scanner(System.in);
+        boolean continuar = true;
 
-        while (true) {
+        while (continuar) {
             System.out.println("1. Register Book");
             System.out.println("2. List All Books");
             System.out.println("3. Delete Book");
             System.out.println("4. Exit");
             System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+            int choice;
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
 
             switch (choice) {
                 case 1:
@@ -55,11 +76,15 @@ public class BookManagerConsoleUI {
                     bookManager.deleteBook(bookId);
                     break;
                 case 4:
-                    scanner.close();
-                    System.exit(0);
+                    continuar = false;
+                    break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
         }
+
+        scanner.close();
     }
 }
+
+
