@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 
 @Configuration
 public class DataLoader {
@@ -28,7 +30,6 @@ public class DataLoader {
             // ---------------------------------------------------------------------
             // 1. CARGA DE CLIENTES
             // ---------------------------------------------------------------------
-            // Siempre aseguramos que existan al menos un administrador y un usuario
             Cliente admin = clienteRepository.findByEmail("admin@farmacia.com")
                     .orElseGet(() -> clienteRepository.save(
                             new Cliente(
@@ -53,14 +54,31 @@ public class DataLoader {
                                     "USER"
                             )));
 
-            // --- Clientes adicionales (solo si no existen) ---
-            List<Cliente> extraClients = List.of(
-                    new Cliente("María", "Pérez", "maria.perez@example.com", passwordEncoder.encode("password123"), "600111222", "Tarjeta", "USER"),
-                    new Cliente("Carlos", "Gómez", "carlos.gomez@example.com", passwordEncoder.encode("password123"), "600333444", "Efectivo", "USER"),
-                    new Cliente("Ana", "López", "ana.lopez@example.com", passwordEncoder.encode("password123"), "600555666", "Transferencia", "USER"),
-                    new Cliente("John", "Doe", "john.doe@example.com", passwordEncoder.encode("password123"), "600777888", "Tarjeta", "USER"),
-                    new Cliente("Laura", "Martín", "laura.martin@example.com", passwordEncoder.encode("password123"), "600999000", "Bizum", "USER")
-            );
+            // Generar MUCHOS clientes extra
+            List<Cliente> extraClients = new ArrayList<>();
+            String[] nombres = {"María", "Carlos", "Ana", "John", "Laura", "Pedro", "Sofía", "Miguel", "Lucía", "David", "Daniela", "Sergio", "Elena", "Manuel", "Sara", "Javier", "Paula", "Alberto", "Marta", "Iván"};
+            String[] apellidos = {"Pérez", "Gómez", "López", "Doe", "Martín", "Ruiz", "Fernández", "Sánchez", "Ramírez", "Vargas", "Moreno", "Castro", "Navarro", "Ortega", "Delgado", "Silva", "Torres", "Molina", "Suárez", "Vega"};
+            String[] pagos = {"Tarjeta", "Transferencia", "Bizum", "Efectivo"};
+            Random rand = new Random();
+
+            int totalClientesExtra = 80; // + los que ya tienes, serán 100
+            for (int i = 0; i < totalClientesExtra; i++) {
+                String nombre = nombres[rand.nextInt(nombres.length)];
+                String apellido = apellidos[rand.nextInt(apellidos.length)];
+                String email = (nombre + "." + apellido + i + "@mail.com").toLowerCase();
+                String telefono = "6" + (rand.nextInt(100000000) + 10000000);
+                String metodoPago = pagos[rand.nextInt(pagos.length)];
+                Cliente c = new Cliente(
+                        nombre,
+                        apellido,
+                        email,
+                        passwordEncoder.encode("password" + (100 + i)),
+                        telefono,
+                        metodoPago,
+                        "USER"
+                );
+                extraClients.add(c);
+            }
 
             extraClients.forEach(c ->
                     clienteRepository.findByEmail(c.getEmail())
@@ -70,8 +88,7 @@ public class DataLoader {
             // ---------------------------------------------------------------------
             // 2. CARGA DE MEDICAMENTOS
             // ---------------------------------------------------------------------
-            // Lista grande de medicamentos de ejemplo
-            List<Medicamento> catalogo = List.of(
+            List<Medicamento> catalogo = new ArrayList<>(List.of(
                     new Medicamento("Paracetamol", "Analgésico", 3.50, 500, "Kern Pharma"),
                     new Medicamento("Ibuprofeno", "Antiinflamatorio", 4.20, 400, "Cinfa"),
                     new Medicamento("Amoxicilina 500 mg", "Antibiótico", 4.75, 300, "Sandoz"),
@@ -92,7 +109,27 @@ public class DataLoader {
                     new Medicamento("Prednisona 30 mg", "Corticoide", 3.45, 150, "Almirall"),
                     new Medicamento("Ciprofloxacino 500 mg", "Antibiótico", 4.10, 175, "Bayer"),
                     new Medicamento("Gabapentina 300 mg", "Antiepiléptico", 5.25, 130, "Pfizer")
-            );
+            ));
+
+            // GENERAR MÁS DE 120 MEDICAMENTOS EXTRAS (nombre único, categoría, precios, stocks, laboratorio aleatorio)
+            String[] bases = {"Cetirizina", "Desloratadina", "Ranitidina", "Azitromicina", "Lorazepam", "Fluoxetina", "Escitalopram", "Tramadol", "Doxiciclina", "Claritromicina", "Enalapril", "Carvedilol", "Rosuvastatina", "Lamotrigina", "Vildagliptina", "Tamsulosina", "Topiramato", "Mirtazapina", "Baclofeno", "Montelukast"};
+            String[] formas = {"Comprimidos", "Jarabe", "Inyectable", "Óvulos", "Pomada", "Spray", "Gotas", "Suspensión", "Crema", "Polvo"};
+            String[] categorias = {"Antialérgico", "Antibiótico", "Ansiolítico", "Antidepresivo", "Analgésico", "Antiinflamatorio", "Corticoide", "Broncodilatador", "Diurético", "Hipoglucemiante", "Anticonvulsivo", "Colesterol", "Antiulceroso", "Vasodilatador"};
+            String[] labs = {"Normon", "Pfizer", "Teva", "Cinfa", "Bayer", "Sandoz", "Sanofi", "GSK", "Almirall", "Novartis", "Merck"};
+            
+            int totalMedicamentosExtra = 150;
+            for (int i = 0; i < totalMedicamentosExtra; i++) {
+                String base = bases[rand.nextInt(bases.length)];
+                String forma = formas[rand.nextInt(formas.length)];
+                String dosis = (rand.nextInt(8) + 1) * 10 + " mg";
+                String nombre = base + " " + dosis + " " + forma + " " + (i+1);
+                String categoria = categorias[rand.nextInt(categorias.length)];
+                double precio = Math.round((1 + rand.nextDouble() * 15) * 100.0) / 100.0;
+                int stock = rand.nextInt(700) + 50;
+                String lab = labs[rand.nextInt(labs.length)];
+                Medicamento m = new Medicamento(nombre, categoria, precio, stock, lab);
+                catalogo.add(m);
+            }
 
             catalogo.forEach(m ->
                     medicamentoRepository.findByNombreIgnoreCase(m.getNombre())
