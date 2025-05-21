@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="css/styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <!-- jsPDF para la factura -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
       font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
@@ -102,7 +104,6 @@
       font-weight: 600;
     }
 
-    /* Botón comprar bonito */
     .btn-comprar {
       display: block;
       width: 100%;
@@ -175,7 +176,37 @@
       transform: translateY(-2px) scale(1.04);
     }
     .form-compra:disabled { opacity: .8; }
-
+    .cancelar-btn {
+      margin-top: 7px;
+      background: linear-gradient(90deg, #ff5252 70%, #ff8b8b 100%);
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      padding: 6px 20px 6px 18px;
+      border-radius: 999px;
+      font-size: 1em;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 8px #ff525224;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.13s, box-shadow 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      outline: none;
+    }
+    .cancelar-btn:before {
+      content: "\f057";
+      font-family: "Font Awesome 5 Free";
+      font-weight: 900;
+      font-size: 1.08em;
+      margin-right: 2px;
+      display: inline-block;
+    }
+    .cancelar-btn:hover, .cancelar-btn:focus {
+      background: linear-gradient(90deg, #c62828 70%, #ff5252 100%);
+      transform: translateY(-2px) scale(1.045);
+      box-shadow: 0 6px 16px #c6282836;
+    }
     .mensaje-error {
       color: #c62828;
       background: #fff3f3;
@@ -228,6 +259,42 @@ function logout(){
   window.location.href = 'login.html';
 }
 
+function descargarFactura({email, cantidad, nombre, precioUnitario, precioTotal, metodoPago, compraId, fecha}) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Factura de compra", 15, 15);
+  doc.setFont("helvetica", "normal");
+
+  doc.text(`ID de compra: ${compraId}`, 15, 25);
+  doc.text(`Fecha: ${fecha}`, 15, 32);
+  doc.text(`Email cliente: ${email}`, 15, 39);
+  doc.text(`Método de pago: ${metodoPago}`, 15, 46);
+
+  doc.text("Medicamento:", 15, 57);
+
+  let y = 64;
+  doc.setFont("helvetica", "bold");
+  doc.text("Nombre", 18, y);
+  doc.text("Cantidad", 68, y);
+  doc.text("Unitario (€)", 108, y);
+  doc.text("Total (€)", 148, y);
+  doc.setFont("helvetica", "normal");
+  y += 7;
+
+  doc.text(nombre, 18, y);
+  doc.text(String(cantidad), 68, y);
+  doc.text(precioUnitario.toFixed(2), 108, y);
+  doc.text(precioTotal.toFixed(2), 148, y);
+
+  y += 12;
+  doc.setFont("helvetica", "bold");
+  doc.text(`TOTAL: €${precioTotal.toFixed(2)}`, 15, y);
+
+  doc.save(`Factura_${compraId}.pdf`);
+}
+
 if (!id) {
   document.getElementById('medicamentoContainer').innerHTML =
     '<div class="mensaje-error">ID no proporcionado.</div>';
@@ -268,14 +335,19 @@ if (!id) {
       </form>
     `;
 
-    // Formulario lógica
     document.getElementById('formCompra').onsubmit = function(e) {
       e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const cantidad = parseInt(document.getElementById('cantidad').value);
+      const metodoPago = document.getElementById('metodoPago').value;
+      const precioUnitario = med.precio;
+      const precioTotal = cantidad * precioUnitario;
+
       const datos = {
-        email: document.getElementById('email').value.trim(),
+        email: email,
         medicamentoIds: [med.id],
-        cantidad: parseInt(document.getElementById('cantidad').value),
-        metodoPago: document.getElementById('metodoPago').value
+        cantidad: cantidad,
+        metodoPago: metodoPago
       };
 
       fetch('/compras/crear-por-email', {
@@ -297,6 +369,19 @@ if (!id) {
           backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
         }).showToast();
         document.getElementById('formCompra').reset();
+
+        // --------- FACTURA PDF ---------
+        const fecha = new Date().toLocaleString();
+        descargarFactura({
+          email,
+          cantidad,
+          nombre: med.nombre,
+          precioUnitario,
+          precioTotal,
+          metodoPago,
+          compraId: json.id,
+          fecha
+        });
       })
       .catch(() => {
         Toastify({
@@ -322,9 +407,8 @@ function mostrarFormulario() {
   }, 250);
 }
 
-
 function abrirCarrito() {
-
+  // Puedes implementar el modal del carrito aquí si lo deseas
 }
 </script>
 

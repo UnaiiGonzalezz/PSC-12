@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="css/styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <!-- jsPDF para la factura -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
       font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
@@ -137,6 +139,37 @@
       nav.navbar { padding: 1rem .5rem; border-radius: 10px;}
       form#formCompra { padding: 1.2rem .7rem; min-width: unset;}
     }
+        .cancelar-btn {
+      margin-top: 7px;
+      background: linear-gradient(90deg, #ff5252 70%, #ff8b8b 100%);
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      padding: 6px 20px 6px 18px;
+      border-radius: 999px;
+      font-size: 1em;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 8px #ff525224;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.13s, box-shadow 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      outline: none;
+    }
+    .cancelar-btn:before {
+      content: "\f057";
+      font-family: "Font Awesome 5 Free";
+      font-weight: 900;
+      font-size: 1.08em;
+      margin-right: 2px;
+      display: inline-block;
+    }
+    .cancelar-btn:hover, .cancelar-btn:focus {
+      background: linear-gradient(90deg, #c62828 70%, #ff5252 100%);
+      transform: translateY(-2px) scale(1.045);
+      box-shadow: 0 6px 16px #c6282836;
+    }
   </style>
 </head>
 
@@ -155,7 +188,6 @@
     <button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
     <!-- Avatar + menú usuario -->
     <div class="user-menu">
-      <!-- FOTO DE PERFIL POR DEFECTO PARA TODOS LOS USUARIOS -->
       <img src="img/perfilusuario.jpg" alt="Usuario" id="profilePic" class="profile-avatar">
       <div id="userDropdown">
         <h4>Pedidos pendientes</h4>
@@ -188,18 +220,20 @@
 </form>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
 <script>
 const token = sessionStorage.getItem('token');
 if(!token) location.href='login.html';
 function logout(){ sessionStorage.clear(); location.href='login.html'; }
 
-/* ---------- cargar opciones ---------- */
+// Guardaremos el catálogo para buscar precios luego
+let catalogoMedicamentos = [];
+
 window.onload = ()=>{
   fetch('/medicamentos/pag?page=0&size=9999&sort=nombre,asc',{headers:{Authorization:'Bearer '+token}})
     .then(r=>r.json()).then(j=>{
       const lista = j.content || j;
-      const sel   = document.getElementById('medicamentoSelect');
+      catalogoMedicamentos = lista; // Guardamos
+      const sel = document.getElementById('medicamentoSelect');
       sel.innerHTML = '<option value="">– elegir –</option>' +
         lista.map(m=>`<option value="${m.id}">${m.nombre} (€${m.precio.toFixed(2)})</option>`).join('');
     });
@@ -209,19 +243,63 @@ window.onload = ()=>{
     metodos.map(m=>`<option>${m}</option>`).join('');
 };
 
+// ----- FACTURA PDF -----
+function descargarFactura({email, medicamentoNombre, cantidad, precioUnitario, precioTotal, metodoPago, compraId, fecha}) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Factura de compra", 15, 15);
+  doc.setFont("helvetica", "normal");
+
+  doc.text(`ID de compra: ${compraId}`, 15, 25);
+  doc.text(`Fecha: ${fecha}`, 15, 32);
+  doc.text(`Email cliente: ${email}`, 15, 39);
+  doc.text(`Método de pago: ${metodoPago}`, 15, 46);
+
+  doc.text("Medicamento:", 15, 57);
+
+  let y = 64;
+  doc.setFont("helvetica", "bold");
+  doc.text("Nombre", 18, y);
+  doc.text("Cantidad", 68, y);
+  doc.text("Unitario (€)", 108, y);
+  doc.text("Total (€)", 148, y);
+  doc.setFont("helvetica", "normal");
+  y += 7;
+
+  doc.text(medicamentoNombre, 18, y);
+  doc.text(String(cantidad), 68, y);
+  doc.text(precioUnitario.toFixed(2), 108, y);
+  doc.text(precioTotal.toFixed(2), 148, y);
+
+  y += 12;
+  doc.setFont("helvetica", "bold");
+  doc.text(`TOTAL: €${precioTotal.toFixed(2)}`, 15, y);
+
+  doc.save(`Factura_${compraId}.pdf`);
+}
+
 /* ---------- enviar compra ---------- */
 document.getElementById('formCompra').onsubmit = e=>{
   e.preventDefault();
 
   const email       = document.getElementById('email').value.trim();
-  const medicamento = document.getElementById('medicamentoSelect').value;
+  const medicamentoId = document.getElementById('medicamentoSelect').value;
   const cantidad    = +document.getElementById('cantidad').value;
   const metodoPago  = document.getElementById('metodoPagoSelect').value;
 
-  if(!medicamento) return Toastify({text:'Elige un medicamento',duration:2500}).showToast();
-  if(!metodoPago)  return Toastify({text:'Elige un método de pago',duration:2500}).showToast();
+  if(!medicamentoId) return Toastify({text:'Elige un medicamento',duration:2500}).showToast();
+  if(!metodoPago)    return Toastify({text:'Elige un método de pago',duration:2500}).showToast();
 
-  const body = { email, medicamentoIds:[+medicamento], cantidad, metodoPago };
+  // Buscar nombre y precio del medicamento seleccionado
+  const med = catalogoMedicamentos.find(m=>String(m.id)===String(medicamentoId));
+  if (!med) return Toastify({text:'Medicamento inválido',duration:2500}).showToast();
+  const medicamentoNombre = med.nombre;
+  const precioUnitario = med.precio;
+  const precioTotal = cantidad * precioUnitario;
+
+  const body = { email, medicamentoIds:[+medicamentoId], cantidad, metodoPago };
 
   fetch('/compras/crear-por-email',{
     method:'POST',
@@ -233,6 +311,19 @@ document.getElementById('formCompra').onsubmit = e=>{
     Toastify({text:`✅ Compra creada (ID: ${j.id})`,duration:3500,gravity:'top',
       backgroundColor:'linear-gradient(to right,#00b09b,#96c93d)'}).showToast();
     e.target.reset();
+
+    // FACTURA PDF
+    const fecha = new Date().toLocaleString();
+    descargarFactura({
+      email,
+      medicamentoNombre,
+      cantidad,
+      precioUnitario,
+      precioTotal,
+      metodoPago,
+      compraId: j.id,
+      fecha
+    });
   })
   .catch(s=>{
     Toastify({text:`❌ Error ${s||''}`,duration:3500,gravity:'top',
@@ -300,6 +391,8 @@ function cancelarPedido(id) {
 
 let cart=JSON.parse(localStorage.getItem('cart')||'[]');
 document.getElementById('cartCount').textContent = cart.length;
+
+function abrirCarrito(){}
 </script>
 </body>
 </html>
