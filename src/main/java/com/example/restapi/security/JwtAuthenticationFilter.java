@@ -31,12 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String servletPath = request.getServletPath();
+        String path = request.getServletPath();
 
-        // Permitir acceso sin token a estas rutas
-        if (servletPath.equals("/index.html") ||
-            servletPath.equals("/login") ||
-            servletPath.equals("/register")) {
+        // ⛔️ Rutas que NO requieren autenticación (añade todas las públicas y estáticas)
+        if (isPublicPath(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,5 +68,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         filterChain.doFilter(request, response);
+    }
+
+    // Helper: detecta todas las rutas públicas (ajusta según tus necesidades)
+    private boolean isPublicPath(HttpServletRequest request) {
+        String path = request.getServletPath();
+        String method = request.getMethod();
+
+        // Permitir acceso libre a estas rutas
+        return path.equals("/") ||
+                path.equals("/index.html") ||
+                path.equals("/login.html") ||
+                path.equals("/registro.html") ||
+                path.equals("/favicon.ico") ||
+                path.startsWith("/css/") ||
+                path.startsWith("/js/") ||
+                path.startsWith("/img/") ||
+                path.startsWith("/swagger-ui/") ||
+                path.startsWith("/v3/api-docs/") ||
+                // ⬇️ Asegúrate de ignorar login y register reales
+                (path.equals("/auth/login") && method.equals("POST")) ||
+                (path.equals("/auth/register") && method.equals("POST")) ||
+                // Otros endpoints públicos (ajusta según tu app)
+                (path.startsWith("/medicamentos/") && method.equals("GET"));
     }
 }

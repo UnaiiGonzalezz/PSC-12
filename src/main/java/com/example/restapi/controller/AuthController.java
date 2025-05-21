@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+// ⛔️ NO @CrossOrigin aquí, lo maneja la configuración global de CORS
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -45,6 +46,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegistroDTO registroDTO) {
+        System.out.println(">> Registro recibido: " + registroDTO.getEmail() + ", nombre: " + registroDTO.getNombre());
+
         if (clienteService.emailYaExiste(registroDTO.getEmail())) {
             return ResponseEntity.status(409).body(Map.of("error", "El correo ya está registrado"));
         }

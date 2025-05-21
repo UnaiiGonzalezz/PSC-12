@@ -12,9 +12,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-@EnableWebSecurity              // 🔧 ¡FUNDAMENTAL!
+@EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
@@ -27,6 +30,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors
+                .configurationSource(corsConfigurationSource())
+            )
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
@@ -37,22 +43,14 @@ public class SecurityConfig {
                     "/nueva-compra.html", "/ver-compra.html",
                     "/admin.html", "/admin-medicamentos.html",
                     "/favicon.ico", "/css/**", "/js/**",
-                    "/swagger-ui/**", "/v3/api-docs/**","/img/logo.png/**"
+                    "/swagger-ui/**", "/v3/api-docs/**", "/img/logo.png/**"
                 ).permitAll()
-
-                // Autenticación
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-
-                // Lectura pública
                 .requestMatchers(HttpMethod.GET, "/medicamentos/**").permitAll()
-
-                // Requiere ADMIN
                 .requestMatchers(HttpMethod.POST, "/medicamentos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/medicamentos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/medicamentos/**").hasRole("ADMIN")
-
-                // Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -63,5 +61,23 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    // ⛔️ ATENCIÓN: Cambia el origen si tu frontend NO está en localhost:8080
+    @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("http://localhost:8080"); // SOLO así, nada de "*" ni "pattern"
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        config.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        return new CorsFilter(corsConfigurationSource());
     }
 }

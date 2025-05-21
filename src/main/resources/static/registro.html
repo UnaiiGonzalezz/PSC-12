@@ -11,8 +11,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      /* Fondo animado + textura SVG superpuesta */
-      background: 
+      background:
         url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" fill="white" fill-opacity="0"/><circle cx="20" cy="20" r="1.5" fill="white" fill-opacity="0.13"/><circle cx="10" cy="30" r="1" fill="white" fill-opacity="0.13"/><circle cx="30" cy="10" r="1" fill="white" fill-opacity="0.13"/></svg>') repeat,
         linear-gradient(-45deg, #0077cc, #39cba7, #56c6e6, #005fa3);
       background-size: 40px 40px, 400% 400%;
@@ -114,7 +113,7 @@
     <img src="img/logo.png" alt="Biocura Pharmacy Logo">
   </div>
   <h1>Registrarse</h1>
-  <form onsubmit="registrar(); return false;">
+  <form id="formRegistro">
     <div class="input-group">
       <input type="text" id="nombre" placeholder="Nombre" required>
       <i class="fas fa-user"></i>
@@ -134,6 +133,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
+document.getElementById('formRegistro').addEventListener('submit', function(event) {
+  event.preventDefault();
+  registrar();
+});
+
 function registrar() {
   const nombre = document.getElementById('nombre').value.trim();
   const email = document.getElementById('email').value.trim();
@@ -148,10 +152,14 @@ function registrar() {
   boton.disabled = true;
   boton.textContent = 'Registrando...';
 
+  // Confirmar datos enviados
+  const payload = { nombre, email, contrasena };
+  console.log('Payload registro:', payload);
+
   fetch('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nombre, email, contrasena })
+    body: JSON.stringify(payload)
   })
   .then(r => {
     if (!r.ok) throw new Error('Error en el registro');
@@ -173,13 +181,12 @@ function showToast(message, type) {
     duration: 3000,
     gravity: "top",
     position: "center",
-    backgroundColor: type === 'success' 
-      ? "linear-gradient(to right, #00b09b, #96c93d)" 
+    backgroundColor: type === 'success'
+      ? "linear-gradient(to right, #00b09b, #96c93d)"
       : "linear-gradient(to right, #ff5f6d, #ffc371)",
     stopOnFocus: true
   }).showToast();
 }
 </script>
-
 </body>
 </html>
