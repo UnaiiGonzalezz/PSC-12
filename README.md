@@ -86,65 +86,109 @@ Puedes abrir el archivo index.html con cualquier navegador para visualizar la do
 
 REST API
 --------
+La aplicación expone una REST API que es utilizada por la interfaz web y clientes externos. Los endpoints están implementados principalmente en las clases controladoras como ClienteController, MedicamentoController y CompraController.
+Para probar estos métodos puedes usar herramientas como Postman o CURL.
 
-The application exposes a REST API, which is used by the web application, which is implemented in the BookController class. To execute these methods, you may install [POSTman app](https://learning.postman.com/docs/getting-started/first-steps/get-postman/) or [CURL command line tool](https://curl.se/). For example, some methods are
+A continuación se muestran algunos ejemplos representativos:
 
-Retrieves all the registered books
+Obtener todos los clientes registrados
 
-    GET http://localhost:8080/api/books
+```bash
+GET http://localhost:8080/api/cliente
+```
 
-Adds a new book to the database
+Registrar un nuevo cliente
 
-    POST http://localhost:8080/api/books
-    Content-Type: application/json
+```bash
+POST http://localhost:8080/api/cliente
+```
+Content-Type: application/json
 
-    {
-    "title": "Spring Boot in Action",
-    "author": "Craig Walls",
-    "isbn": "9781617292545"
-    }
+{
+  "nombre": "Ana",
+  "apellido": "Pérez",
+  "email": "ana.perez@demo.es",
+  "metodoPago": "Tarjeta",
+  "rol": "USER"
+}
 
-Removes a previously registered book
+Obtener lista de medicamentos
 
-    DELETE http://localhost:8080/api/books/1
+```bash
+GET http://localhost:8080/api/medicamento
+```
+Registrar una compra
 
-To see the full list of methods from the REST API, you can visit Swagger interface at: http://localhost:8080/swagger-ui.html. Check the annotations in the *BookController* class, the required dependencies in the *pom.xml* file and the *application.properties* file for its configuration
+```bash
+POST http://localhost:8080/api/compra
+```
+Content-Type: application/json
 
-Command line client
--------------------
+{
+  "clienteId": 1,
+  "medicamentos": [
+    { "id": 5, "cantidad": 2 },
+    { "id": 3, "cantidad": 1 }
+  ]
+}
 
-There is a sample REST API client implementation using the SpringBoot REST client libraries in class *BookManager.java*. You can launch the client using the following Maven command (check)
+Eliminar un cliente
 
-    mvn exec:java
+```bash
+DELETE http://localhost:8080/api/cliente/1
+```
+Para ver la lista completa de endpoints expuestos por la API, puedes visitar la interfaz de Swagger en:
 
-See <build> section in *pom.xml* to see how this command was configured to work.
+```bash
+http://localhost:8080/swagger-ui.html
+```
 
-Packaging the application
--------------------------
+Autenticación y Seguridad
+El proyecto incluye autenticación basada en JWT. Algunos endpoints requieren autorización. Para los accesos públicos y privados se usan filtros configurados mediante Spring Security.
 
-Application can be packaged executing the following command
+Pruebas automatizadas
+La suite de tests utiliza JUnit 5, Mockito y Spring Boot Test. Incluye pruebas funcionales, de integración y de rendimiento (con junitperf).
 
-    mvn package
+Cobertura con JaCoCo
+JaCoCo está configurado para exigir una cobertura mínima del 95% tanto en instrucciones como en ramas. Para generar el informe de cobertura:
 
-including all the SpringBoot required libraries inside the *target/rest-api-0.0.1-SNAPSHOT.jar*, which can be distributed.
+```bash
+mvn clean test
+```
 
-Once packaged, the server can be launched with
+El reporte estará disponible en:
 
-    java -jar rest-api-0.0.1-SNAPSHOT.jar
+```bash
+target/site/jacoco/index.html
+```
 
-and the sample client by running, as SpringBoot changes the way the default Java loader
+Generar documentación técnica (Doxygen)
+Puedes generar documentación a partir de los comentarios del código fuente con:
 
-    java -cp rest-api-0.0.1-SNAPSHOT.jar -Dloader.main=com.example.restapi.client.BookManager org.springframework.boot.loader.launch.PropertiesLauncher localhost 8080
+```bash
+mvn site
+```
+Esto ejecuta Doxygen usando el archivo doxyfile presente en la raíz del proyecto.
 
-Therefore, in a real development, it would be advisable to create different Maven projects for server and client applications, easing distribution and manteinance of each application separately.
+Empaquetar la aplicación
+Para empaquetar el proyecto con todas sus dependencias:
 
-References
-----------
+```bash
+mvn clean package
+```
+Esto generará un archivo .jar en target/, por ejemplo:
 
-* Very good explaination of the project: https://medium.com/@pratik.941/building-rest-api-using-spring-boot-a-comprehensive-guide-3e9b6d7a8951 
-* Building REST services with Spring: https://spring.io/guides/tutorials/rest
-* Good example documenting how to generate Swagger APIs in Spring Boot: https://bell-sw.com/blog/documenting-rest-api-with-swagger-in-spring-boot-3/#mcetoc_1heq9ft3o1v 
-* Docker example with Spring: https://medium.com/@yunuseulucay/end-to-end-spring-boot-with-mysql-and-docker-2c42a6e036c0
+```bash
+target/rest-api-0.0.1-SNAPSHOT.jar
+```
 
+Puedes ejecutarlo con:
 
-
+```bash
+java -jar target/rest-api-0.0.1-SNAPSHOT.jar
+```
+Referencias
+Guía completa para construir REST APIs con Spring Boot
+Documentación oficial de Spring REST
+Documentar APIs con Swagger en Spring Boot
+Ejemplo Spring Boot + MySQL + Docker
