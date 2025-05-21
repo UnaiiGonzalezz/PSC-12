@@ -109,7 +109,8 @@
     <button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
     <!-- Avatar + menú usuario -->
     <div class="user-menu">
-      <img src="img/perfil_default.png" alt="Usuario" id="profilePic" class="profile-avatar">
+      <!-- FOTO DE PERFIL POR DEFECTO PARA TODOS LOS USUARIOS -->
+      <img src="img/perfilusuario.jpg" alt="Usuario" id="profilePic" class="profile-avatar">
       <div id="userDropdown">
         <h4>Pedidos pendientes</h4>
         <ul id="listaPedidos">
@@ -184,7 +185,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
-/* === utilidades === */
+// ========== JS igual que tenías antes ==========
 const qs = id => document.getElementById(id);
 function showSpin(b){ qs('spinner').style.display = b ? 'flex' : 'none'; }
 function toast(t, ok=true){
@@ -193,19 +194,16 @@ function toast(t, ok=true){
                         : 'linear-gradient(to right,#ff5f6d,#ffc371)'}).showToast();
 }
 
-/* === seguridad === */
 const token = sessionStorage.getItem('token');
 if (!token) location.href = 'login.html';
 function logout(){ sessionStorage.clear(); location.href='login.html'; }
 
-/* === estado global === */
 let page=0, size=10, totalPages=1;
 let ordenCol='', ordenDir=1;
-let meds=[];      // datos actuales
+let meds=[];      
 let cart=JSON.parse(localStorage.getItem('cart')||'[]');
 qs('cartCount').textContent = cart.length;
 
-/* === preferencias persistentes === */
 function savePrefs(){ localStorage.setItem('prefs', JSON.stringify({
   q:qs('buscador').value,min:qs('minPrecio').value,max:qs('maxPrecio').value,
   hide:qs('hideNoStock').checked,size:qs('pageSize').value,
@@ -218,7 +216,6 @@ function loadPrefs(){
   if(p.dark) document.body.classList.add('dark');
 }
 
-/* === backend === */
 function urlBackend(){
   const q=qs('buscador').value.trim();
   size=+qs('pageSize').value;
@@ -234,7 +231,6 @@ function cargar(){
     .catch(s=>{showSpin(false);toast('Error '+s,false);});
 }
 
-/* === filtros & render === */
 function aplicarFiltros(){
   let arr=[...meds];
   const min=+qs('minPrecio').value||0,max=+qs('maxPrecio').value||Infinity;
@@ -258,18 +254,15 @@ function pintar(list){
   qs('prev').disabled=page===0; qs('next').disabled=page+1>=totalPages;
 }
 
-/* ordenar */
 document.querySelectorAll('th[data-col]').forEach(th=>{
   th.addEventListener('click',()=>{const c=th.dataset.col;ordenDir=(ordenCol===c?-ordenDir:1);ordenCol=c;aplicarFiltros();});
 });
 
-/* paginación */
 function resetPag(){page=0;}
 function next(){if(page+1<totalPages){page++;cargar();}}
 function prev(){if(page>0){page--;cargar();}}
 window.addEventListener('scroll',()=>qs('topBtn').style.display=scrollY>200?'block':'none');
 
-/* exportar/copiar */
 function exportarCSV(){
   const filas=[['Nombre','Precio','Stock'],...meds.map(m=>[m.nombre,m.precio,m.stock])];
   const blob=new Blob([filas.map(f=>f.join(',')).join('\n')],{type:'text/csv'});
@@ -279,10 +272,8 @@ function exportarCSV(){
 function copiarTabla(){navigator.clipboard.writeText(meds.map(m=>`${m.nombre}\t${m.precio}`).join('\n'))
   .then(()=>toast('Copiado ✔'));}
 
-/* dark-mode */
 function toggleDark(){document.body.classList.toggle('dark');savePrefs();}
 
-/* carrito */
 function addCart(id){cart.push(id);localStorage.setItem('cart',JSON.stringify(cart));
   qs('cartCount').textContent=cart.length;toast('Añadido al carrito');}
 function abrirCarrito(){
@@ -297,7 +288,6 @@ function quitItem(id){cart=cart.filter(x=>x!==id);localStorage.setItem('cart',JS
   qs('cartCount').textContent=cart.length;abrirCarrito();}
 function vaciarCarrito(){cart=[];localStorage.removeItem('cart');qs('cartCount').textContent='0';abrirCarrito();}
 
-/* crear compra */
 function crearCompra(e){
   e.preventDefault();
   if(!cart.length){toast('Carrito vacío',false);return;}
@@ -317,8 +307,7 @@ function crearCompra(e){
   .finally(()=>showSpin(false));
 }
 
-/* === PERFIL USUARIO Y PEDIDOS (CORREGIDO Y MEJORADO) === */
-// Mostrar/Ocultar menú usuario
+// PERFIL USUARIO Y PEDIDOS
 const profilePic = document.getElementById('profilePic');
 const userDropdown = document.getElementById('userDropdown');
 profilePic.addEventListener('click', (e) => {
@@ -330,11 +319,9 @@ profilePic.addEventListener('click', (e) => {
 });
 window.addEventListener('click', () => userDropdown.classList.remove('active'));
 
-// Cargar pedidos pendientes del usuario actualmente logueado, con botón cancelar
 function cargarPedidosPendientes() {
   const token = sessionStorage.getItem('token');
-  const email = sessionStorage.getItem('email'); // Debe haberse guardado al iniciar sesión
-
+  const email = sessionStorage.getItem('email');
   if (!token || !email) {
     document.getElementById('listaPedidos').innerHTML = `<li class="no-pedidos">No identificado</li>`;
     return;
@@ -362,14 +349,13 @@ function cargarPedidosPendientes() {
   });
 }
 
-// Cancelar pedido
 function cancelarPedido(id) {
   const token = sessionStorage.getItem('token');
   if (!confirm("¿Seguro que quieres cancelar este pedido?")) return;
   showSpin(true);
 
-  fetch(`/compras/${id}/cancelar`, { // Ajusta endpoint y método según tu backend
-    method: 'PUT', // O PATCH o DELETE si tu API lo espera distinto
+  fetch(`/compras/${id}/cancelar`, { 
+    method: 'PUT',
     headers: { 'Authorization': 'Bearer ' + token }
   })
   .then(r => {
@@ -383,7 +369,6 @@ function cancelarPedido(id) {
   .finally(() => showSpin(false));
 }
 
-/* arranque */
 loadPrefs();
 window.onload=cargar;
 </script>
