@@ -8,6 +8,13 @@ public class SecurityUtil {
     /** Devuelve el email (subject) almacenado en el JWT ya validado. */
     public static String getCurrentUserEmail() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return (auth != null) ? (String) auth.getPrincipal() : null;
+
+        // Refactor explícito para que JaCoCo detecte mejor las ramas
+        String email = null;
+        if (auth != null) {
+            email = (String) auth.getPrincipal();
+        }
+
+        return email;
     }
 }
