@@ -86,8 +86,6 @@ Puedes abrir el archivo index.html con cualquier navegador para visualizar la do
 
 REST API
 --------
-
-REST API
 La aplicación expone una REST API que es utilizada por la interfaz web y clientes externos. Los endpoints están implementados principalmente en las clases controladoras como ClienteController, MedicamentoController y CompraController.
 Para probar estos métodos puedes usar herramientas como Postman o CURL.
 
@@ -98,6 +96,7 @@ Obtener todos los clientes registrados
 ```bash
 GET http://localhost:8080/api/cliente
 ```
+
 Registrar un nuevo cliente
 
 ```bash
@@ -112,11 +111,12 @@ Content-Type: application/json
   "metodoPago": "Tarjeta",
   "rol": "USER"
 }
+
 Obtener lista de medicamentos
 
 ```bash
 GET http://localhost:8080/api/medicamento
-''''
+```
 Registrar una compra
 
 ```bash
@@ -131,6 +131,7 @@ Content-Type: application/json
     { "id": 3, "cantidad": 1 }
   ]
 }
+
 Eliminar un cliente
 
 ```bash
@@ -142,5 +143,52 @@ Para ver la lista completa de endpoints expuestos por la API, puedes visitar la 
 http://localhost:8080/swagger-ui.html
 ```
 
+Autenticación y Seguridad
+El proyecto incluye autenticación basada en JWT. Algunos endpoints requieren autorización. Para los accesos públicos y privados se usan filtros configurados mediante Spring Security.
 
+Pruebas automatizadas
+La suite de tests utiliza JUnit 5, Mockito y Spring Boot Test. Incluye pruebas funcionales, de integración y de rendimiento (con junitperf).
 
+Cobertura con JaCoCo
+JaCoCo está configurado para exigir una cobertura mínima del 95% tanto en instrucciones como en ramas. Para generar el informe de cobertura:
+
+```bash
+mvn clean test
+```
+
+El reporte estará disponible en:
+
+```bash
+target/site/jacoco/index.html
+```
+
+Generar documentación técnica (Doxygen)
+Puedes generar documentación a partir de los comentarios del código fuente con:
+
+```bash
+mvn site
+```
+Esto ejecuta Doxygen usando el archivo doxyfile presente en la raíz del proyecto.
+
+Empaquetar la aplicación
+Para empaquetar el proyecto con todas sus dependencias:
+
+```bash
+mvn clean package
+```
+Esto generará un archivo .jar en target/, por ejemplo:
+
+```bash
+target/rest-api-0.0.1-SNAPSHOT.jar
+```
+
+Puedes ejecutarlo con:
+
+```bash
+java -jar target/rest-api-0.0.1-SNAPSHOT.jar
+```
+Referencias
+Guía completa para construir REST APIs con Spring Boot
+Documentación oficial de Spring REST
+Documentar APIs con Swagger en Spring Boot
+Ejemplo Spring Boot + MySQL + Docker
