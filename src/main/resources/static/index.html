@@ -79,6 +79,20 @@
       text-align: center;
       padding: .6rem 0;
     }
+    .cancelar-btn {
+      margin-top:4px;
+      background:#ff6b6b;
+      border:none;
+      color:white;
+      padding:4px 10px;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:0.95em;
+      transition:background 0.2s;
+    }
+    .cancelar-btn:hover {
+      background:#d32f2f;
+    }
   </style>
 </head>
 <body>
@@ -303,7 +317,7 @@ function crearCompra(e){
   .finally(()=>showSpin(false));
 }
 
-/* === PERFIL USUARIO Y PEDIDOS (CORREGIDO) === */
+/* === PERFIL USUARIO Y PEDIDOS (CORREGIDO Y MEJORADO) === */
 // Mostrar/Ocultar menú usuario
 const profilePic = document.getElementById('profilePic');
 const userDropdown = document.getElementById('userDropdown');
@@ -316,7 +330,7 @@ profilePic.addEventListener('click', (e) => {
 });
 window.addEventListener('click', () => userDropdown.classList.remove('active'));
 
-// Cargar pedidos pendientes del usuario actualmente logueado
+// Cargar pedidos pendientes del usuario actualmente logueado, con botón cancelar
 function cargarPedidosPendientes() {
   const token = sessionStorage.getItem('token');
   const email = sessionStorage.getItem('email'); // Debe haberse guardado al iniciar sesión
@@ -337,7 +351,8 @@ function cargarPedidosPendientes() {
         `<li>
           <strong>ID:</strong> ${p.id}<br>
           <strong>Fecha:</strong> ${p.fechaCompra}<br>
-          <strong>Estado:</strong> ${p.estado}
+          <strong>Estado:</strong> ${p.estado}<br>
+          <button class="cancelar-btn" onclick="cancelarPedido(${p.id})">Cancelar</button>
         </li>`
       ).join('');
     }
@@ -345,6 +360,27 @@ function cargarPedidosPendientes() {
   .catch(() => {
     document.getElementById('listaPedidos').innerHTML = `<li class="no-pedidos">No se pudieron cargar los pedidos</li>`;
   });
+}
+
+// Cancelar pedido
+function cancelarPedido(id) {
+  const token = sessionStorage.getItem('token');
+  if (!confirm("¿Seguro que quieres cancelar este pedido?")) return;
+  showSpin(true);
+
+  fetch(`/compras/${id}/cancelar`, { // Ajusta endpoint y método según tu backend
+    method: 'PUT', // O PATCH o DELETE si tu API lo espera distinto
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(r => {
+    if (!r.ok) throw new Error();
+    toast("Pedido cancelado ✔");
+    cargarPedidosPendientes();
+  })
+  .catch(() => {
+    toast("No se pudo cancelar el pedido", false);
+  })
+  .finally(() => showSpin(false));
 }
 
 /* arranque */

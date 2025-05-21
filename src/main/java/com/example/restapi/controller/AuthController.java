@@ -38,6 +38,8 @@ public class AuthController {
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
             response.put("rol", cliente.getRol());
+            response.put("email", cliente.getEmail()); // <-- LÍNEA AÑADIDA
+
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(401).body(Map.of("error", "Credenciales incorrectas"));

@@ -16,6 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -36,7 +38,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Recursos públicos
+                // Recursos públicos (html, css, js, docs)
                 .requestMatchers(
                     "/", "/index.html", "/login.html", "/registro.html",
                     "/cliente.html", "/compra.html", "/medicamento.html",
@@ -45,12 +47,23 @@ public class SecurityConfig {
                     "/favicon.ico", "/css/**", "/js/**",
                     "/swagger-ui/**", "/v3/api-docs/**", "/img/logo.png/**"
                 ).permitAll()
+                // Auth
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                // Medicamentos: GET público, resto solo ADMIN
                 .requestMatchers(HttpMethod.GET, "/medicamentos/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/medicamentos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/medicamentos/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/medicamentos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/medicamentos/**").hasRole("ADMIN")
+                // Compras: solo autenticado (usuarios logueados)
+                .requestMatchers(HttpMethod.GET, "/compras/usuario/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/compras/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/compras/**").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/compras/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/compras/**").authenticated()
+                // Si quieres, permite solo ADMIN el listado general de compras
+                // .requestMatchers(HttpMethod.GET, "/compras").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -63,11 +76,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // ⛔️ ATENCIÓN: Cambia el origen si tu frontend NO está en localhost:8080
+    // CORS para desarrollo, añade/elimina orígenes según lo necesites
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:8080"); // SOLO así, nada de "*" ni "pattern"
+        config.setAllowedOrigins(List.of(
+            "http://localhost:8080",
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ public class CompraController {
     @Autowired
     private MedicamentoRepository medicamentoRepository;
 
-// Obtener todas
+    // Obtener todas
     @GetMapping
     public List<CompraDTO> getAllCompras() {
         return compraService.getAllCompras()
@@ -40,7 +41,7 @@ public class CompraController {
                 .collect(Collectors.toList());
     }
 
-    // ✅ POST: Crear compra desde email
+    // POST: Crear compra desde email
     @PostMapping("/crear-por-email")
     public ResponseEntity<Map<String, Object>> crearCompraDesdeEmail(@RequestBody CompraRequest request) {
         Cliente cliente = clienteService.findByEmail(request.getEmail())
@@ -69,7 +70,7 @@ public class CompraController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ GET: Obtener detalles de compra (estado)
+    // GET: Obtener detalles de compra (estado)
     @GetMapping("/{id}")
     public ResponseEntity<?> getEstadoCompra(@PathVariable Long id) {
         return compraService.getEstadoCompraDTO(id)
@@ -77,7 +78,7 @@ public class CompraController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ✅ PATCH: Cambiar estado de una compra
+    // PATCH: Cambiar estado de una compra
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Compra> cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String nuevoEstado = body.get("estado");
@@ -89,7 +90,44 @@ public class CompraController {
         return ResponseEntity.ok(actualizada);
     }
 
-    // ✅ Clase auxiliar para recibir JSON en POST
+    // PUT: Cancelar una compra (solo dueño o admin)
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<?> cancelarCompra(@PathVariable Long id, Principal principal) {
+        Compra compra = compraService.getCompraById(id).orElse(null);
+        if (compra == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Seguridad: solo el dueño puede cancelar (o añade lógica para admin si lo necesitas)
+        if (principal != null && !compra.getCliente().getEmail().equalsIgnoreCase(principal.getName())) {
+            return ResponseEntity.status(403).body("No puedes cancelar pedidos de otros usuarios.");
+        }
+        if ("Cancelada".equalsIgnoreCase(compra.getEstado())) {
+            return ResponseEntity.badRequest().body("La compra ya estaba cancelada.");
+        }
+        compra.setEstado("Cancelada");
+        compraService.saveCompra(compra);
+        return ResponseEntity.ok().build();
+    }
+
+    // GET: Obtener compras de un usuario (por email y opcional estado)
+    @GetMapping("/usuario/{email}")
+    public ResponseEntity<List<CompraDTO>> getComprasPorUsuarioYEstado(
+            @PathVariable String email,
+            @RequestParam(value = "estado", required = false) String estado) {
+        List<Compra> compras;
+        if (estado != null && !estado.isEmpty()) {
+            compras = compraService.getComprasByEmailAndEstado(email, estado);
+        } else {
+            compras = compraService.getComprasByEmail(email);
+        }
+        List<CompraDTO> comprasDTO = compras.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(comprasDTO);
+    }
+
+    // Clase auxiliar para recibir JSON en POST
     public static class CompraRequest {
         private String email;
         private List<Long> medicamentoIds;
@@ -111,27 +149,27 @@ public class CompraController {
 
     // Conversión a DTO
     private CompraDTO convertToDTO(Compra c) {
-    return new CompraDTO(
-        c.getId(),
-        c.getCliente().getId(),
-        c.getCliente().getNombre(),
-        c.getCliente().getApellido(),
-        c.getMedicamentos().stream()
-            .map(m -> new MedicamentoDTO(
-                m.getId(),
-                m.getNombre(),
-                m.getPrecio(),
-                m.getCategoria(),
-                m.getStock(),
-                m.getProveedor(),
-                m.isDisponible()
-            ))
-            .toList(),
-        c.getFechaCompra(),
-        c.getCantidad(),
-        c.getPago(),
-        c.getEstado(),
-        c.getMetodoPago()
-    );
+        return new CompraDTO(
+            c.getId(),
+            c.getCliente().getId(),
+            c.getCliente().getNombre(),
+            c.getCliente().getApellido(),
+            c.getMedicamentos().stream()
+                .map(m -> new MedicamentoDTO(
+                    m.getId(),
+                    m.getNombre(),
+                    m.getPrecio(),
+                    m.getCategoria(),
+                    m.getStock(),
+                    m.getProveedor(),
+                    m.isDisponible()
+                ))
+                .toList(),
+            c.getFechaCompra(),
+            c.getCantidad(),
+            c.getPago(),
+            c.getEstado(),
+            c.getMetodoPago()
+        );
     }
 }

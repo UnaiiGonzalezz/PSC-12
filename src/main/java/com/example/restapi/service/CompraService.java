@@ -20,7 +20,7 @@ public class CompraService {
     @Autowired
     private CompraRepository compraRepository;
 
-    /* ---------- CRUD básico ---------- */
+    // CRUD básico
     public List<Compra> getAllCompras() {
         return compraRepository.findAll();
     }
@@ -41,7 +41,6 @@ public class CompraService {
         compraRepository.deleteById(id);
     }
 
-    /* ---------- Cambiar estado ---------- */
     private static final Set<String> ESTADOS_VALIDOS = Set.of("Pendiente", "Enviado", "Entregado", "Cancelada", "Recibido");
 
     public Compra updateEstado(Long id, String nuevoEstado) {
@@ -59,7 +58,6 @@ public class CompraService {
         return compraRepository.save(compra);
     }
 
-    /* ---------- Historial de compras por cliente ---------- */
     public List<CompraResumenDTO> getHistorialPorCliente(Long clienteId) {
         return compraRepository.findByClienteId(clienteId).stream()
                 .map(c -> new CompraResumenDTO(
@@ -70,7 +68,6 @@ public class CompraService {
                 .collect(Collectors.toList());
     }
 
-    /* ---------- Estado detallado de compra ---------- */
     @Transactional(readOnly = true)
     public Optional<EstadoCompraDTO> getEstadoCompraDTO(Long id) {
         return compraRepository.findById(id)
@@ -79,7 +76,6 @@ public class CompraService {
 
     private EstadoCompraDTO mapToEstadoDTO(Compra compra) {
         var cliente = compra.getCliente();
-
         var clienteInfo = new EstadoCompraDTO.ClienteInfo(
                 cliente.getNombre(),
                 cliente.getApellido(),
@@ -96,13 +92,12 @@ public class CompraService {
                 compra.getId(),
                 compra.getEstado(),
                 compra.getFechaCompra(),
-                cliente.getId(), // ✅ Este campo es necesario
+                cliente.getId(),
                 clienteInfo,
                 medicamentosInfo
         );
     }
 
-    /* ---------- Crear compra desde carrito ---------- */
     @Transactional
     public Compra crearDesdeCarrito(Carrito carrito) {
         Cliente cliente = carrito.getCliente();
@@ -127,7 +122,15 @@ public class CompraService {
         return compraRepository.save(compra);
     }
 
-    /* ---------- Buscar compras por cliente ---------- */
+    // --- Métodos que usan fetch join ---
+    public List<Compra> getComprasByEmail(String email) {
+        return compraRepository.findWithMedicamentosByClienteEmail(email);
+    }
+
+    public List<Compra> getComprasByEmailAndEstado(String email, String estado) {
+        return compraRepository.findWithMedicamentosByClienteEmailAndEstado(email, estado);
+    }
+
     public List<Compra> findByCliente(Cliente cliente) {
         return compraRepository.findByCliente(cliente);
     }
