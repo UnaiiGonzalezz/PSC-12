@@ -87,64 +87,60 @@ Puedes abrir el archivo index.html con cualquier navegador para visualizar la do
 REST API
 --------
 
-The application exposes a REST API, which is used by the web application, which is implemented in the BookController class. To execute these methods, you may install [POSTman app](https://learning.postman.com/docs/getting-started/first-steps/get-postman/) or [CURL command line tool](https://curl.se/). For example, some methods are
+REST API
+La aplicación expone una REST API que es utilizada por la interfaz web y clientes externos. Los endpoints están implementados principalmente en las clases controladoras como ClienteController, MedicamentoController y CompraController.
+Para probar estos métodos puedes usar herramientas como Postman o CURL.
 
-Retrieves all the registered books
+A continuación se muestran algunos ejemplos representativos:
 
-    GET http://localhost:8080/api/books
+Obtener todos los clientes registrados
 
-Adds a new book to the database
+```bash
+GET http://localhost:8080/api/cliente
+```
+Registrar un nuevo cliente
 
-    POST http://localhost:8080/api/books
-    Content-Type: application/json
+```bash
+POST http://localhost:8080/api/cliente
+```
+Content-Type: application/json
 
-    {
-    "title": "Spring Boot in Action",
-    "author": "Craig Walls",
-    "isbn": "9781617292545"
-    }
+{
+  "nombre": "Ana",
+  "apellido": "Pérez",
+  "email": "ana.perez@demo.es",
+  "metodoPago": "Tarjeta",
+  "rol": "USER"
+}
+Obtener lista de medicamentos
 
-Removes a previously registered book
+```bash
+GET http://localhost:8080/api/medicamento
+''''
+Registrar una compra
 
-    DELETE http://localhost:8080/api/books/1
+```bash
+POST http://localhost:8080/api/compra
+```
+Content-Type: application/json
 
-To see the full list of methods from the REST API, you can visit Swagger interface at: http://localhost:8080/swagger-ui.html. Check the annotations in the *BookController* class, the required dependencies in the *pom.xml* file and the *application.properties* file for its configuration
+{
+  "clienteId": 1,
+  "medicamentos": [
+    { "id": 5, "cantidad": 2 },
+    { "id": 3, "cantidad": 1 }
+  ]
+}
+Eliminar un cliente
 
-Command line client
--------------------
+```bash
+DELETE http://localhost:8080/api/cliente/1
+```
+Para ver la lista completa de endpoints expuestos por la API, puedes visitar la interfaz de Swagger en:
 
-There is a sample REST API client implementation using the SpringBoot REST client libraries in class *BookManager.java*. You can launch the client using the following Maven command (check)
-
-    mvn exec:java
-
-See <build> section in *pom.xml* to see how this command was configured to work.
-
-Packaging the application
--------------------------
-
-Application can be packaged executing the following command
-
-    mvn package
-
-including all the SpringBoot required libraries inside the *target/rest-api-0.0.1-SNAPSHOT.jar*, which can be distributed.
-
-Once packaged, the server can be launched with
-
-    java -jar rest-api-0.0.1-SNAPSHOT.jar
-
-and the sample client by running, as SpringBoot changes the way the default Java loader
-
-    java -cp rest-api-0.0.1-SNAPSHOT.jar -Dloader.main=com.example.restapi.client.BookManager org.springframework.boot.loader.launch.PropertiesLauncher localhost 8080
-
-Therefore, in a real development, it would be advisable to create different Maven projects for server and client applications, easing distribution and manteinance of each application separately.
-
-References
-----------
-
-* Very good explaination of the project: https://medium.com/@pratik.941/building-rest-api-using-spring-boot-a-comprehensive-guide-3e9b6d7a8951 
-* Building REST services with Spring: https://spring.io/guides/tutorials/rest
-* Good example documenting how to generate Swagger APIs in Spring Boot: https://bell-sw.com/blog/documenting-rest-api-with-swagger-in-spring-boot-3/#mcetoc_1heq9ft3o1v 
-* Docker example with Spring: https://medium.com/@yunuseulucay/end-to-end-spring-boot-with-mysql-and-docker-2c42a6e036c0
+```bash
+http://localhost:8080/swagger-ui.html
+```
 
 
 
