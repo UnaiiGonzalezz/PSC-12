@@ -5,47 +5,83 @@
   <title>Catálogo de Medicamentos</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
   <style>
-    /* --- layout básico --- */
     body{padding:20px;}
     .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
     #logoutBtn{background:crimson;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;}
     #logoutBtn:hover{background:darkred;}
-
-    /* --- spinner global --- */
     #spinner{position:fixed;inset:0;background:rgba(255,255,255,.45);display:none;justify-content:center;align-items:center;z-index:1000;}
     #spinner div{width:56px;height:56px;border:8px solid #0077cc;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);} }
-
-    /* --- colores según stock --- */
     .out{background:#ffd6d6 !important;}
     .low{background:#fff8d6 !important;}
-
-    /* --- botón carrito --- */
     #cartBtn{background:#ffc107;border:none;border-radius:50%;width:36px;height:36px;font-weight:700;cursor:pointer;position:relative;}
     #cartBtn span{position:absolute;top:-6px;right:-6px;background:crimson;color:#fff;font-size:.7rem;border-radius:50%;padding:2px 5px;}
-
-    /* --- modal carrito --- */
     #cartModal{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,.55);z-index:1100;}
     #cartBox{background:#fff;padding:24px 32px;border-radius:12px;max-width:460px;width:90%;position:relative;}
     #cartBox h3{margin-bottom:16px;}
     #cartBox .close{position:absolute;top:10px;right:15px;font-size:1.3rem;cursor:pointer;color:#888;}
-
-    /* --- dark-mode --- */
     body.dark{background:#0f172a;color:#e2e8f0;}
     body.dark table{background:#1e293b;color:#e2e8f0;}
     body.dark th{background:#0d6efd;}
     body.dark .toolbar button{background:#0d6efd;color:#fff;}
     body.dark #cartBox{background:#1e293b;color:#e2e8f0;}
-    
-
-    
+    .profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #1e88e5;
+      cursor: pointer;
+      object-fit: cover;
+      transition: box-shadow .2s;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.09);
+    }
+    .user-menu {
+      position: relative;
+    }
+    #userDropdown {
+      display: none;
+      position: absolute;
+      top: 48px;
+      right: 0;
+      background: #fff;
+      color: #333;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
+      min-width: 280px;
+      z-index: 2222;
+      border: 1px solid #e0e0e0;
+      padding: 0.5rem 0;
+    }
+    #userDropdown.active {
+      display: block;
+    }
+    #userDropdown h4 {
+      padding: 1rem 1.2rem 0.2rem 1.2rem;
+      margin: 0;
+      font-size: 1rem;
+      color: #1565c0;
+    }
+    #userDropdown ul {
+      list-style: none;
+      margin: 0;
+      padding: 0 1.2rem 0.7rem 1.2rem;
+    }
+    #userDropdown ul li {
+      font-size: 0.97rem;
+      margin: 0.6rem 0;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: .5rem;
+    }
+    #userDropdown ul li:last-child { border-bottom: none; }
+    #userDropdown .no-pedidos {
+      color: #666;
+      text-align: center;
+      padding: .6rem 0;
+    }
   </style>
 </head>
-
 <body>
-
 <!-- ░░ NAVBAR ░░ -->
 <nav class="navbar">
   <div class="nav-links">
@@ -57,35 +93,37 @@
   <div style="display:flex;align-items:center;gap:12px;">
     <button id="cartBtn" onclick="abrirCarrito()">🛒<span id="cartCount">0</span></button>
     <button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
+    <!-- Avatar + menú usuario -->
+    <div class="user-menu">
+      <img src="img/perfil_default.png" alt="Usuario" id="profilePic" class="profile-avatar">
+      <div id="userDropdown">
+        <h4>Pedidos pendientes</h4>
+        <ul id="listaPedidos">
+          <li class="no-pedidos">Cargando...</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </nav>
 
 <h1>Medicamentos disponibles</h1>
-
-<!-- ░░ TOOLBAR ░░ -->
 <div class="toolbar">
   <input id="buscador" placeholder="Buscar nombre…" oninput="resetPag();cargar()">
-
   <input type="number" id="minPrecio" placeholder="€ mín" style="width:80px">
   <input type="number" id="maxPrecio" placeholder="€ máx" style="width:80px">
   <button onclick="resetPag();cargar()">Filtrar €</button>
-
   <label style="display:flex;align-items:center;gap:4px;">
     <input type="checkbox" id="hideNoStock" onchange="cargar()"> Ocultar sin stock
   </label>
-
   <select id="pageSize" onchange="resetPag();cargar()">
     <option value="10">10 / pág</option>
     <option value="25">25 / pág</option>
     <option value="50">50 / pág</option>
   </select>
-
   <button onclick="exportarCSV()">Exportar CSV</button>
   <button onclick="copiarTabla()">Copiar</button>
   <button onclick="toggleDark()">🌙 / ☀️</button>
 </div>
-
-<!-- ░░ TABLA ░░ -->
 <table>
   <thead>
     <tr>
@@ -97,38 +135,26 @@
   </thead>
   <tbody id="tbody"></tbody>
 </table>
-
-<!-- ░░ PAGINACIÓN ░░ -->
 <div class="paginacion">
   <button onclick="prev()" id="prev">&larr; Anterior</button>
   <span id="pagina"></span>
   <button onclick="next()" id="next">Siguiente &rarr;</button>
 </div>
-
-<!-- botón subir -->
 <button id="topBtn" style="position:fixed;right:20px;bottom:20px;display:none"
         onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
-
-<!-- spinner -->
 <div id="spinner"><div></div></div>
-
 <!-- ░░ CARRITO ░░ -->
 <div id="cartModal">
   <div id="cartBox">
     <span class="close" onclick="cerrarCarrito()">×</span>
     <h3>Carrito</h3>
-
     <ul id="cartList" class="detalle"></ul>
     <p style="margin-top:10px;font-weight:600;">
       Total: €<span id="cartTotal">0.00</span>
     </p>
-
-    <!-- formulario crear compra -->
     <form id="compraForm" onsubmit="crearCompra(event)"
           style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
       <input type="email" id="emailCompra" placeholder="Email cliente" required>
-
-      <!-- ▼ desplegable método de pago -->
       <select id="metodoPago" required>
         <option value="" disabled selected>Elige método de pago</option>
         <option>TARJETA</option>
@@ -136,16 +162,13 @@
         <option>PAYPAL</option>
         <option>TRANSFERENCIA</option>
       </select>
-
       <button type="submit">Crear compra</button>
     </form>
-
     <button onclick="vaciarCarrito()" style="margin-top:10px">Vaciar carrito</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
 <script>
 /* === utilidades === */
 const qs = id => document.getElementById(id);
@@ -278,6 +301,50 @@ function crearCompra(e){
   .catch(()=>{const localId=Date.now();toast(`Compra registrada localmente (ID: ${localId})`,false);
               vaciarCarrito();cerrarCarrito();})
   .finally(()=>showSpin(false));
+}
+
+/* === PERFIL USUARIO Y PEDIDOS (CORREGIDO) === */
+// Mostrar/Ocultar menú usuario
+const profilePic = document.getElementById('profilePic');
+const userDropdown = document.getElementById('userDropdown');
+profilePic.addEventListener('click', (e) => {
+  userDropdown.classList.toggle('active');
+  if (userDropdown.classList.contains('active')) {
+    cargarPedidosPendientes();
+  }
+  e.stopPropagation();
+});
+window.addEventListener('click', () => userDropdown.classList.remove('active'));
+
+// Cargar pedidos pendientes del usuario actualmente logueado
+function cargarPedidosPendientes() {
+  const token = sessionStorage.getItem('token');
+  const email = sessionStorage.getItem('email'); // Debe haberse guardado al iniciar sesión
+
+  if (!token || !email) {
+    document.getElementById('listaPedidos').innerHTML = `<li class="no-pedidos">No identificado</li>`;
+    return;
+  }
+  fetch(`/compras/usuario/${encodeURIComponent(email)}?estado=PENDIENTE`, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(r => r.json())
+  .then(pedidos => {
+    if (!Array.isArray(pedidos) || pedidos.length === 0) {
+      document.getElementById('listaPedidos').innerHTML = `<li class="no-pedidos">No tienes pedidos pendientes</li>`;
+    } else {
+      document.getElementById('listaPedidos').innerHTML = pedidos.map(p =>
+        `<li>
+          <strong>ID:</strong> ${p.id}<br>
+          <strong>Fecha:</strong> ${p.fechaCompra}<br>
+          <strong>Estado:</strong> ${p.estado}
+        </li>`
+      ).join('');
+    }
+  })
+  .catch(() => {
+    document.getElementById('listaPedidos').innerHTML = `<li class="no-pedidos">No se pudieron cargar los pedidos</li>`;
+  });
 }
 
 /* arranque */

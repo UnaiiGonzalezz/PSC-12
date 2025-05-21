@@ -75,6 +75,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         String method = request.getMethod();
 
+        if (method == null) return false; // <-- Corregido para evitar NullPointer
+
         // Permitir acceso libre a estas rutas
         return path.equals("/") ||
                 path.equals("/index.html") ||

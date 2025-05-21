@@ -28,6 +28,63 @@
   --dur: .3s;
 }
 
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--clr-primary);
+  cursor: pointer;
+  object-fit: cover;
+  transition: box-shadow .2s;
+  box-shadow: 0 2px 8px rgba(30,136,229,0.09);
+}
+
+.user-menu {
+  position: relative;
+}
+
+#userDropdown {
+  display: none;
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: var(--clr-surface);
+  color: var(--clr-text);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: 280px;
+  z-index: 2222;
+  border: 1px solid var(--clr-border);
+  padding: 0.5rem 0;
+}
+#userDropdown.active {
+  display: block;
+}
+#userDropdown h4 {
+  padding: 1rem 1.2rem 0.2rem 1.2rem;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--clr-primary-dark);
+}
+#userDropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 1.2rem 0.7rem 1.2rem;
+}
+#userDropdown ul li {
+  font-size: 0.97rem;
+  margin: 0.6rem 0;
+  border-bottom: 1px solid var(--clr-border);
+  padding-bottom: .5rem;
+}
+#userDropdown ul li:last-child { border-bottom: none; }
+#userDropdown .no-pedidos {
+  color: var(--clr-text-light);
+  text-align: center;
+  padding: .6rem 0;
+}
+
 /* =====================================================
    RESET & BASE
    ===================================================== */
