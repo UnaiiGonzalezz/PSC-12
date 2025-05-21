@@ -4,118 +4,192 @@
   <meta charset="UTF-8">
   <title>Detalle de Compra</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <style>
-    #detalle {
-      margin-top: 20px;
-      padding: 20px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      font-size: 1.1rem;
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: #f7fafd;
+      color: #25324b;
+      padding: 2rem;
+      min-height: 100vh;
     }
-    #detalle li {
-      margin-bottom: 10px;
+    h1 {
+      color: #1565c0;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 36px;
+      letter-spacing: -0.5px;
+      text-align: center;
     }
-    .volver {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: #0077cc;
+    nav.navbar {
+      background: linear-gradient(90deg,#1565c0,#42a5f5);
+      color: #fff;
+      padding: 1.2rem 2rem;
+      border-radius: 18px;
+      margin-bottom: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 16px #1e88e522;
+      font-size: 1.08rem;
+    }
+    .nav-links a {
+      color: #fff;
       text-decoration: none;
-      font-weight: bold;
+      padding: .5rem 1rem;
+      border-radius: 9px;
+      font-weight: 600;
+      transition: background .15s, transform .13s;
+      margin-right: 6px;
     }
-    .volver:hover {
-      text-decoration: underline;
+    .nav-links a.active, .nav-links a:hover {
+      background: rgba(255,255,255,0.13);
+      transform: translateY(-2px);
     }
-    body{padding:20px;}
-    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
-    #logoutBtn{background:crimson;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;}
-    #logoutBtn:hover{background:darkred;}
-    #spinner{position:fixed;inset:0;background:rgba(255,255,255,.45);display:none;justify-content:center;align-items:center;z-index:1000;}
-    #spinner div{width:56px;height:56px;border:8px solid #0077cc;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);} }
-    .out{background:#ffd6d6 !important;}
-    .low{background:#fff8d6 !important;}
-    #cartBtn{background:#ffc107;border:none;border-radius:50%;width:36px;height:36px;font-weight:700;cursor:pointer;position:relative;}
-    #cartBtn span{position:absolute;top:-6px;right:-6px;background:crimson;color:#fff;font-size:.7rem;border-radius:50%;padding:2px 5px;}
-    #cartModal{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,.55);z-index:1100;}
-    #cartBox{background:#fff;padding:24px 32px;border-radius:12px;max-width:460px;width:90%;position:relative;}
-    #cartBox h3{margin-bottom:16px;}
-    #cartBox .close{position:absolute;top:10px;right:15px;font-size:1.3rem;cursor:pointer;color:#888;}
-    /* PERFIL USUARIO */
-    .profile-avatar {
-      width: 40px;
-      height: 40px;
+    #cartBtn {
+      background: #00bfa5;
+      color: #fff;
       border-radius: 50%;
-      border: 2px solid #1e88e5;
+      font-weight: 600;
+      font-size: 1.3em;
+      padding: 0 17px 0 14px;
+      border: none;
       cursor: pointer;
-      object-fit: cover;
-      transition: box-shadow .2s;
-      box-shadow: 0 2px 8px rgba(30,136,229,0.09);
-    }
-    .user-menu {
+      box-shadow: 0 2px 8px #00bfa522;
       position: relative;
     }
+    #cartBtn span {
+      position: absolute;top: -6px;right: -6px;
+      background: crimson;color: #fff;font-size: .7rem;
+      border-radius: 50%;padding: 2px 5px;
+      font-weight: 600;
+    }
+    #logoutBtn {
+      background: crimson;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-left: 7px;
+      transition: background .15s;
+    }
+    #logoutBtn:hover { background: darkred; }
+    .profile-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid #1e88e5; cursor: pointer; object-fit: cover;
+      transition: box-shadow .2s; margin-left: 7px;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.09);
+    }
+    .user-menu { position: relative; }
     #userDropdown {
-      display: none;
-      position: absolute;
-      top: 48px;
-      right: 0;
-      background: #fff;
-      color: #333;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.12);
-      min-width: 280px;
-      z-index: 2222;
-      border: 1px solid #e0e0e0;
-      padding: 0.5rem 0;
+      display: none; position: absolute; top: 48px; right: 0;
+      background: #fff; color: #333; border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12); min-width: 280px; z-index: 2222;
+      border: 1px solid #e0e0e0; padding: 0.5rem 0;
     }
-    #userDropdown.active {
-      display: block;
-    }
-    #userDropdown h4 {
-      padding: 1rem 1.2rem 0.2rem 1.2rem;
-      margin: 0;
-      font-size: 1rem;
-      color: #1565c0;
-    }
-    #userDropdown ul {
-      list-style: none;
-      margin: 0;
-      padding: 0 1.2rem 0.7rem 1.2rem;
-    }
-    #userDropdown ul li {
-      font-size: 0.97rem;
-      margin: 0.6rem 0;
-      border-bottom: 1px solid #e0e0e0;
-      padding-bottom: .5rem;
-    }
+    #userDropdown.active { display: block; }
+    #userDropdown h4 { padding: 1rem 1.2rem 0.2rem 1.2rem; margin: 0;
+      font-size: 1rem; color: #1565c0;}
+    #userDropdown ul { list-style: none; margin: 0; padding: 0 1.2rem 0.7rem 1.2rem;}
+    #userDropdown ul li { font-size: 0.97rem; margin: 0.6rem 0; border-bottom: 1px solid #e0e0e0; padding-bottom: .5rem;}
     #userDropdown ul li:last-child { border-bottom: none; }
-    #userDropdown .no-pedidos {
-      color: #666;
-      text-align: center;
-      padding: .6rem 0;
-    }
+    #userDropdown .no-pedidos { color: #666; text-align: center; padding: .6rem 0;}
     .cancelar-btn {
-      margin-top:4px;
-      background:#ff6b6b;
-      border:none;
-      color:white;
-      padding:4px 10px;
-      border-radius:6px;
-      cursor:pointer;
-      font-size:0.95em;
-      transition:background 0.2s;
+      margin-top:4px; background:#ff6b6b; border:none; color:white;
+      padding:4px 10px; border-radius:6px; cursor:pointer; font-size:0.95em; transition:background 0.2s;
     }
-    .cancelar-btn:hover {
-      background:#d32f2f;
+    .cancelar-btn:hover { background:#d32f2f; }
+
+    /* FORMULARIO de búsqueda */
+    form[onsubmit] {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 16px #1976d211;
+      padding: 38px 30px 24px 30px;
+      margin: 0 auto 32px auto;
+      max-width: 420px;
+      min-width: 220px;
+      text-align: center;
+      font-size: 1.15em;
+      position: relative;
     }
-      nav.navbar {
-    margin-bottom: 40px;
-  }
+    form[onsubmit] label {
+      font-weight: 600;
+      color: #1565c0;
+      font-size: 1.12em;
+    }
+    form[onsubmit] input[type=number] {
+      padding: 12px;
+      width: 80%;
+      border-radius: 10px;
+      border: 1.5px solid #e3e9f4;
+      margin: 12px 0 18px 0;
+      font-size: 1.07em;
+      background: #f5f7fb;
+      transition: border .14s;
+      outline: none;
+    }
+    form[onsubmit] input[type=number]:focus {
+      border: 1.5px solid #42a5f5;
+    }
+    form[onsubmit] button {
+      background: linear-gradient(90deg, #42a5f5 60%, #1565c0 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 100px;
+      padding: 11px 36px;
+      font-size: 1.12em;
+      cursor: pointer;
+      box-shadow: 0 2px 12px #42a5f512;
+      transition: background 0.16s, box-shadow .13s, transform .12s;
+    }
+    form[onsubmit] button:hover, form[onsubmit] button:focus {
+      background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+      box-shadow: 0 4px 20px #1565c03c;
+      color: #fff;
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    /* CARD DETALLE */
+    #detalle {
+      margin-top: 28px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px #1e88e524, 0 2px 14px #42a5f511;
+      max-width: 510px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 1.17em;
+      list-style: none;
+      padding: 2.2rem 2.4rem 1.2rem 2.4rem;
+      min-height: 62px;
+      color: #234;
+      transition: box-shadow .2s;
+    }
+    #detalle li {
+      margin-bottom: 1.3em;
+      font-size: 1.09em;
+      border-bottom: 1px solid #e3e9f4;
+      padding-bottom: 9px;
+    }
+    #detalle li:last-child { border-bottom: none; }
+    #detalle strong {
+      color: #1565c0;
+      font-weight: 600;
+      font-size: 1.01em;
+      margin-right: 2px;
+    }
+
+    @media (max-width:600px) {
+      nav.navbar { padding: 1rem .5rem; border-radius: 10px;}
+      form[onsubmit] { padding: 1.2rem 0.7rem; min-width: unset; }
+      #detalle { padding: 1.2rem 0.7rem; }
+      h1 { font-size: 1.3rem; }
+    }
   </style>
 </head>
 
@@ -129,12 +203,10 @@
     <a href="nueva-compra.html">Nueva compra</a>
     <a href="admin.html">Admin</a>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
+  <div style="display:flex;align-items:center;gap:14px;">
     <button id="cartBtn" onclick="abrirCarrito()">🛒<span id="cartCount">0</span></button>
     <button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
-    <!-- Avatar + menú usuario -->
     <div class="user-menu">
-      <!-- FOTO DE PERFIL POR DEFECTO PARA TODOS LOS USUARIOS -->
       <img src="img/perfilusuario.jpg" alt="Usuario" id="profilePic" class="profile-avatar">
       <div id="userDropdown">
         <h4>Pedidos pendientes</h4>
@@ -146,13 +218,12 @@
   </div>
 </nav>
 
-
 <h1>Consultar Compra</h1>
 
-<form onsubmit="buscarCompra(); return false;" style="text-align:center;">
-  <label>ID de la compra:</label><br><br>
-  <input type="number" id="idCompra" required style="padding:10px; width:300px; border-radius:8px; border:1px solid #ccc;"><br><br>
-  <button type="submit" style="padding:10px 20px; background:#0077cc; color:white; border:none; border-radius:8px; cursor:pointer;">Buscar</button>
+<form onsubmit="buscarCompra(); return false;">
+  <label for="idCompra">ID de la compra:</label><br>
+  <input type="number" id="idCompra" required placeholder="Introduce el ID de la compra"><br>
+  <button type="submit">Buscar</button>
 </form>
 
 <ul id="detalle" class="detalle"></ul>
@@ -212,7 +283,6 @@ function cargarPedidosPendientes() {
 function cancelarPedido(id) {
   const token = sessionStorage.getItem('token');
   if (!confirm("¿Seguro que quieres cancelar este pedido?")) return;
-  // Spinner opcional (usa el tuyo si lo tienes)
   fetch(`/compras/${id}/cancelar`, { 
     method: 'PUT',
     headers: { 'Authorization': 'Bearer ' + token }

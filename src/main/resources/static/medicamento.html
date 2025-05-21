@@ -4,85 +4,196 @@
   <meta charset="UTF-8">
   <title>Detalle del Medicamento</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <style>
-    .detalle-medicamento {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: #f7fafd;
+      color: #25324b;
+      padding: 2rem;
+      min-height: 100vh;
     }
+    nav.navbar {
+      background: linear-gradient(90deg,#1565c0,#42a5f5);
+      color: #fff;
+      padding: 1.2rem 2rem;
+      border-radius: 18px;
+      margin-bottom: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 16px #1e88e522;
+      font-size: 1.08rem;
+    }
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      padding: .5rem 1rem;
+      border-radius: 9px;
+      font-weight: 600;
+      transition: background .15s, transform .13s;
+      margin-right: 6px;
+    }
+    .nav-links a.active, .nav-links a:hover {
+      background: rgba(255,255,255,0.13);
+      transform: translateY(-2px);
+    }
+    #cartBtn {
+      background: #00bfa5;
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 1.3em;
+      padding: 0 17px 0 14px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #00bfa522;
+      position: relative;
+    }
+    #cartBtn span {
+      position: absolute;top: -6px;right: -6px;
+      background: crimson;color: #fff;font-size: .7rem;
+      border-radius: 50%;padding: 2px 5px;
+      font-weight: 600;
+    }
+    #logoutBtn {
+      background: crimson;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-left: 7px;
+      transition: background .15s;
+    }
+    #logoutBtn:hover { background: darkred; }
 
+    /* Card medicamento */
+    .detalle-medicamento {
+      max-width: 470px;
+      margin: 36px auto;
+      background: #fff;
+      padding: 38px 30px 26px 30px;
+      border-radius: 20px;
+      box-shadow: 0 6px 32px #1e88e524, 0 2px 12px #42a5f511;
+      font-size: 1.13rem;
+      position: relative;
+      color: #2c3a4b;
+      min-height: 180px;
+      transition: box-shadow .2s;
+    }
     .detalle-medicamento h2 {
       text-align: center;
-      color: #005fa3;
-      margin-bottom: 20px;
+      color: #1565c0;
+      margin-bottom: 26px;
+      font-size: 1.42rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
     }
-
     .detalle-medicamento p {
-      font-size: 1.1rem;
-      margin-bottom: 10px;
+      font-size: 1.09rem;
+      margin-bottom: 13px;
+      color: #34495e;
+    }
+    .detalle-medicamento p strong {
+      color: #1976d2;
+      font-weight: 600;
     }
 
+    /* Botón comprar bonito */
     .btn-comprar {
+      display: block;
       width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      font-size: 1rem;
-      font-weight: bold;
-      background: linear-gradient(90deg, #0077cc, #005fa3);
+      margin-top: 24px;
+      padding: 13px 0;
+      font-size: 1.07rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #00bfa5 60%, #2be7c1 100%);
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 100px;
       cursor: pointer;
+      box-shadow: 0 2px 14px #00bfa514;
+      transition: background 0.13s, transform 0.13s, box-shadow 0.13s;
+      outline: none;
     }
-
-    .btn-comprar:hover {
-      background: linear-gradient(90deg, #005fa3, #0077cc);
+    .btn-comprar:hover, .btn-comprar:focus {
+      background: linear-gradient(90deg, #0abe76 0%, #00bfa5 100%);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 4px 18px #00bfa53d;
+    }
+    .btn-comprar:disabled {
+      background: #e3e9f4 !important;
+      color: #aaa;
+      cursor: not-allowed;
     }
 
     .form-compra {
-      margin-top: 20px;
+      margin-top: 22px;
       display: none;
+      animation: fadeIn .4s cubic-bezier(.4,0,.2,1);
+      background: #f8fafc;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px #42a5f512;
+      padding: 20px 16px 13px 16px;
     }
-
-    .form-compra input {
-      margin-bottom: 15px;
-      padding: 10px;
+    .form-compra input,
+    .form-compra select {
+      margin-bottom: 14px;
+      padding: 11px 15px;
       width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      
+      border: 1.5px solid #e3e9f4;
+      border-radius: 9px;
+      font-size: 1.07em;
+      background: #fff;
+      outline: none;
+      transition: border .13s;
     }
-          nav.navbar {
-    margin-bottom: 40px;
-  }
-        /* --- layout básico --- */
-    body{padding:20px;}
-    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
-    #logoutBtn{background:crimson;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;}
-    #logoutBtn:hover{background:darkred;}
+    .form-compra input:focus, .form-compra select:focus {
+      border: 1.5px solid #00bfa5;
+    }
+    .form-compra button {
+      margin-top: 8px;
+      background: linear-gradient(90deg, #42a5f5 60%, #1565c0 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 100px;
+      padding: 12px;
+      width: 100%;
+      font-size: 1.09em;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #42a5f511;
+      transition: background 0.15s, box-shadow 0.14s, transform 0.13s;
+    }
+    .form-compra button:hover, .form-compra button:focus {
+      background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+      box-shadow: 0 4px 16px #1565c033;
+      color: #fff !important;
+      transform: translateY(-2px) scale(1.04);
+    }
+    .form-compra:disabled { opacity: .8; }
 
-    /* --- spinner global --- */
-    #spinner{position:fixed;inset:0;background:rgba(255,255,255,.45);display:none;justify-content:center;align-items:center;z-index:1000;}
-    #spinner div{width:56px;height:56px;border:8px solid #0077cc;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);} }
+    .mensaje-error {
+      color: #c62828;
+      background: #fff3f3;
+      border: 1px solid #ffcdd2;
+      padding: 10px;
+      border-radius: 7px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
 
-    /* --- colores según stock --- */
-    .out{background:#ffd6d6 !important;}
-    .low{background:#fff8d6 !important;}
-
-    /* --- botón carrito --- */
-    #cartBtn{background:#ffc107;border:none;border-radius:50%;width:36px;height:36px;font-weight:700;cursor:pointer;position:relative;}
-    #cartBtn span{position:absolute;top:-6px;right:-6px;background:crimson;color:#fff;font-size:.7rem;border-radius:50%;padding:2px 5px;}
-
-    /* --- modal carrito --- */
-    #cartModal{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,.55);z-index:1100;}
-    #cartBox{background:#fff;padding:24px 32px;border-radius:12px;max-width:460px;width:90%;position:relative;}
-    #cartBox h3{margin-bottom:16px;}
-    #cartBox .close{position:absolute;top:10px;right:15px;font-size:1.3rem;cursor:pointer;color:#888;}
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(24px);}
+      100% { opacity: 1; transform: none;}
+    }
+    @media (max-width:600px) {
+      nav.navbar { padding: 1rem .5rem; border-radius: 10px;}
+      .detalle-medicamento { padding: 1.1rem 0.7rem; min-width: unset;}
+    }
   </style>
 </head>
 <body>
@@ -95,7 +206,7 @@
     <a href="nueva-compra.html">Nueva compra</a>
     <a href="admin.html">Admin</a>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
+  <div style="display:flex;align-items:center;gap:14px;">
     <button id="cartBtn" onclick="abrirCarrito()">🛒<span id="cartCount">0</span></button>
     <button id="logoutBtn" onclick="logout()">Cerrar sesión</button>
   </div>
@@ -109,9 +220,17 @@
 <script>
 const id = new URLSearchParams(window.location.search).get('id');
 const token = sessionStorage.getItem('token');
+let cart=JSON.parse(localStorage.getItem('cart')||'[]');
+document.getElementById('cartCount').textContent = cart.length;
+
+function logout(){
+  sessionStorage.clear();
+  window.location.href = 'login.html';
+}
 
 if (!id) {
-  document.getElementById('medicamentoContainer').innerHTML = '<p class="error">ID no proporcionado.</p>';
+  document.getElementById('medicamentoContainer').innerHTML =
+    '<div class="mensaje-error">ID no proporcionado.</div>';
 } else {
   fetch(`/medicamentos/${id}`, {
     headers: {
@@ -123,30 +242,40 @@ if (!id) {
     return res.json();
   })
   .then(med => {
+    let disabled = !med.disponible || med.stock < 1;
     document.getElementById('medicamentoContainer').innerHTML = `
       <h2>${med.nombre}</h2>
       <p><strong>ID:</strong> ${med.id}</p>
-      <p><strong>Categoría:</strong> ${med.categoria}</p>
+      <p><strong>Categoría:</strong> ${med.categoria||'-'}</p>
       <p><strong>Precio:</strong> €${med.precio.toFixed(2)}</p>
       <p><strong>Stock:</strong> ${med.stock}</p>
-      <p><strong>Proveedor:</strong> ${med.proveedor}</p>
+      <p><strong>Proveedor:</strong> ${med.proveedor||'-'}</p>
       <p><strong>Disponible:</strong> ${med.disponible ? 'Sí' : 'No'}</p>
-      <button class="btn-comprar" onclick="mostrarFormulario()">Comprar este medicamento</button>
+      <button class="btn-comprar" onclick="mostrarFormulario()" ${disabled?'disabled':''}>
+        ${disabled ? 'No disponible para compra' : 'Comprar este medicamento'}
+      </button>
       <form class="form-compra" id="formCompra">
-        <input type="email" id="email" placeholder="Email del cliente" required>
+        <input type="email" id="email" placeholder="Email del cliente" required autocomplete="email">
         <input type="number" id="cantidad" placeholder="Cantidad" min="1" max="${med.stock}" required>
-        <input type="text" id="metodoPago" placeholder="Método de pago" required>
+        <select id="metodoPago" required>
+          <option value="" disabled selected>Método de pago</option>
+          <option>TARJETA</option>
+          <option>BIZUM</option>
+          <option>PAYPAL</option>
+          <option>TRANSFERENCIA</option>
+        </select>
         <button type="submit" class="btn-comprar">Confirmar compra</button>
       </form>
     `;
 
+    // Formulario lógica
     document.getElementById('formCompra').onsubmit = function(e) {
       e.preventDefault();
       const datos = {
         email: document.getElementById('email').value.trim(),
         medicamentoIds: [med.id],
         cantidad: parseInt(document.getElementById('cantidad').value),
-        metodoPago: document.getElementById('metodoPago').value.trim()
+        metodoPago: document.getElementById('metodoPago').value
       };
 
       fetch('/compras/crear-por-email', {
@@ -181,12 +310,21 @@ if (!id) {
     };
   })
   .catch(() => {
-    document.getElementById('medicamentoContainer').innerHTML = '<p class="error">Medicamento no encontrado.</p>';
+    document.getElementById('medicamentoContainer').innerHTML =
+      '<div class="mensaje-error">Medicamento no encontrado.</div>';
   });
 }
 
 function mostrarFormulario() {
   document.querySelector('.form-compra').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('email').focus();
+  }, 250);
+}
+
+
+function abrirCarrito() {
+
 }
 </script>
 
