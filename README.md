@@ -1,3 +1,5 @@
+[![Java CI with Maven](https://github.com/UnaiiGonzalezz/PSC-12/actions/workflows/maven.yml/badge.svg)](https://github.com/UnaiiGonzalezz/PSC-12/actions/workflows/maven.yml)
+
 # SpringBoot + REST API + MySQL (Proyecto Farmacia)
 
 Este proyecto está desarrollado como parte de la asignatura **Procesos del Software y Calidad**. Se trata de una API REST para la gestión de una farmacia, utilizando tecnologías como **Spring Boot**, **MySQL**, **JPA** y **Maven**.
