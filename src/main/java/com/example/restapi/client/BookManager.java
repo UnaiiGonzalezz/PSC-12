@@ -28,6 +28,8 @@ public class BookManager {
             System.out.println("Failed to register book. Status code: " + response.getStatusCode());
         }
     }
+//SPRINT 3
+
 
     public List<Book> getAllBooks() {
         ResponseEntity<Book[]> response = restTemplate.getForEntity(BOOK_CONTROLLER_URL, Book[].class);

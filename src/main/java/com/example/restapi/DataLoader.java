@@ -107,8 +107,9 @@ public class DataLoader {
                     new Medicamento("Lisinopril 20 mg", "Antihipertensivo", 2.35, 230, "Teva"),
                     new Medicamento("Furosemida 40 mg", "Diurético", 1.80, 260, "Sanofi"),
                     new Medicamento("Prednisona 30 mg", "Corticoide", 3.45, 150, "Almirall"),
-                    new Medicamento("Ciprofloxacino 500 mg", "Antibiótico", 4.10, 175, "Bayer"),
-                    new Medicamento("Gabapentina 300 mg", "Antiepiléptico", 5.25, 130, "Pfizer")
+                    new Medicamento("Ciprofloxacino 500 mg", "Antibiótico", 4.10, 175, "Bayer")
+                    //SPRINT 3
+  
             ));
 
             // GENERAR MÁS DE 120 MEDICAMENTOS EXTRAS (nombre único, categoría, precios, stocks, laboratorio aleatorio)
