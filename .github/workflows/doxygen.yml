@@ -33,6 +33,6 @@ jobs:
         cp -r target/site/* docs/site/
         rm -rf docs/doxygen
         mkdir -p docs/doxygen
-        cp -r target/doxygen/html/* docs/doxygen/
+        cp -r target/html/* docs/doxygen/
 
         
