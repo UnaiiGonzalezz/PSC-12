@@ -131,5 +131,6 @@ class BookControllerTest {
                .andExpect(status().isNotFound());
 
         verify(bookService, never()).deleteBook(6L);
+        
     }
 }
