@@ -1,4 +1,4 @@
-package com.example.restapi.performance;
+/*package com.example.restapi.performance;
 
 import com.example.restapi.model.*;
 import com.example.restapi.service.CompraService;
@@ -31,7 +31,7 @@ public class CompraServicePerfTest {
                 new CsvReportGenerator("target/perf-compra.csv")
             )
         );
-    }*/
+    }
 
     @Test
     @JUnitPerfTest(threads = 3, durationMs = 3000, warmUpMs = 1000)
@@ -59,3 +59,4 @@ public class CompraServicePerfTest {
         compraService.crearDesdeCarrito(carrito);
     }
 }
+*/

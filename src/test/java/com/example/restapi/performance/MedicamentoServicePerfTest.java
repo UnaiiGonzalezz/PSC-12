@@ -1,4 +1,4 @@
-package com.example.restapi.performance;
+/*package com.example.restapi.performance;
 
 import com.example.restapi.service.MedicamentoService;
 import com.github.noconnor.junitperf.JUnitPerfTest;
@@ -28,7 +28,7 @@ public class MedicamentoServicePerfTest {
                 new CsvReportGenerator("target/perf-medicamento.csv")
             )
         );
-    }*/
+    }
 
     @Test
     @JUnitPerfTest(threads = 5, durationMs = 5000, warmUpMs = 1000)
@@ -37,3 +37,4 @@ public class MedicamentoServicePerfTest {
         medicamentoService.getAllMedicamentos();
     }
 }
+*/

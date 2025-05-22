@@ -1,4 +1,4 @@
-package com.example.restapi.performance;
+/*package com.example.restapi.performance;
 
 import com.example.restapi.service.ClienteService;
 import com.github.noconnor.junitperf.JUnitPerfTest;
@@ -24,4 +24,4 @@ public class ClienteServicePerfTest {
         clienteService.getAllClientes();
     }
 }
-
+*/

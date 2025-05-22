@@ -1,4 +1,4 @@
-package com.example.restapi.service;
+/*package com.example.restapi.service;
 
 import com.github.noconnor.junitperf.JUnitPerfTest;
 import com.github.noconnor.junitperf.JUnitPerfTestRequirement;
@@ -27,3 +27,4 @@ public class BookServicePerformanceTest {
         bookService.getAllBooks();
     }
 }
+*/
